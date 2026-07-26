@@ -1,0 +1,40 @@
+name: CI
+
+"on":
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: clientapi
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: clientapi/go.mod
+          cache-dependency-path: clientapi/go.sum
+      - name: Verify modules
+        run: go mod verify
+      - name: Verify dependency licenses
+        run: ../scripts/check-licenses.sh .
+      - name: Check formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          unformatted="$(gofmt -l .)"
+          test -z "$unformatted" || {
+            printf '%s\n' "$unformatted"
+            exit 1
+          }
+      - name: Vet
+        run: go vet ./...
+      - name: Test
+        run: go test -short ./...
