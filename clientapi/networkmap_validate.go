@@ -5,12 +5,18 @@ import (
 	"strings"
 
 	protocolv1 "github.com/unng-lab/endlessnet-relay/protocol/v1"
-	wgkeys "github.com/unng-lab/endlessnet/clientapi/wireguard"
+	wgkeys "github.com/unng-lab/endlessnet/clientapi/v2/wireguard"
 )
 
 // ValidateNetworkMap validates the complete untrusted map boundary before a
 // client is allowed to cache, render, or apply it.
 func ValidateNetworkMap(response RegisterNodeResponse) error {
+	return ValidateNetworkMapSnapshot(response.Snapshot())
+}
+
+// ValidateNetworkMapSnapshot validates a stream snapshot or reconstructed
+// delta result before it is cached or applied to the local network stack.
+func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 	networkID := strings.TrimSpace(response.Network.ID)
 	if networkID == "" {
 		return fmt.Errorf("network map network_id is missing")

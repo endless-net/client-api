@@ -1,0 +1,6543 @@
+{
+  "components": {
+    "responses": {
+      "Error": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StableBillingError"
+            }
+          },
+          "text/plain": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "Error response"
+      }
+    },
+    "schemas": {
+      "StableBillingError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error_code",
+          "error"
+        ],
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "enum": [
+              "checkout_required",
+              "entitlement_denied",
+              "billing_state_denied",
+              "plan_limit_exceeded"
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "account_id": {
+            "type": "string"
+          },
+          "plan_id": {
+            "type": "string"
+          },
+          "billing_period": {
+            "type": "string"
+          },
+          "checkout_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "current_plan": {
+            "type": "string"
+          },
+          "required_plan": {
+            "type": "string"
+          },
+          "plan_status": {
+            "type": "string"
+          },
+          "upgrade_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "action": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "usage": {
+            "type": "integer"
+          }
+        }
+      },
+      "Account": {
+        "additionalProperties": false,
+        "properties": {
+          "billing_country": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "billing_country",
+          "created_at",
+          "currency",
+          "id",
+          "name",
+          "slug",
+          "status",
+          "type",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AccountLegalProfile": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "billing_email": {
+            "type": "string"
+          },
+          "company_name": {
+            "type": "string"
+          },
+          "contract_number": {
+            "type": "string"
+          },
+          "inn": {
+            "type": "string"
+          },
+          "kpp": {
+            "type": "string"
+          },
+          "legal_address": {
+            "type": "string"
+          },
+          "ogrn": {
+            "type": "string"
+          },
+          "tax_system": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "billing_email",
+          "company_name",
+          "contract_number",
+          "inn",
+          "kpp",
+          "legal_address",
+          "ogrn",
+          "tax_system",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AccountMembership": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "created_at",
+          "role",
+          "status",
+          "updated_at",
+          "user_id"
+        ],
+        "type": "object"
+      },
+      "AdminMachine": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "advertised_ips": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "approval_state": {
+            "type": "string"
+          },
+          "assigned_ip": {
+            "type": "string"
+          },
+          "assigned_ipv6": {
+            "type": "string"
+          },
+          "client_version": {
+            "type": "string"
+          },
+          "client_version_status": {
+            "enum": [
+              "current",
+              "outdated",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "device_fingerprint": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "endpoint_candidates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "endpoint_expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "endpoint_generation": {
+            "type": "integer"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "identity_public_key": {
+            "type": "string"
+          },
+          "key_expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "key_expiry_enabled": {
+            "type": "boolean"
+          },
+          "last_seen": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "network_name": {
+            "type": "string"
+          },
+          "os": {
+            "type": "string"
+          },
+          "owner_email": {
+            "type": "string"
+          },
+          "owner_name": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "public_key": {
+            "type": "string"
+          },
+          "recommended_client_version": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "assigned_ip",
+          "client_version_status",
+          "created_at",
+          "hostname",
+          "id",
+          "key_expiry_enabled",
+          "last_seen",
+          "network_id",
+          "network_name",
+          "public_key",
+          "recommended_client_version",
+          "status",
+          "updated_at",
+          "user_id"
+        ],
+        "type": "object"
+      },
+      "AdvertisedService": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "approval_mode": {
+            "type": "string"
+          },
+          "approval_status": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dns_name": {
+            "type": "string"
+          },
+          "eligible_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "health": {
+            "type": "string"
+          },
+          "host_count": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ports": {
+            "items": {
+              "$ref": "#/components/schemas/ServicePort"
+            },
+            "type": "array"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "approval_mode",
+          "approval_status",
+          "created_at",
+          "dns_name",
+          "health",
+          "host_count",
+          "id",
+          "name",
+          "ports",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AppConnectorApp": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "allowed_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "allowed_users": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "connector_nodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "connector_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dns_enabled": {
+            "type": "boolean"
+          },
+          "health": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "last_activity_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "policy_status": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "target_type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "created_at",
+          "dns_enabled",
+          "health",
+          "id",
+          "name",
+          "policy_status",
+          "target",
+          "target_type",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AppListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "apps": {
+            "items": {
+              "$ref": "#/components/schemas/AppConnectorApp"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "apps",
+          "pagination"
+        ],
+        "type": "object"
+      },
+      "AppRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "allowed_users": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "connector_nodes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "connector_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dns_enabled": {
+            "type": "boolean"
+          },
+          "health": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "policy_status": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "target_type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dns_enabled",
+          "name",
+          "target",
+          "target_type"
+        ],
+        "type": "object"
+      },
+      "AuditEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "actor_user_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "target_type": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "user_agent": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "created_at",
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "BillingCheckoutRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "billing_period": {
+            "type": "string"
+          },
+          "failure_url": {
+            "type": "string"
+          },
+          "plan_id": {
+            "type": "string"
+          },
+          "success_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "billing_period",
+          "plan_id"
+        ],
+        "type": "object"
+      },
+      "ChangePlanRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "billing_period": {
+            "type": "string"
+          },
+          "plan_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_id"
+        ],
+        "type": "object"
+      },
+      "CheckoutSession": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "billing_period": {
+            "type": "string"
+          },
+          "confirmation_url": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "invoice_id": {
+            "type": "string"
+          },
+          "plan_id": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "provider_payment_id": {
+            "type": "string"
+          },
+          "provider_status": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscription_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "amount",
+          "billing_period",
+          "created_at",
+          "currency",
+          "id",
+          "invoice_id",
+          "plan_id",
+          "provider",
+          "status",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "CreateJoinTokenRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "ephemeral": {
+            "type": "boolean"
+          },
+          "idempotency_key": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "network_name": {
+            "type": "string"
+          },
+          "preauthorized": {
+            "type": "boolean"
+          },
+          "reusable": {
+            "type": "boolean"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ttl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "network_id",
+          "network_name",
+          "ttl"
+        ],
+        "type": "object"
+      },
+      "CreateJoinTokenResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "ephemeral": {
+            "type": "boolean"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "network_name": {
+            "type": "string"
+          },
+          "preauthorized": {
+            "type": "boolean"
+          },
+          "reusable": {
+            "type": "boolean"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expires_at",
+          "id",
+          "token"
+        ],
+        "type": "object"
+      },
+      "NodeEnrollmentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "approval_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "approved_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "approved_by_user_id": {
+            "type": "string"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "device_fingerprint": {
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "identity_public_key": {
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "network_name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "public_key": {
+            "type": "string"
+          },
+          "rejected_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rejected_by_user_id": {
+            "type": "string"
+          },
+          "rejection_reason": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "approved",
+              "rejected",
+              "expired",
+              "enrolled"
+            ],
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "created_at",
+          "expires_at",
+          "hostname",
+          "id",
+          "public_key",
+          "status"
+        ],
+        "type": "object"
+      },
+      "NodeEnrollmentRequestListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "pagination": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/NodeEnrollmentRequest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "pagination",
+          "requests"
+        ],
+        "type": "object"
+      },
+      "ApproveNodeEnrollmentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "network_id": {
+            "type": "string"
+          },
+          "network_name": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RejectNodeEnrollmentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CreateNetworkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "cell_id": {
+            "type": "string"
+          },
+          "cidr": {
+            "type": "string"
+          },
+          "dns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "idempotency_key": {
+            "type": "string"
+          },
+          "ipv6_cidr": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cidr",
+          "dns",
+          "name"
+        ],
+        "type": "object"
+      },
+      "DNSNameserver": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "split_domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "address",
+          "created_at",
+          "enabled",
+          "id",
+          "priority",
+          "scope",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "DNSNameserverRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "split_domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "address",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "DNSSearchDomain": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "created_at",
+          "domain",
+          "id"
+        ],
+        "type": "object"
+      },
+      "DNSSearchDomainRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "domain": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "type": "object"
+      },
+      "DNSSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "https_certs_enabled": {
+            "type": "boolean"
+          },
+          "magicdns_enabled": {
+            "type": "boolean"
+          },
+          "nameservers": {
+            "items": {
+              "$ref": "#/components/schemas/DNSNameserver"
+            },
+            "type": "array"
+          },
+          "override_local_dns": {
+            "type": "boolean"
+          },
+          "search_domains": {
+            "items": {
+              "$ref": "#/components/schemas/DNSSearchDomain"
+            },
+            "type": "array"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "https_certs_enabled",
+          "magicdns_enabled",
+          "override_local_dns",
+          "suffix",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "DNSSettingsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "https_certs_enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "magicdns_enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "override_local_dns": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "suffix": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FlowLogEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "packets": {
+            "type": "integer"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "rule_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "window_end": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "window_start": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "decision",
+          "destination",
+          "id",
+          "port",
+          "protocol",
+          "source",
+          "window_end",
+          "window_start"
+        ],
+        "type": "object"
+      },
+      "FlowLogListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FlowLogEvent"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/FlowLogSettings"
+          }
+        },
+        "required": [
+          "events",
+          "pagination",
+          "settings"
+        ],
+        "type": "object"
+      },
+      "FlowLogSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "privacy_notice_acknowledged": {
+            "type": "boolean"
+          },
+          "retention_days": {
+            "type": "integer"
+          },
+          "stream_enabled": {
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "enabled",
+          "privacy_notice_acknowledged",
+          "retention_days",
+          "stream_enabled",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "FlowLogSettingsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "privacy_notice_acknowledged": {
+            "type": "boolean"
+          },
+          "retention_days": {
+            "type": "integer"
+          },
+          "stream_enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled",
+          "privacy_notice_acknowledged",
+          "stream_enabled"
+        ],
+        "type": "object"
+      },
+      "InviteAccountMemberRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "user_id"
+        ],
+        "type": "object"
+      },
+      "Invoice": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "checkout_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "due_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItem"
+            },
+            "type": "array"
+          },
+          "number": {
+            "type": "string"
+          },
+          "paid_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subscription_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "amount",
+          "created_at",
+          "currency",
+          "due_at",
+          "id",
+          "number",
+          "provider",
+          "status",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "InvoiceItem": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "invoice_id": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "unit_amount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "description",
+          "id",
+          "invoice_id",
+          "quantity",
+          "unit_amount"
+        ],
+        "type": "object"
+      },
+      "LicenseKey": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "customer_name": {
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "issued_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "limits": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "not_before": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "plan_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "uploaded_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "expires_at",
+          "features",
+          "fingerprint",
+          "id",
+          "issued_at",
+          "limits",
+          "not_before",
+          "plan_id",
+          "status",
+          "uploaded_at"
+        ],
+        "type": "object"
+      },
+      "LogStream": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "event_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "created_at",
+          "event_types",
+          "id",
+          "status",
+          "updated_at",
+          "url"
+        ],
+        "type": "object"
+      },
+      "LogStreamRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "event_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_types",
+          "url"
+        ],
+        "type": "object"
+      },
+      "MachineListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "machines": {
+            "items": {
+              "$ref": "#/components/schemas/AdminMachine"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "machines",
+          "pagination"
+        ],
+        "type": "object"
+      },
+      "Network": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "authoritative_cell_id": {
+            "type": "string"
+          },
+          "cell_id": {
+            "type": "string"
+          },
+          "cidr": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ipv6_cidr": {
+            "type": "string"
+          },
+          "migrating_to_cell_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cidr",
+          "created_at",
+          "id",
+          "name",
+          "owner_id",
+          "revision"
+        ],
+        "type": "object"
+      },
+      "Node": {
+        "additionalProperties": false,
+        "properties": {
+          "advertised_ips": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "approval_state": {
+            "type": "string"
+          },
+          "assigned_ip": {
+            "type": "string"
+          },
+          "assigned_ipv6": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "device_fingerprint": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "endpoint_candidates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "endpoint_expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "endpoint_generation": {
+            "type": "integer"
+          },
+          "ephemeral": {
+            "type": "boolean"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "identity_public_key": {
+            "type": "string"
+          },
+          "key_expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "key_expiry_enabled": {
+            "type": "boolean"
+          },
+          "last_seen": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "network_id": {
+            "type": "string"
+          },
+          "public_key": {
+            "type": "string"
+          },
+          "requested_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "approval_state",
+          "assigned_ip",
+          "created_at",
+          "ephemeral",
+          "hostname",
+          "id",
+          "key_expiry_enabled",
+          "last_seen",
+          "network_id",
+          "public_key",
+          "status",
+          "updated_at",
+          "user_id"
+        ],
+        "type": "object"
+      },
+      "PageInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "limit",
+          "offset",
+          "total"
+        ],
+        "type": "object"
+      },
+      "PatchAccountRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "billing_country": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "legal_profile": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountLegalProfile"
+              }
+            ],
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PatchMachineRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "approval_state": {
+            "type": "string"
+          },
+          "assigned_ip": {
+            "type": "string"
+          },
+          "assigned_ipv6": {
+            "type": "string"
+          },
+          "client_version": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "key_expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "key_expiry_enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "os": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Plan": {
+        "additionalProperties": false,
+        "properties": {
+          "account_type": {
+            "type": "string"
+          },
+          "billing_provider": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "id": {
+            "type": "string"
+          },
+          "limits": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "monthly_price": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "periods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "yearly_price": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "account_type",
+          "billing_provider",
+          "currency",
+          "description",
+          "features",
+          "id",
+          "limits",
+          "monthly_price",
+          "name",
+          "periods",
+          "public",
+          "yearly_price"
+        ],
+        "type": "object"
+      },
+      "PolicyFile": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "editor_locked": {
+            "type": "boolean"
+          },
+          "external_reference": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "gitops_mode": {
+            "type": "boolean"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "last_sync_status": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validation_errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "account_id",
+          "editor_locked",
+          "format",
+          "gitops_mode",
+          "hash",
+          "text",
+          "updated_at",
+          "version"
+        ],
+        "type": "object"
+      },
+      "PolicyPreviewResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "changed": {
+            "type": "boolean"
+          },
+          "current_hash": {
+            "type": "string"
+          },
+          "diff": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "effective_rules": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "new_hash": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "changed",
+          "new_hash"
+        ],
+        "type": "object"
+      },
+      "PolicySaveRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "editor_locked": {
+            "type": "boolean"
+          },
+          "external_reference": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string"
+          },
+          "gitops_mode": {
+            "type": "boolean"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "PolicyTestResult": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "pass": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "pass"
+        ],
+        "type": "object"
+      },
+      "PolicyTestRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "passed": {
+            "type": "integer"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyTestResult"
+            },
+            "type": "array"
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "failed",
+          "passed",
+          "results",
+          "valid"
+        ],
+        "type": "object"
+      },
+      "PolicyValidationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "valid"
+        ],
+        "type": "object"
+      },
+      "ServiceListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "pagination": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/AdvertisedService"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "pagination",
+          "services"
+        ],
+        "type": "object"
+      },
+      "ServicePort": {
+        "additionalProperties": false,
+        "properties": {
+          "port": {
+            "type": "string"
+          },
+          "protocol": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "port",
+          "protocol"
+        ],
+        "type": "object"
+      },
+      "ServiceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "approval_mode": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dns_name": {
+            "type": "string"
+          },
+          "eligible_tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "health": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ports": {
+            "items": {
+              "$ref": "#/components/schemas/ServicePort"
+            },
+            "type": "array"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "ports"
+        ],
+        "type": "object"
+      },
+      "Subscription": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "billing_period": {
+            "type": "string"
+          },
+          "cancel_at_period_end": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "current_period_ends_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "current_period_starts_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "plan_id": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "provider_customer_id": {
+            "type": "string"
+          },
+          "provider_subscription_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "trial_ends_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "trial_starts_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "billing_period",
+          "cancel_at_period_end",
+          "created_at",
+          "id",
+          "plan_id",
+          "provider",
+          "status",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "TrustCredential": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "last_used_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "created_at",
+          "description",
+          "id",
+          "issuer",
+          "scopes",
+          "status"
+        ],
+        "type": "object"
+      },
+      "TrustCredentialListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "credentials": {
+            "items": {
+              "$ref": "#/components/schemas/TrustCredential"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "credentials",
+          "pagination"
+        ],
+        "type": "object"
+      },
+      "TrustCredentialRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "rotate_secret": {
+            "type": "boolean"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "issuer",
+          "scopes"
+        ],
+        "type": "object"
+      },
+      "UpdateAccountMemberRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UsageSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "audit_events": {
+            "type": "integer"
+          },
+          "computed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "join_tokens_active": {
+            "type": "integer"
+          },
+          "limits": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "networks": {
+            "type": "integer"
+          },
+          "nodes": {
+            "type": "integer"
+          },
+          "users": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "account_id",
+          "audit_events",
+          "computed_at",
+          "join_tokens_active",
+          "limits",
+          "networks",
+          "nodes",
+          "users"
+        ],
+        "type": "object"
+      },
+      "WebhookDelivery": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "response_code": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "webhook_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "attempt",
+          "created_at",
+          "event_type",
+          "id",
+          "status",
+          "webhook_id"
+        ],
+        "type": "object"
+      },
+      "WebhookEndpoint": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "event_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "retry_policy": {
+            "type": "string"
+          },
+          "signing_secret": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "created_at",
+          "event_types",
+          "id",
+          "retry_policy",
+          "status",
+          "updated_at",
+          "url"
+        ],
+        "type": "object"
+      },
+      "WebhookEndpointListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "pagination": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "webhooks": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookEndpoint"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "pagination",
+          "webhooks"
+        ],
+        "type": "object"
+      },
+      "WebhookEndpointRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "event_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "retry_policy": {
+            "type": "string"
+          },
+          "rotate_secret": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_types",
+          "url"
+        ],
+        "type": "object"
+      },
+      "AccountListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/Account"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "accounts"
+        ],
+        "type": "object"
+      },
+      "AuditListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/AuditEvent"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "type": "object"
+      },
+      "AuthProvider": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "AuthProvidersResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/AuthProvider"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "providers"
+        ],
+        "type": "object"
+      },
+      "InvoiceListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "invoices": {
+            "items": {
+              "$ref": "#/components/schemas/Invoice"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "invoices"
+        ],
+        "type": "object"
+      },
+      "LogStreamListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "streams": {
+            "items": {
+              "$ref": "#/components/schemas/LogStream"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "streams"
+        ],
+        "type": "object"
+      },
+      "MeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "absolute_expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "session_refreshed": {
+            "type": "boolean"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "absolute_expires_at",
+          "email",
+          "expires_at",
+          "name",
+          "session_refreshed",
+          "user_id"
+        ],
+        "type": "object"
+      },
+      "MembershipListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/AccountMembership"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "members"
+        ],
+        "type": "object"
+      },
+      "MissingLicenseResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "status"
+        ],
+        "type": "object"
+      },
+      "PlanListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/Plan"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "plans"
+        ],
+        "type": "object"
+      },
+      "StatusResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerSession": {
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "browserSession": {
+        "in": "cookie",
+        "name": "__Host-endlessnet_session",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "EndlessNet Frontend API",
+    "version": "4.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/status": {
+      "get": {
+        "operationId": "getManagementStatus",
+        "responses": {
+          "200": {
+            "description": "Management and dependency status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "dependencies"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "dependencies": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string",
+                        "enum": [
+                          "available",
+                          "unavailable"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/accounts": {
+      "get": {
+        "operationId": "listAccounts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}": {
+      "patch": {
+        "operationId": "patchAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/billing/change-plan": {
+      "post": {
+        "operationId": "changeBillingPlan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/billing/checkout": {
+      "post": {
+        "operationId": "createBillingCheckout",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillingCheckoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSession"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/billing/checkout/{checkout_id}": {
+      "get": {
+        "operationId": "getBillingCheckout",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "checkout_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSession"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/billing/invoices": {
+      "get": {
+        "operationId": "listBillingInvoices",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/billing/legal": {
+      "get": {
+        "operationId": "getBillingLegalProfile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLegalProfile"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/billing/subscription": {
+      "get": {
+        "operationId": "getBillingSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/billing/usage": {
+      "get": {
+        "operationId": "getBillingUsage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageSnapshot"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/invites": {
+      "post": {
+        "operationId": "inviteAccountMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteAccountMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountMembership"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/license": {
+      "get": {
+        "operationId": "getLicense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LicenseKey"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MissingLicenseResponse"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/members": {
+      "get": {
+        "operationId": "listAccountMembers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/members/{user_id}": {
+      "delete": {
+        "operationId": "removeAccountMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateAccountMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccountMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountMembership"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/apps": {
+      "get": {
+        "operationId": "listApps",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createApp",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConnectorApp"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/audit": {
+      "get": {
+        "operationId": "listAuditEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/dns": {
+      "get": {
+        "operationId": "getDNSSettings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DNSSettings"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchDNSSettings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DNSSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DNSSettings"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/dns/nameservers": {
+      "post": {
+        "operationId": "createDNSNameserver",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DNSNameserverRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DNSNameserver"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/dns/nameservers/{resource_id}": {
+      "delete": {
+        "operationId": "deleteDNSNameserver",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateDNSNameserver",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DNSNameserverRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DNSNameserver"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/dns/search-domains": {
+      "post": {
+        "operationId": "createDNSSearchDomain",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DNSSearchDomainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DNSSearchDomain"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/dns/search-domains/{resource_id}": {
+      "delete": {
+        "operationId": "deleteDNSSearchDomain",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateDNSSearchDomain",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DNSSearchDomainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DNSSearchDomain"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/flow-logs": {
+      "get": {
+        "operationId": "listFlowLogs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowLogListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/flow-logs/settings": {
+      "post": {
+        "operationId": "updateFlowLogSettings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowLogSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowLogSettings"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/enrollment-requests": {
+      "get": {
+        "operationId": "listNodeEnrollmentRequests",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEnrollmentRequestListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/enrollment-requests/{request_id}": {
+      "get": {
+        "operationId": "getNodeEnrollmentRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEnrollmentRequest"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/enrollment-requests/{request_id}/approve": {
+      "post": {
+        "operationId": "approveNodeEnrollmentRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveNodeEnrollmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEnrollmentRequest"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/enrollment-requests/{request_id}/reject": {
+      "post": {
+        "operationId": "rejectNodeEnrollmentRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectNodeEnrollmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEnrollmentRequest"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/join-tokens": {
+      "post": {
+        "operationId": "createJoinToken",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateJoinTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateJoinTokenResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/join-tokens/{token_id}": {
+      "delete": {
+        "operationId": "revokeJoinToken",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "token_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/log-streams": {
+      "get": {
+        "operationId": "listLogStreams",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogStreamListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createLogStream",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogStreamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogStream"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/log-streams/{resource_id}": {
+      "delete": {
+        "operationId": "deleteLogStream",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateLogStream",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogStreamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogStream"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/machines": {
+      "get": {
+        "operationId": "listMachines",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MachineListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/policy": {
+      "get": {
+        "operationId": "getPolicy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyFile"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "put": {
+        "operationId": "savePolicy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicySaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyFile"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/policy/preview": {
+      "post": {
+        "operationId": "previewPolicy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicySaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyPreviewResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/policy/tests/run": {
+      "post": {
+        "operationId": "runPolicyTests",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyTestRunResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/policy/validate": {
+      "post": {
+        "operationId": "validatePolicy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicySaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyValidationResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/services": {
+      "get": {
+        "operationId": "listServices",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdvertisedService"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/trust-credentials": {
+      "get": {
+        "operationId": "listTrustCredentials",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustCredentialListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTrustCredential",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustCredentialRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustCredential"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/trust-credentials/{resource_id}": {
+      "delete": {
+        "operationId": "deleteTrustCredential",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateTrustCredential",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustCredentialRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustCredential"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/webhooks": {
+      "get": {
+        "operationId": "listWebhooks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEndpointListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createWebhook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookEndpointRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEndpoint"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/webhooks/{resource_id}": {
+      "delete": {
+        "operationId": "deleteWebhook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateWebhook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookEndpointRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEndpoint"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/accounts/{account_id}/webhooks/{resource_id}/test": {
+      "post": {
+        "operationId": "testWebhook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookDelivery"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/apps/{app_id}": {
+      "delete": {
+        "operationId": "deleteApp",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateApp",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConnectorApp"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/machines/{machine_id}": {
+      "delete": {
+        "operationId": "deleteMachine",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getMachine",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMachine"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchMachine",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "machine_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchMachineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMachine"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/admin/services/{service_id}": {
+      "delete": {
+        "operationId": "deleteService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success without a response body"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdvertisedService"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "get": {
+        "operationId": "startBrowserLogin",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "provider",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "return_to",
+            "required": true,
+            "schema": {
+              "maxLength": 2048,
+              "pattern": "^/",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the selected OIDC provider",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": {
+                  "format": "uri",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/callback": {
+      "get": {
+        "operationId": "completeBrowserLogin",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "code",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "error",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the intended UI destination or a stable Flutter login error",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "responses": {
+          "204": {
+            "description": "Session invalidated and browser cookie cleared"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/auth/providers": {
+      "get": {
+        "operationId": "listAuthProviders",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProvidersResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/billing/plans": {
+      "get": {
+        "operationId": "listBillingPlans",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanListResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/networks": {
+      "get": {
+        "operationId": "listNetworks",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Network"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createNetwork",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNetworkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Network"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "402": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/networks/{network_id}/nodes": {
+      "get": {
+        "operationId": "listNetworkNodes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "network_id",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Node"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "browserSession": []
+    },
+    {
+      "bearerSession": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://admin.endlessnet.ru/api/v1"
+    }
+  ],
+  "x-endlessnet-contract-status": "stable",
+  "x-endlessnet-contract-version": "4.0.0"
+}

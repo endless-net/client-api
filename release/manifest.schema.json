@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release-manifest.schema.json",
+  "title": "EndlessNet compatibility release manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "release", "status", "components", "modules"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "release": {"type": "string", "minLength": 1},
+    "status": {"enum": ["candidate", "released"]},
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "repository", "git_commit", "image"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "repository": {"type": "string", "pattern": "^unng-lab/"},
+          "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "image": {
+            "oneOf": [
+              {"type": "null"},
+              {"type": "string", "pattern": "^.+@sha256:[0-9a-f]{64}$"}
+            ]
+          }
+        }
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "version", "sum"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "version": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"},
+          "sum": {"type": "string", "pattern": "^h1:[A-Za-z0-9+/=]+$"}
+        }
+      }
+    }
+  },
+  "allOf": [{
+    "if": {"properties": {"status": {"const": "released"}}},
+    "then": {
+      "properties": {
+        "components": {
+          "items": {"properties": {"image": {"type": "string"}}}
+        }
+      }
+    }
+  }]
+}
