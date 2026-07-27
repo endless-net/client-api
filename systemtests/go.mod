@@ -7,7 +7,7 @@ require (
 	github.com/unng-lab/endlessnet-coordinator/coordinatorapi v1.0.0-rc.2
 	github.com/unng-lab/endlessnet-identity/identityapi v1.0.0-rc.1
 	github.com/unng-lab/endlessnet-management/managementapi v1.0.0-rc.1
-	github.com/unng-lab/endlessnet-servicekit v1.0.0-rc.3
+	github.com/unng-lab/endlessnet-servicekit v1.0.0-rc.4
 	github.com/unng-lab/endlessnet-signing/signingapi v1.0.0-rc.2
 	github.com/unng-lab/endlessnet/clientapi/v2 v2.0.0-rc.2
 )
