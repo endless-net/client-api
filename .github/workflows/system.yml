@@ -1,0 +1,30 @@
+name: Cutover system suite
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  system:
+    runs-on: ubuntu-latest
+    environment: cutover-candidate
+    env:
+      GOPRIVATE: github.com/unng-lab/*
+      GONOSUMDB: github.com/unng-lab/*
+      ENDLESSNET_SYSTEM_API_URL: ${{ vars.ENDLESSNET_SYSTEM_API_URL }}
+      ENDLESSNET_SYSTEM_NODE_ID: ${{ vars.ENDLESSNET_SYSTEM_NODE_ID }}
+    defaults:
+      run:
+        working-directory: systemtests
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Configure private modules
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: systemtests/go.mod
+          cache-dependency-path: systemtests/go.sum
+      - run: go test -tags=system -count=1 ./...

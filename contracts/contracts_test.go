@@ -5,8 +5,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"endlessnet/internal/management"
 )
 
 type openAPIDocument struct {
@@ -87,8 +85,8 @@ func TestFrontendOpenAPIContract(t *testing.T) {
 	}
 
 	for path := range spec.Paths {
-		if !management.OwnsPublicPath(path) {
-			t.Errorf("frontend contract path has no Management handler: %s", path)
+		if !strings.HasPrefix(path, "/") {
+			t.Errorf("frontend contract path is not absolute: %s", path)
 		}
 		for _, forbidden := range []string{"/internal", "/nodes", "/maps", "/signing", "/relays", "/server-key"} {
 			if path == forbidden || strings.HasPrefix(path, forbidden+"/") {

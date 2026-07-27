@@ -1,0 +1,123 @@
+{
+  "$schema": "../manifest.schema.json",
+  "schema_version": 1,
+  "release": "split-ydb-map-v3-rc1",
+  "status": "candidate",
+  "components": [
+    {
+      "name": "contract-hub",
+      "repository": "unng-lab/endlessnet",
+      "git_commit": "1d23c60caa1d0fb0f4c2480e4053a81f03af0b00",
+      "image": null
+    },
+    {
+      "name": "servicekit",
+      "repository": "unng-lab/endlessnet-servicekit",
+      "git_commit": "6b96796377cc13e734e3c8fdaeaa99da2b9627b2",
+      "image": null
+    },
+    {
+      "name": "gateway",
+      "repository": "unng-lab/endlessnet-gateway",
+      "git_commit": "ba4d3290b239acaf3e4520106e161ef4aebb4b16",
+      "image": null
+    },
+    {
+      "name": "identity",
+      "repository": "unng-lab/endlessnet-identity",
+      "git_commit": "93a546ee12cbddf034414016c65e9dc04986e8ff",
+      "image": null
+    },
+    {
+      "name": "coordinator",
+      "repository": "unng-lab/endlessnet-coordinator",
+      "git_commit": "11d677c399f45ec7aec331b1981099dd3cc2c01f",
+      "image": null
+    },
+    {
+      "name": "billing",
+      "repository": "unng-lab/endlessnet-billing",
+      "git_commit": "addfe909b185bf534d8eefa6673afde257244a87",
+      "image": null
+    },
+    {
+      "name": "management",
+      "repository": "unng-lab/endlessnet-management",
+      "git_commit": "e7b4c62dfa71fa7643ed42cce8222f4ed34f6779",
+      "image": null
+    },
+    {
+      "name": "signing",
+      "repository": "unng-lab/endlessnet-signing",
+      "git_commit": "440de88320db8eb44ea461f3afb7b9cc28e0e554",
+      "image": null
+    },
+    {
+      "name": "mcp",
+      "repository": "unng-lab/endlessnet-mcp",
+      "git_commit": "615322fe1235521a5ff84b5092c4d44f8b3d2e13",
+      "image": null
+    },
+    {
+      "name": "relay",
+      "repository": "unng-lab/endlessnet-relay",
+      "git_commit": "9a3d97c31ec4eab66e6c6cfd1e6df5cb5ebbb6ee",
+      "image": null
+    },
+    {
+      "name": "stun",
+      "repository": "unng-lab/endlessnet-stun",
+      "git_commit": "4cf3402d82b86e5fc8a7312a556467774ce3ef74",
+      "image": null
+    },
+    {
+      "name": "client",
+      "repository": "unng-lab/endlessnet-client",
+      "git_commit": "7ca528475b794eead1e3d482690cc2437c6d854a",
+      "image": null
+    },
+    {
+      "name": "observability",
+      "repository": "unng-lab/endlessnet-observability",
+      "git_commit": "56cd47b544faf06b44f66cf9ca79bd54893b6d86",
+      "image": null
+    }
+  ],
+  "modules": [
+    {
+      "path": "github.com/unng-lab/endlessnet/clientapi/v2",
+      "version": "v2.0.0-rc.1",
+      "sum": "h1:4ie/UmewjOxfDDSK2QhJZyah0glza8gX/MgeVR8hApI="
+    },
+    {
+      "path": "github.com/unng-lab/endlessnet-servicekit",
+      "version": "v1.0.0-rc.3",
+      "sum": "h1:sxobyWKThlH6kqYq0YTgj+/loBs47HVKACl7Pml3AXs="
+    },
+    {
+      "path": "github.com/unng-lab/endlessnet-identity/identityapi",
+      "version": "v1.0.0-rc.1",
+      "sum": "h1:kU4ArJt6rh5WJiPJtphLIh2G9ug4Qm6KrL8NeJ8Xnho="
+    },
+    {
+      "path": "github.com/unng-lab/endlessnet-coordinator/coordinatorapi",
+      "version": "v1.0.0-rc.2",
+      "sum": "h1:OzS/7xDOcqH/M+KSmATvdTAZymftLXPUtO/M4Q685+g="
+    },
+    {
+      "path": "github.com/unng-lab/endlessnet-billing/billingapi",
+      "version": "v1.0.0-rc.2",
+      "sum": "h1:dgB0M8LvkFHaykV7CYyMqeESvpLZKw85WuqP1MnKzX8="
+    },
+    {
+      "path": "github.com/unng-lab/endlessnet-management/managementapi",
+      "version": "v1.0.0-rc.1",
+      "sum": "h1:oajcXUx0HBS5UAQPuCQEStULkgMJDLBdV12Q+xOEPnw="
+    },
+    {
+      "path": "github.com/unng-lab/endlessnet-signing/signingapi",
+      "version": "v1.0.0-rc.2",
+      "sum": "h1:7PGbYP+l2WKLbtuBL9vPCVtQn+JsQikwlyqjpRnEnWM="
+    }
+  ]
+}
