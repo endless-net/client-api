@@ -7,7 +7,7 @@
     {
       "name": "contract-hub",
       "repository": "unng-lab/endlessnet",
-      "git_commit": "1d23c60caa1d0fb0f4c2480e4053a81f03af0b00",
+      "git_commit": "26f084f5d592d9076a4cb26ab56dabf134ffa8d4",
       "image": null
     },
     {
@@ -31,7 +31,7 @@
     {
       "name": "coordinator",
       "repository": "unng-lab/endlessnet-coordinator",
-      "git_commit": "11d677c399f45ec7aec331b1981099dd3cc2c01f",
+      "git_commit": "8e240b9306ccd140f50e7780be9cde5a7e3a6956",
       "image": null
     },
     {
@@ -49,19 +49,19 @@
     {
       "name": "signing",
       "repository": "unng-lab/endlessnet-signing",
-      "git_commit": "440de88320db8eb44ea461f3afb7b9cc28e0e554",
+      "git_commit": "1c9d7d5c3a3f50042d5a83aa717df539dfae91de",
       "image": null
     },
     {
       "name": "mcp",
       "repository": "unng-lab/endlessnet-mcp",
-      "git_commit": "615322fe1235521a5ff84b5092c4d44f8b3d2e13",
+      "git_commit": "70914af1be2752a21711f6e86883f67949047486",
       "image": null
     },
     {
       "name": "relay",
       "repository": "unng-lab/endlessnet-relay",
-      "git_commit": "9a3d97c31ec4eab66e6c6cfd1e6df5cb5ebbb6ee",
+      "git_commit": "e08a1e3e669d2c67cc2a53209e4173760a55e74d",
       "image": null
     },
     {
@@ -86,8 +86,8 @@
   "modules": [
     {
       "path": "github.com/unng-lab/endlessnet/clientapi/v2",
-      "version": "v2.0.0-rc.1",
-      "sum": "h1:4ie/UmewjOxfDDSK2QhJZyah0glza8gX/MgeVR8hApI="
+      "version": "v2.0.0-rc.2",
+      "sum": "h1:Sg4BzTex8TKVnf2deVfWle+8ppb2YCWRe9AMZRusGh4="
     },
     {
       "path": "github.com/unng-lab/endlessnet-servicekit",
