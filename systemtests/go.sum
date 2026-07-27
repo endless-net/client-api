@@ -12,7 +12,7 @@ github.com/unng-lab/endlessnet-servicekit v1.0.0-rc.3 h1:sxobyWKThlH6kqYq0YTgj+/
 github.com/unng-lab/endlessnet-servicekit v1.0.0-rc.3/go.mod h1:LwZ3zOXAVokYDDCWInENKDT6Ssw9xqJqNpQxQfnr/D8=
 github.com/unng-lab/endlessnet-signing/signingapi v1.0.0-rc.2 h1:7PGbYP+l2WKLbtuBL9vPCVtQn+JsQikwlyqjpRnEnWM=
 github.com/unng-lab/endlessnet-signing/signingapi v1.0.0-rc.2/go.mod h1:fPlv6lfH5zJqzn7n2E0Je813HW+5ACDVRcsVMZgvhcY=
-github.com/unng-lab/endlessnet/clientapi/v2 v2.0.0-rc.1 h1:4ie/UmewjOxfDDSK2QhJZyah0glza8gX/MgeVR8hApI=
-github.com/unng-lab/endlessnet/clientapi/v2 v2.0.0-rc.1/go.mod h1:z3sf8k29x86UYk3uQlpNN0PQuZUKi1lfG/tnPto+LVs=
+github.com/unng-lab/endlessnet/clientapi/v2 v2.0.0-rc.2 h1:Sg4BzTex8TKVnf2deVfWle+8ppb2YCWRe9AMZRusGh4=
+github.com/unng-lab/endlessnet/clientapi/v2 v2.0.0-rc.2/go.mod h1:vcn6SEBttqcK0WuVPTuwZexglvz52xO/f9K9xcstkQ4=
 golang.org/x/crypto v0.53.0 h1:QZ4Muo8THX6CizN2vPPd5fBGHyogrdK9fG4wLPFUsto=
 golang.org/x/crypto v0.53.0/go.mod h1:DNLU434OwVakk9PzuwV8w62mAJpRJL3vsgcfp4Qnsio=
