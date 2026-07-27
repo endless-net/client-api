@@ -13,6 +13,6 @@ require (
 )
 
 require (
-	github.com/unng-lab/endlessnet-relay v1.1.2 // indirect
+	github.com/unng-lab/endlessnet-relay v1.1.3 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
 )
