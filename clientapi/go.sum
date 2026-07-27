@@ -1,4 +1,4 @@
-github.com/unng-lab/endlessnet-relay v1.1.2 h1:SpjwmsM2z3WE9CNWIdQhnJJX2uuh8Bd5YYKlPwmnmrk=
-github.com/unng-lab/endlessnet-relay v1.1.2/go.mod h1:s+Z09bqvyIpwjZflqCuMBMNVDqEjD95NzkDqmQmWRr0=
+github.com/unng-lab/endlessnet-relay v1.1.3 h1:TL6BEsdWMRHH+SoHhbVBjAvm9eyDI7hrVDCjJykFEa8=
+github.com/unng-lab/endlessnet-relay v1.1.3/go.mod h1:qxSKhWWoXxCDpd8pv5sQkVNJkrSuaDjL/GIGTb9ie1M=
 golang.org/x/crypto v0.53.0 h1:QZ4Muo8THX6CizN2vPPd5fBGHyogrdK9fG4wLPFUsto=
 golang.org/x/crypto v0.53.0/go.mod h1:DNLU434OwVakk9PzuwV8w62mAJpRJL3vsgcfp4Qnsio=
