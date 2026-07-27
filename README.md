@@ -1,15 +1,14 @@
-# EndlessNet Client API
+# EndlessNet contracts and integration
 
-This public repository contains only the producer-owned Go contract consumed by
-EndlessNet clients:
+This public repository is the compatibility and release hub for independently
+released EndlessNet components. It intentionally contains no runtime binary.
 
-- module: `github.com/unng-lab/endlessnet/clientapi`;
-- source: [`clientapi/`](clientapi/);
-- release tags: `clientapi/vMAJOR.MINOR.PATCH`.
+- `clientapi/` — `github.com/unng-lab/endlessnet/clientapi/v2`;
+- `contracts/` — browser OpenAPI and runtime configuration contracts;
+- `architecture/` — cross-service boundaries and interaction rules;
+- `release/` — immutable compatibility-manifest schema and candidates;
+- `systemtests/` — cross-repository contract and system gates.
 
-The private EndlessNet control plane is maintained separately and is not part
-of this repository. Backend-internal packages, deployment configuration, and
-production inventory are intentionally excluded.
-
-See [`clientapi/README.md`](clientapi/README.md) for the contract boundary and
-versioning rules.
+Service implementations live in their producer-owned repositories. The release
+manifest is the only supported way to select a mutually tested set of service
+images, API modules, client, Relay, and STUN artifacts.

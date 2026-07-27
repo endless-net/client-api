@@ -1,4 +1,4 @@
-module github.com/unng-lab/endlessnet/clientapi
+module github.com/unng-lab/endlessnet/clientapi/v2
 
 go 1.26.5
 
