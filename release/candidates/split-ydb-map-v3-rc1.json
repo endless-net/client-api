@@ -13,49 +13,49 @@
     {
       "name": "servicekit",
       "repository": "unng-lab/endlessnet-servicekit",
-      "git_commit": "6b96796377cc13e734e3c8fdaeaa99da2b9627b2",
+      "git_commit": "8c0beacec962e1d1553ffebfab089ba275485943",
       "image": null
     },
     {
       "name": "gateway",
       "repository": "unng-lab/endlessnet-gateway",
-      "git_commit": "ba4d3290b239acaf3e4520106e161ef4aebb4b16",
+      "git_commit": "863eb89f8ad0e17732d4c76c09049f06eed76556",
       "image": null
     },
     {
       "name": "identity",
       "repository": "unng-lab/endlessnet-identity",
-      "git_commit": "93a546ee12cbddf034414016c65e9dc04986e8ff",
+      "git_commit": "10c9913f4e42271e781d11609eb926e8c242fa1f",
       "image": null
     },
     {
       "name": "coordinator",
       "repository": "unng-lab/endlessnet-coordinator",
-      "git_commit": "8e240b9306ccd140f50e7780be9cde5a7e3a6956",
+      "git_commit": "3eceef43f425e4acb30cc23f811cd6c5b711b329",
       "image": null
     },
     {
       "name": "billing",
       "repository": "unng-lab/endlessnet-billing",
-      "git_commit": "addfe909b185bf534d8eefa6673afde257244a87",
+      "git_commit": "dd6bf249bac59312bd29bf17f3110afd04dc3ee3",
       "image": null
     },
     {
       "name": "management",
       "repository": "unng-lab/endlessnet-management",
-      "git_commit": "e7b4c62dfa71fa7643ed42cce8222f4ed34f6779",
+      "git_commit": "fd34bd4be819eba9916f4221a3fa1d675be142ca",
       "image": null
     },
     {
       "name": "signing",
       "repository": "unng-lab/endlessnet-signing",
-      "git_commit": "1c9d7d5c3a3f50042d5a83aa717df539dfae91de",
+      "git_commit": "075e7df786872a3fe6eb50b431e259d66a849e95",
       "image": null
     },
     {
       "name": "mcp",
       "repository": "unng-lab/endlessnet-mcp",
-      "git_commit": "70914af1be2752a21711f6e86883f67949047486",
+      "git_commit": "e1c2473f783a972de92f5ed6d389b1e0c7bba57b",
       "image": null
     },
     {
@@ -91,8 +91,8 @@
     },
     {
       "path": "github.com/unng-lab/endlessnet-servicekit",
-      "version": "v1.0.0-rc.3",
-      "sum": "h1:sxobyWKThlH6kqYq0YTgj+/loBs47HVKACl7Pml3AXs="
+      "version": "v1.0.0-rc.4",
+      "sum": "h1:hC1v2oU4vFR8fm5QShzfd8NpSco+8JtU4vujCNw0QHo="
     },
     {
       "path": "github.com/unng-lab/endlessnet-identity/identityapi",
