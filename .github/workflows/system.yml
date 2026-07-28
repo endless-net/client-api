@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: cutover-candidate
     env:
-      GOPRIVATE: github.com/unng-lab/*
-      GONOSUMDB: github.com/unng-lab/*
+      GOPRIVATE: github.com/unng-lab/*,github.com/endless-net/*
+      GONOSUMDB: github.com/unng-lab/*,github.com/endless-net/*
       ENDLESSNET_SYSTEM_API_URL: ${{ vars.ENDLESSNET_SYSTEM_API_URL }}
       ENDLESSNET_SYSTEM_NODE_ID: ${{ vars.ENDLESSNET_SYSTEM_NODE_ID }}
     defaults:

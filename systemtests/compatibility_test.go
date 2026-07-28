@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/endless-net/service-kit/event"
 	billingapi "github.com/unng-lab/endlessnet-billing/billingapi/v1"
 	coordinatorapi "github.com/unng-lab/endlessnet-coordinator/coordinatorapi/v1"
 	identityapi "github.com/unng-lab/endlessnet-identity/identityapi/v1"
 	managementapi "github.com/unng-lab/endlessnet-management/managementapi/v1"
-	"github.com/unng-lab/endlessnet-servicekit/event"
 	signingapi "github.com/unng-lab/endlessnet-signing/signingapi/v1"
 	clientapi "github.com/unng-lab/endlessnet/clientapi/v2"
 )

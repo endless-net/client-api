@@ -1,3 +1,5 @@
+github.com/endless-net/service-kit v1.0.1 h1:OiZ4MUtc/0yIXKCvM6jwMJxxc8DDzLNjSJTuzUBCTgA=
+github.com/endless-net/service-kit v1.0.1/go.mod h1:GInty+Z8C7fTK9A/pEHOzMBnZg4GP4f34fsGQ4ZN84Y=
 github.com/unng-lab/endlessnet-billing/billingapi v1.0.0-rc.2 h1:dgB0M8LvkFHaykV7CYyMqeESvpLZKw85WuqP1MnKzX8=
 github.com/unng-lab/endlessnet-billing/billingapi v1.0.0-rc.2/go.mod h1:UDM0DDyeiXzRTCrMzrM+p/+Yfqn53ny2ABQ81SaZjDg=
 github.com/unng-lab/endlessnet-coordinator/coordinatorapi v1.0.0-rc.2 h1:OzS/7xDOcqH/M+KSmATvdTAZymftLXPUtO/M4Q685+g=
@@ -8,8 +10,6 @@ github.com/unng-lab/endlessnet-management/managementapi v1.0.0-rc.1 h1:oajcXUx0H
 github.com/unng-lab/endlessnet-management/managementapi v1.0.0-rc.1/go.mod h1:XyqvDrfPRY4qnwfM/GlGCU1HHqRyNA4vWiEE5NAok5g=
 github.com/unng-lab/endlessnet-relay v1.1.3 h1:TL6BEsdWMRHH+SoHhbVBjAvm9eyDI7hrVDCjJykFEa8=
 github.com/unng-lab/endlessnet-relay v1.1.3/go.mod h1:qxSKhWWoXxCDpd8pv5sQkVNJkrSuaDjL/GIGTb9ie1M=
-github.com/unng-lab/endlessnet-servicekit v1.0.0-rc.4 h1:hC1v2oU4vFR8fm5QShzfd8NpSco+8JtU4vujCNw0QHo=
-github.com/unng-lab/endlessnet-servicekit v1.0.0-rc.4/go.mod h1:LwZ3zOXAVokYDDCWInENKDT6Ssw9xqJqNpQxQfnr/D8=
 github.com/unng-lab/endlessnet-signing/signingapi v1.0.0-rc.2 h1:7PGbYP+l2WKLbtuBL9vPCVtQn+JsQikwlyqjpRnEnWM=
 github.com/unng-lab/endlessnet-signing/signingapi v1.0.0-rc.2/go.mod h1:fPlv6lfH5zJqzn7n2E0Je813HW+5ACDVRcsVMZgvhcY=
 github.com/unng-lab/endlessnet/clientapi/v2 v2.0.0-rc.3 h1:EjQn4keDZe189giXBWIsvR4Ddk6NBQ5l1eqrERjgxM4=
