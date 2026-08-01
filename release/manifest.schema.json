@@ -41,16 +41,84 @@
           "sum": {"type": "string", "pattern": "^h1:[A-Za-z0-9+/=]+$"}
         }
       }
-    }
-  },
-  "allOf": [{
-    "if": {"properties": {"status": {"const": "released"}}},
-    "then": {
-      "properties": {
-        "components": {
-          "items": {"properties": {"image": {"type": "string"}}}
+    },
+    "contracts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "version", "architecture_repository", "architecture_commit"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "version": {"type": "integer", "minimum": 1},
+          "architecture_repository": {"const": "endless-net/architecture"},
+          "architecture_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
         }
       }
     }
-  }]
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "released"}}},
+      "then": {
+        "properties": {
+          "components": {
+            "items": {"properties": {"image": {"type": "string"}}}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["contracts"],
+        "properties": {
+          "contracts": {
+            "contains": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {"name": {"const": "client-signing-identity-recovery"}}
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "contracts": {
+            "contains": {
+              "type": "object",
+              "required": ["name", "version", "architecture_repository", "architecture_commit"],
+              "properties": {
+                "name": {"const": "client-signing-identity-recovery"},
+                "version": {"const": 1},
+                "architecture_repository": {"const": "endless-net/architecture"},
+                "architecture_commit": {"const": "6cf37091846920e238bef631ef8951d395c084a1"}
+              }
+            }
+          },
+          "components": {
+            "allOf": [
+              {"contains": {"type": "object", "required": ["repository"], "properties": {"repository": {"const": "endless-net/client-api"}}}},
+              {"contains": {"type": "object", "required": ["repository"], "properties": {"repository": {"const": "endless-net/coordinator"}}}},
+              {"contains": {"type": "object", "required": ["repository"], "properties": {"repository": {"const": "endless-net/gateway"}}}},
+              {"contains": {"type": "object", "required": ["repository"], "properties": {"repository": {"const": "endless-net/client"}}}},
+              {"contains": {"type": "object", "required": ["repository"], "properties": {"repository": {"const": "endless-net/client-ui"}}}},
+              {"contains": {"type": "object", "required": ["repository"], "properties": {"repository": {"const": "endless-net/system-tests"}}}}
+            ]
+          },
+          "modules": {
+            "contains": {
+              "type": "object",
+              "required": ["path", "version", "sum"],
+              "properties": {
+                "path": {"const": "github.com/endless-net/client-api/clientapi/v2"},
+                "version": {"type": "string", "pattern": "^v2\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"},
+                "sum": {"type": "string", "pattern": "^h1:[A-Za-z0-9+/=]+$"}
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

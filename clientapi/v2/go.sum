@@ -1,0 +1,6 @@
+github.com/endless-net/client-api/clientapi v1.2.0 h1:/bHn9FMqm0DWQSusBA1wqO2d87V3J6D232bk4RgfyLI=
+github.com/endless-net/client-api/clientapi v1.2.0/go.mod h1:WfCT8T23ZlNR2M4og4e3HFMo4l1EAveSj5xXQUTgvNU=
+github.com/endless-net/relay v1.1.4 h1:1Oh+AU4iab/83yNDA3YY3ekBFzjvLzEEQuB1b5cY70k=
+github.com/endless-net/relay v1.1.4/go.mod h1:N7ZQeRUH5TJE5FxsvcdTn0SNFT82YFmgO1Su1GXaAj0=
+golang.org/x/crypto v0.53.0 h1:QZ4Muo8THX6CizN2vPPd5fBGHyogrdK9fG4wLPFUsto=
+golang.org/x/crypto v0.53.0/go.mod h1:DNLU434OwVakk9PzuwV8w62mAJpRJL3vsgcfp4Qnsio=

@@ -1,0 +1,12 @@
+Third-party components
+======================
+
+The `github.com/endless-net/client-api/clientapi/v2` module includes:
+
+- github.com/endless-net/client-api/clientapi — Apache-2.0
+- github.com/endless-net/relay — Apache-2.0
+- golang.org/x/crypto — BSD-3-Clause
+
+Authoritative license texts and attribution are available in each dependency's
+source distribution. CI regenerates and validates the dependency license report
+for every public change.

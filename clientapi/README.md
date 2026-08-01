@@ -1,13 +1,16 @@
 # EndlessNet Client API
 
-`clientapi` is the producer-owned v1 Go contract between the EndlessNet control
-plane and independently released clients.
+`clientapi` contains the producer-owned Go contracts between the EndlessNet
+control plane and independently released clients.
 
 The module contains:
 
 - the `v1` package: public HTTP DTOs, the strict control-plane HTTP SDK,
   map-stream v3 framing, identity proof binding, signed map and
   node-credential verification;
+- the nested `github.com/endless-net/client-api/clientapi/v2` module: the
+  machine-readable public recovery error contract and strict, durably
+  idempotent node credential renewal/re-registration DTOs;
 - `wireguard`: shared WireGuard key, address, prefix and endpoint validation used
   on both sides of the contract.
 
@@ -21,5 +24,7 @@ reconstruct into a copy, validate and authenticate it, and only then replace
 cache and WireGuard state atomically. A mismatch requires a full snapshot; no
 personalized delta history or explicit ACK is part of the protocol.
 
-Releases use submodule tags such as `clientapi/v1.2.0`. A breaking contract
-change requires a new Go module major version and an explicit product migration.
+The v1 module uses tags such as `clientapi/v1.2.0`. The independently pinnable
+v2 module uses tags such as `clientapi/v2/v2.0.0-rc.1`. A breaking contract
+change requires a new Go module major version and an explicit product migration;
+the v2 recovery cutover has no v1 plain-text compatibility fallback.

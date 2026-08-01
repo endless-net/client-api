@@ -2,6 +2,7 @@ package systemtests
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -9,21 +10,39 @@ import (
 	"testing"
 )
 
+const (
+	recoveryContractName       = "client-signing-identity-recovery"
+	recoveryArchitectureCommit = "6cf37091846920e238bef631ef8951d395c084a1"
+	recoveryClientAPIModule    = "github.com/endless-net/client-api/clientapi/v2"
+)
+
+type releaseComponent struct {
+	Name       string  `json:"name"`
+	Repository string  `json:"repository"`
+	GitCommit  string  `json:"git_commit"`
+	Image      *string `json:"image"`
+}
+
+type releaseModule struct {
+	Path    string `json:"path"`
+	Version string `json:"version"`
+	Sum     string `json:"sum"`
+}
+
+type releaseContract struct {
+	Name                   string `json:"name"`
+	Version                int    `json:"version"`
+	ArchitectureRepository string `json:"architecture_repository"`
+	ArchitectureCommit     string `json:"architecture_commit"`
+}
+
 type releaseManifest struct {
-	SchemaVersion int    `json:"schema_version"`
-	Release       string `json:"release"`
-	Status        string `json:"status"`
-	Components    []struct {
-		Name       string  `json:"name"`
-		Repository string  `json:"repository"`
-		GitCommit  string  `json:"git_commit"`
-		Image      *string `json:"image"`
-	} `json:"components"`
-	Modules []struct {
-		Path    string `json:"path"`
-		Version string `json:"version"`
-		Sum     string `json:"sum"`
-	} `json:"modules"`
+	SchemaVersion int                `json:"schema_version"`
+	Release       string             `json:"release"`
+	Status        string             `json:"status"`
+	Components    []releaseComponent `json:"components"`
+	Modules       []releaseModule    `json:"modules"`
+	Contracts     []releaseContract  `json:"contracts,omitempty"`
 }
 
 func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
@@ -79,10 +98,61 @@ func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
 			}
 			modulePaths[module.Path] = true
 		}
+		contractNames := map[string]bool{}
+		for _, contract := range manifest.Contracts {
+			if contract.Name == "" || contractNames[contract.Name] || contract.Version < 1 ||
+				contract.ArchitectureRepository != "endless-net/architecture" ||
+				!commitPattern.MatchString(contract.ArchitectureCommit) {
+				t.Fatalf("%s has invalid or duplicate contract %#v", file, contract)
+			}
+			contractNames[contract.Name] = true
+		}
+		if err := validateRecoveryContractPins(manifest); err != nil {
+			t.Fatalf("%s: %v", file, err)
+		}
 	}
 	for component, present := range required {
 		if !present {
 			t.Errorf("candidate manifests do not pin %s", component)
 		}
 	}
+}
+
+func validateRecoveryContractPins(manifest releaseManifest) error {
+	claimed := false
+	for _, contract := range manifest.Contracts {
+		if contract.Name != recoveryContractName {
+			continue
+		}
+		claimed = true
+		if contract.Version != 1 || contract.ArchitectureRepository != "endless-net/architecture" ||
+			contract.ArchitectureCommit != recoveryArchitectureCommit {
+			return fmt.Errorf("%s must pin version 1 at architecture commit %s", recoveryContractName, recoveryArchitectureCommit)
+		}
+	}
+	if !claimed {
+		return nil
+	}
+	repositories := make(map[string]bool, len(manifest.Components))
+	for _, component := range manifest.Components {
+		repositories[component.Repository] = true
+	}
+	for _, repository := range []string{
+		"endless-net/client-api",
+		"endless-net/coordinator",
+		"endless-net/gateway",
+		"endless-net/client",
+		"endless-net/client-ui",
+		"endless-net/system-tests",
+	} {
+		if !repositories[repository] {
+			return fmt.Errorf("%s requires an exact %s component commit", recoveryContractName, repository)
+		}
+	}
+	for _, module := range manifest.Modules {
+		if module.Path == recoveryClientAPIModule && strings.HasPrefix(module.Version, "v2.") && strings.HasPrefix(module.Sum, "h1:") {
+			return nil
+		}
+	}
+	return fmt.Errorf("%s requires a checksummed v2 pin of %s", recoveryContractName, recoveryClientAPIModule)
 }
