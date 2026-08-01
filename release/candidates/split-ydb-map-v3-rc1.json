@@ -87,7 +87,7 @@
     {
       "path": "github.com/endless-net/client-api/clientapi",
       "version": "v1.1.1",
-      "sum": "h1:oj/7X4hUtCi+H79tyB/ac2ieBDP/VYeBBtR582Qd2u0="
+      "sum": "h1:4UgFc7ORoSiIDYEaeKaA6ULii43xNzH73yYkVlCbbhs="
     },
     {
       "path": "github.com/endless-net/service-kit",
