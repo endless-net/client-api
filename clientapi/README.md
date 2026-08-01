@@ -25,6 +25,6 @@ cache and WireGuard state atomically. A mismatch requires a full snapshot; no
 personalized delta history or explicit ACK is part of the protocol.
 
 The v1 module uses tags such as `clientapi/v1.2.0`. The independently pinnable
-v2 module uses tags such as `clientapi/v2/v2.0.0-rc.1`. A breaking contract
+v2 module uses tags such as `clientapi/v2.0.0-rc.4`. A breaking contract
 change requires a new Go module major version and an explicit product migration;
 the v2 recovery cutover has no v1 plain-text compatibility fallback.

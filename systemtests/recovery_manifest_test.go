@@ -65,7 +65,7 @@ func recoveryManifestFixture() releaseManifest {
 		Status:        "candidate",
 		Components:    components,
 		Modules: []releaseModule{{
-			Path: recoveryClientAPIModule, Version: "v2.0.0-rc.1", Sum: "h1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+			Path: recoveryClientAPIModule, Version: "v2.0.0-rc.4", Sum: "h1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
 		}},
 		Contracts: []releaseContract{{
 			Name: recoveryContractName, Version: 1,
