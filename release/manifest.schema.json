@@ -18,7 +18,7 @@
         "required": ["name", "repository", "git_commit", "image"],
         "properties": {
           "name": {"type": "string", "minLength": 1},
-          "repository": {"type": "string", "pattern": "^unng-lab/"},
+          "repository": {"type": "string", "pattern": "^endless-net/"},
           "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
           "image": {
             "oneOf": [

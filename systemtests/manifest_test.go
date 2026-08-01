@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -55,7 +56,7 @@ func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
 		names, repositories := map[string]bool{}, map[string]bool{}
 		for _, component := range manifest.Components {
 			if component.Name == "" || names[component.Name] || repositories[component.Repository] ||
-				!commitPattern.MatchString(component.GitCommit) {
+				!strings.HasPrefix(component.Repository, "endless-net/") || !commitPattern.MatchString(component.GitCommit) {
 				t.Fatalf("%s has invalid or duplicate component %#v", file, component)
 			}
 			names[component.Name], repositories[component.Repository] = true, true

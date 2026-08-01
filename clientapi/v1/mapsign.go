@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	relayauth "github.com/unng-lab/endlessnet-relay/protocol/v1"
+	relayauth "github.com/endless-net/relay/protocol/v1"
 )
 
 const (

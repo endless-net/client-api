@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	protocolv1 "github.com/unng-lab/endlessnet-relay/protocol/v1"
-	wgkeys "github.com/unng-lab/endlessnet/clientapi/v2/wireguard"
+	wgkeys "github.com/endless-net/client-api/clientapi/wireguard"
+	protocolv1 "github.com/endless-net/relay/protocol/v1"
 )
 
 // ValidateNetworkMap validates the complete untrusted map boundary before a

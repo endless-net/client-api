@@ -1,8 +1,8 @@
-module github.com/unng-lab/endlessnet/clientapi/v2
+module github.com/endless-net/client-api/clientapi
 
 go 1.26.5
 
 require (
-	github.com/unng-lab/endlessnet-relay v1.1.3
+	github.com/endless-net/relay v1.1.4
 	golang.org/x/crypto v0.53.0
 )
