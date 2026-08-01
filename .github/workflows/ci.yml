@@ -55,8 +55,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      GOPRIVATE: github.com/unng-lab/*,github.com/endless-net/*
-      GONOSUMDB: github.com/unng-lab/*,github.com/endless-net/*
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
     defaults:
       run:
         working-directory: systemtests

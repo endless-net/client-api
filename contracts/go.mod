@@ -1,3 +1,3 @@
-module github.com/unng-lab/endlessnet/contracts
+module github.com/endless-net/client-api/contracts
 
 go 1.26.5

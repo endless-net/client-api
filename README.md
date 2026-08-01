@@ -3,7 +3,7 @@
 This public repository is the compatibility and release hub for independently
 released EndlessNet components. It intentionally contains no runtime binary.
 
-- `clientapi/` — `github.com/unng-lab/endlessnet/clientapi/v2`;
+- `clientapi/` — `github.com/endless-net/client-api/clientapi` (v1);
 - `contracts/` — browser OpenAPI and runtime configuration contracts;
 - `architecture/` — cross-service boundaries and interaction rules;
 - `release/` — immutable compatibility-manifest schema and candidates;

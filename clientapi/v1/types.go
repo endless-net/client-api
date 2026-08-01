@@ -6,33 +6,31 @@ import (
 	"strings"
 	"time"
 
-	relayauth "github.com/unng-lab/endlessnet-relay/protocol/v1"
+	relayauth "github.com/endless-net/relay/protocol/v1"
 )
 
 const (
-	MapStreamProtocolVersion       = 3
-	MapStreamCapabilitySnapshot    = "snapshot"
-	MapStreamCapabilitySignedDelta = "signed-delta"
-	MapStreamCapabilityCheckpoint  = "checkpoint"
-	MapStreamCapabilityResync      = "resync"
-	MapStreamCapabilityHeartbeat   = "heartbeat"
-	NodeStatusOnline               = "online"
-	NodeStatusOffline              = "offline"
-	NodeApprovalPending            = "pending"
-	NodeApprovalApproved           = "approved"
-	NodeApprovalRejected           = "rejected"
-	NodeEnrollmentRequestPending   = "pending"
-	NodeEnrollmentRequestApproved  = "approved"
-	NodeEnrollmentRequestRejected  = "rejected"
-	NodeEnrollmentRequestExpired   = "expired"
-	NodeEnrollmentRequestEnrolled  = "enrolled"
+	MapStreamProtocolVersion      = 2
+	MapStreamCapabilityFullMap    = "full-map"
+	MapStreamCapabilityDelta      = "delta"
+	MapStreamCapabilityResync     = "resync"
+	MapStreamCapabilityHeartbeat  = "heartbeat"
+	NodeStatusOnline              = "online"
+	NodeStatusOffline             = "offline"
+	NodeApprovalPending           = "pending"
+	NodeApprovalApproved          = "approved"
+	NodeApprovalRejected          = "rejected"
+	NodeEnrollmentRequestPending  = "pending"
+	NodeEnrollmentRequestApproved = "approved"
+	NodeEnrollmentRequestRejected = "rejected"
+	NodeEnrollmentRequestExpired  = "expired"
+	NodeEnrollmentRequestEnrolled = "enrolled"
 )
 
 func MapStreamSupportedCapabilities() []string {
 	return []string{
-		MapStreamCapabilitySnapshot,
-		MapStreamCapabilitySignedDelta,
-		MapStreamCapabilityCheckpoint,
+		MapStreamCapabilityFullMap,
+		MapStreamCapabilityDelta,
 		MapStreamCapabilityResync,
 		MapStreamCapabilityHeartbeat,
 	}
@@ -233,7 +231,6 @@ type STUNEndpoint struct {
 }
 
 type RegisterNodeResponse struct {
-	Revision            MapRevision           `json:"revision"`
 	Network             Network               `json:"network"`
 	Node                Node                  `json:"node"`
 	Peers               []Peer                `json:"peers"`
@@ -245,77 +242,34 @@ type RegisterNodeResponse struct {
 	MapSignature        *MapSignature         `json:"map_signature,omitempty"`
 }
 
-// NetworkMapSnapshot is the complete, signed client projection. Enrollment
-// credentials are deliberately excluded so a snapshot can be cached safely.
-type NetworkMapSnapshot struct {
-	Revision            MapRevision           `json:"revision"`
-	Network             Network               `json:"network"`
-	Node                Node                  `json:"node"`
-	Peers               []Peer                `json:"peers"`
-	RegistrationBinding string                `json:"registration_binding,omitempty"`
-	STUNEndpoints       []STUNEndpoint        `json:"stun_endpoints,omitempty"`
-	Relays              []relayauth.Endpoint  `json:"relays"`
-	RelayCredential     *relayauth.Credential `json:"relay_credential,omitempty"`
-	MapSignature        *MapSignature         `json:"map_signature,omitempty"`
-}
-
-func (r RegisterNodeResponse) Snapshot() NetworkMapSnapshot {
-	return NetworkMapSnapshot{
-		Revision:            r.Revision,
-		Network:             r.Network,
-		Node:                r.Node,
-		Peers:               r.Peers,
-		RegistrationBinding: r.RegistrationBinding,
-		STUNEndpoints:       r.STUNEndpoints,
-		Relays:              r.Relays,
-		RelayCredential:     r.RelayCredential,
-		MapSignature:        r.MapSignature,
-	}
-}
-
-type MapRevision struct {
-	Network uint64 `json:"network"`
-	Global  uint64 `json:"global"`
-}
-
-func (r MapRevision) Equal(other MapRevision) bool {
-	return r.Network == other.Network && r.Global == other.Global
-}
-
-type MapCursor struct {
-	Revision MapRevision `json:"revision"`
-	MapHash  string      `json:"map_hash,omitempty"`
-}
-
 type MapStreamEvent struct {
-	Type            string              `json:"type"`
-	ProtocolVersion int                 `json:"protocol_version"`
-	Capabilities    []string            `json:"capabilities"`
-	EventID         string              `json:"event_id"`
-	From            MapRevision         `json:"from"`
-	To              MapRevision         `json:"to"`
-	BaseHash        string              `json:"base_hash,omitempty"`
-	Reason          string              `json:"reason,omitempty"`
-	Snapshot        *NetworkMapSnapshot `json:"snapshot,omitempty"`
-	Delta           *MapDelta           `json:"delta,omitempty"`
-	ResultSignature *MapSignature       `json:"result_signature,omitempty"`
+	Type            string                `json:"type"`
+	ProtocolVersion int                   `json:"protocol_version"`
+	Capabilities    []string              `json:"capabilities"`
+	FromRevision    uint64                `json:"from_revision"`
+	ToRevision      uint64                `json:"to_revision"`
+	Reason          string                `json:"reason,omitempty"`
+	Map             *RegisterNodeResponse `json:"map,omitempty"`
+	Delta           *MapDelta             `json:"delta,omitempty"`
 }
 
 func (e MapStreamEvent) HasFullMap() bool {
-	return e.Snapshot != nil &&
-		strings.TrimSpace(e.Snapshot.Network.ID) != "" &&
-		strings.TrimSpace(e.Snapshot.Node.ID) != ""
+	return e.Map != nil &&
+		strings.TrimSpace(e.Map.Network.ID) != "" &&
+		strings.TrimSpace(e.Map.Node.ID) != ""
 }
 
 type MapDelta struct {
-	Network         *Network              `json:"network,omitempty"`
-	Node            *Node                 `json:"node,omitempty"`
-	PeerUpserts     []Peer                `json:"peer_upserts,omitempty"`
-	PeerRemoveIDs   []string              `json:"peer_remove_ids,omitempty"`
-	STUNEndpoints   *[]STUNEndpoint       `json:"stun_endpoints,omitempty"`
-	RelayUpserts    []relayauth.Endpoint  `json:"relay_upserts,omitempty"`
-	RelayRemoveIDs  []string              `json:"relay_remove_ids,omitempty"`
-	RelayCredential *relayauth.Credential `json:"relay_credential,omitempty"`
+	Added   []Peer              `json:"added,omitempty"`
+	Updated []Peer              `json:"updated,omitempty"`
+	Removed []Peer              `json:"removed,omitempty"`
+	Relays  *RelayEndpointDelta `json:"relays,omitempty"`
+}
+
+type RelayEndpointDelta struct {
+	Added   []relayauth.Endpoint `json:"added,omitempty"`
+	Updated []relayauth.Endpoint `json:"updated,omitempty"`
+	Removed []relayauth.Endpoint `json:"removed,omitempty"`
 }
 
 type ServerKeyResponse struct {

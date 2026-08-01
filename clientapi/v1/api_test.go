@@ -238,43 +238,27 @@ func TestReadMapStreamEventFailsOverToNextCoordinator(t *testing.T) {
 		if got, want := r.Header.Get("X-EndlessNet-Map-Capabilities"), strings.Join(MapStreamSupportedCapabilities(), ","); got != want {
 			t.Fatalf("capabilities header = %q, want %q", got, want)
 		}
-		if got := r.URL.Query().Get("from_network_revision"); got != "7" {
-			t.Fatalf("from_network_revision = %q, want 7", got)
-		}
-		if got := r.URL.Query().Get("from_global_revision"); got != "2" {
-			t.Fatalf("from_global_revision = %q, want 2", got)
-		}
-		if got := r.URL.Query().Get("from_map_hash"); got != "hash-7" {
-			t.Fatalf("from_map_hash = %q, want hash-7", got)
-		}
 		setMapStreamResponseHeaders(w)
 		w.Header().Set("Content-Type", "application/x-ndjson")
 		_ = json.NewEncoder(w).Encode(MapStreamEvent{
 			Type:            "snapshot",
 			ProtocolVersion: MapStreamProtocolVersion,
 			Capabilities:    MapStreamSupportedCapabilities(),
-			EventID:         "event-9",
-			From:            MapRevision{Network: 7, Global: 2},
-			To:              MapRevision{Network: 9, Global: 2},
-			Snapshot: &NetworkMapSnapshot{
-				Revision: MapRevision{Network: 9, Global: 2},
-				Network:  Network{ID: "net-1", Revision: 9},
-				Node:     Node{ID: "node-1", NetworkID: "net-1"},
+			ToRevision:      9,
+			Map: &RegisterNodeResponse{
+				Network: Network{ID: "net-1", Revision: 9},
+				Node:    Node{ID: "node-1", NetworkID: "net-1"},
 			},
-			ResultSignature: &MapSignature{PayloadHash: "hash-9"},
 		})
 	}))
 	defer secondary.Close()
 
 	api := NewAPIWithNodeCredentialURLs([]string{primary.URL, secondary.URL}, "", "credential")
-	event, err := api.ReadMapStreamEvent("node-1", MapCursor{
-		Revision: MapRevision{Network: 7, Global: 2},
-		MapHash:  "hash-7",
-	}, time.Second)
+	event, err := api.ReadMapStreamEvent("node-1", 7, time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if event.To.Network != 9 || event.Snapshot.Network.ID != "net-1" {
+	if event.ToRevision != 9 || event.Map.Network.ID != "net-1" {
 		t.Fatalf("event = %#v, want fallback stream event", event)
 	}
 	if api.BaseURL != secondary.URL {
@@ -289,19 +273,17 @@ func TestReadMapStreamEventRejectsMissingCapabilities(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(MapStreamEvent{
 			Type:            "snapshot",
 			ProtocolVersion: MapStreamProtocolVersion,
-			EventID:         "event-3",
-			To:              MapRevision{Network: 3},
-			Snapshot: &NetworkMapSnapshot{
+			ToRevision:      3,
+			Map: &RegisterNodeResponse{
 				Network: Network{ID: "net-1", Revision: 3},
 				Node:    Node{ID: "node-1", NetworkID: "net-1"},
 			},
-			ResultSignature: &MapSignature{PayloadHash: "hash-3"},
 		})
 	}))
 	defer server.Close()
 
 	api := newAPIWithNodeCredentialForTest(server.URL, "", "credential")
-	_, err := api.ReadMapStreamEvent("node-1", MapCursor{}, time.Second)
+	_, err := api.ReadMapStreamEvent("node-1", 0, time.Second)
 	if err == nil || !strings.Contains(err.Error(), "event capabilities") {
 		t.Fatalf("missing capabilities error = %v", err)
 	}
@@ -319,32 +301,29 @@ func TestReadMapStreamEventSkipsHeartbeat(t *testing.T) {
 			Type:            "heartbeat",
 			ProtocolVersion: MapStreamProtocolVersion,
 			Capabilities:    MapStreamSupportedCapabilities(),
-			EventID:         "heartbeat-3",
-			From:            MapRevision{Network: 3},
-			To:              MapRevision{Network: 3},
+			FromRevision:    3,
+			ToRevision:      3,
 		})
 		_ = encoder.Encode(MapStreamEvent{
 			Type:            "snapshot",
 			ProtocolVersion: MapStreamProtocolVersion,
 			Capabilities:    MapStreamSupportedCapabilities(),
-			EventID:         "event-4",
-			From:            MapRevision{Network: 3},
-			To:              MapRevision{Network: 4},
-			Snapshot: &NetworkMapSnapshot{
+			FromRevision:    3,
+			ToRevision:      4,
+			Map: &RegisterNodeResponse{
 				Network: Network{ID: "net-1", Revision: 4},
 				Node:    Node{ID: "node-1", NetworkID: "net-1"},
 			},
-			ResultSignature: &MapSignature{PayloadHash: "hash-4"},
 		})
 	}))
 	defer server.Close()
 
 	api := newAPIWithNodeCredentialForTest(server.URL, "", "credential")
-	event, err := api.ReadMapStreamEvent("node-1", MapCursor{Revision: MapRevision{Network: 3}}, time.Second)
+	event, err := api.ReadMapStreamEvent("node-1", 3, time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if event.Type != "snapshot" || event.From.Network != 3 || event.To.Network != 4 {
+	if event.Type != "snapshot" || event.FromRevision != 3 || event.ToRevision != 4 {
 		t.Fatalf("event after heartbeat = %#v", event)
 	}
 }
@@ -356,20 +335,18 @@ func TestReadMapStreamEventRejectsExplicitCapabilitiesWithoutFullMap(t *testing.
 		_ = json.NewEncoder(w).Encode(MapStreamEvent{
 			Type:            "snapshot",
 			ProtocolVersion: MapStreamProtocolVersion,
-			Capabilities:    []string{MapStreamCapabilitySignedDelta},
-			EventID:         "event-3",
-			To:              MapRevision{Network: 3},
-			Snapshot: &NetworkMapSnapshot{
+			Capabilities:    []string{MapStreamCapabilityDelta},
+			ToRevision:      3,
+			Map: &RegisterNodeResponse{
 				Network: Network{ID: "net-1", Revision: 3},
 				Node:    Node{ID: "node-1", NetworkID: "net-1"},
 			},
-			ResultSignature: &MapSignature{PayloadHash: "hash-3"},
 		})
 	}))
 	defer server.Close()
 
 	api := newAPIWithNodeCredentialForTest(server.URL, "", "credential")
-	_, err := api.ReadMapStreamEvent("node-1", MapCursor{}, time.Second)
+	_, err := api.ReadMapStreamEvent("node-1", 0, time.Second)
 	if err == nil || !strings.Contains(err.Error(), "event capabilities") {
 		t.Fatalf("ReadMapStreamEvent error = %v, want missing full-map rejection", err)
 	}
@@ -384,18 +361,16 @@ func TestReadMapStreamEventRejectsUnknownCapability(t *testing.T) {
 			Type:            "snapshot",
 			ProtocolVersion: MapStreamProtocolVersion,
 			Capabilities:    capabilities,
-			EventID:         "event-1",
-			Snapshot: &NetworkMapSnapshot{
+			Map: &RegisterNodeResponse{
 				Network: Network{ID: "net-1", Revision: 1},
 				Node:    Node{ID: "node-1", NetworkID: "net-1"},
 			},
-			ResultSignature: &MapSignature{PayloadHash: "hash-1"},
 		})
 	}))
 	defer server.Close()
 
 	api := newAPIWithNodeCredentialForTest(server.URL, "", "credential")
-	_, err := api.ReadMapStreamEvent("node-1", MapCursor{}, time.Second)
+	_, err := api.ReadMapStreamEvent("node-1", 0, time.Second)
 	if err == nil || !strings.Contains(err.Error(), "event capabilities") {
 		t.Fatalf("ReadMapStreamEvent error = %v, want unknown capability rejection", err)
 	}
@@ -405,12 +380,12 @@ func TestReadMapStreamEventRejectsRemovedRevisionField(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		setMapStreamResponseHeaders(w)
 		w.Header().Set("Content-Type", "application/x-ndjson")
-		_, _ = io.WriteString(w, `{"type":"snapshot","protocol_version":3,"capabilities":["snapshot","signed-delta","checkpoint","resync","heartbeat"],"event_id":"event-1","previous_revision":0,"to":{"network":1,"global":0},"snapshot":{"network":{"id":"net-1","revision":1},"node":{"id":"node-1","network_id":"net-1"}}}`+"\n")
+		_, _ = io.WriteString(w, `{"type":"snapshot","protocol_version":2,"capabilities":["full-map","delta","resync","heartbeat"],"previous_revision":0,"to_revision":1,"map":{"network":{"id":"net-1","revision":1},"node":{"id":"node-1","network_id":"net-1"}}}`+"\n")
 	}))
 	defer server.Close()
 
 	api := newAPIWithNodeCredentialForTest(server.URL, "", "credential")
-	_, err := api.ReadMapStreamEvent("node-1", MapCursor{}, time.Second)
+	_, err := api.ReadMapStreamEvent("node-1", 0, time.Second)
 	if err == nil || !strings.Contains(err.Error(), "previous_revision") {
 		t.Fatalf("ReadMapStreamEvent error = %v, want removed field rejection", err)
 	}
@@ -425,12 +400,12 @@ func TestReadMapStreamEventRejectsRemovedEmbeddedSigningKeys(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				setMapStreamResponseHeaders(w)
 				w.Header().Set("Content-Type", "application/x-ndjson")
-				_, _ = io.WriteString(w, `{"type":"snapshot","protocol_version":3,"capabilities":["snapshot","signed-delta","checkpoint","resync","heartbeat"],"event_id":"event-1","from":{"network":0,"global":0},"to":{"network":1,"global":0},"snapshot":`+mapJSON+`,"result_signature":{"payload_hash":"hash-1"}}`+"\n")
+				_, _ = io.WriteString(w, `{"type":"snapshot","protocol_version":2,"capabilities":["full-map","delta","resync","heartbeat"],"from_revision":0,"to_revision":1,"map":`+mapJSON+`}`+"\n")
 			}))
 			defer server.Close()
 
 			api := newAPIWithNodeCredentialForTest(server.URL, "", "credential")
-			if _, err := api.ReadMapStreamEvent("node-1", MapCursor{}, time.Second); err == nil || !strings.Contains(err.Error(), "public_key") {
+			if _, err := api.ReadMapStreamEvent("node-1", 0, time.Second); err == nil || !strings.Contains(err.Error(), "public_key") {
 				t.Fatalf("ReadMapStreamEvent error = %v, want removed public_key rejection", err)
 			}
 		})
@@ -532,7 +507,7 @@ func TestReadMapStreamEventRejectsOversizedControlFrame(t *testing.T) {
 
 	api := newAPIWithNodeCredentialForTest(server.URL, "", "credential")
 	api.HTTPClient.Timeout = 2 * time.Second
-	_, err := api.ReadMapStreamEvent("node-1", MapCursor{}, time.Second)
+	_, err := api.ReadMapStreamEvent("node-1", 0, time.Second)
 	if err == nil || !strings.Contains(err.Error(), "control map stream event exceeds") {
 		t.Fatalf("ReadMapStreamEvent error = %v, want oversized control frame rejection", err)
 	}

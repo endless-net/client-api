@@ -5,18 +5,18 @@ import (
 	"testing"
 	"time"
 
+	billingapi "github.com/endless-net/billing/billingapi/v1"
+	clientapi "github.com/endless-net/client-api/clientapi/v1"
+	coordinatorapi "github.com/endless-net/coordinator/coordinatorapi/v1"
+	identityapi "github.com/endless-net/identity/identityapi/v1"
+	managementapi "github.com/endless-net/management/managementapi/v1"
 	"github.com/endless-net/service-kit/event"
-	billingapi "github.com/unng-lab/endlessnet-billing/billingapi/v1"
-	coordinatorapi "github.com/unng-lab/endlessnet-coordinator/coordinatorapi/v1"
-	identityapi "github.com/unng-lab/endlessnet-identity/identityapi/v1"
-	managementapi "github.com/unng-lab/endlessnet-management/managementapi/v1"
-	signingapi "github.com/unng-lab/endlessnet-signing/signingapi/v1"
-	clientapi "github.com/unng-lab/endlessnet/clientapi/v2"
+	signingapi "github.com/endless-net/signing/signingapi/v1"
 )
 
 func TestPinnedModulesShareCompatibilityBaseline(t *testing.T) {
-	if clientapi.MapStreamProtocolVersion != 3 {
-		t.Fatalf("map protocol = %d, want 3", clientapi.MapStreamProtocolVersion)
+	if clientapi.MapStreamProtocolVersion != 2 {
+		t.Fatalf("map protocol = %d, want 2", clientapi.MapStreamProtocolVersion)
 	}
 	now := time.Unix(1, 0).UTC()
 	envelope := event.Envelope{

@@ -6,7 +6,7 @@ system suite passes. Released manifests never contain tags or mutable image
 references.
 
 Schema version 1 uses canonical `endless-net/*` repository coordinates. Legacy
-`unng-lab/*` repository coordinates are rejected after the clean cutover.
+pre-cutover repository coordinates are rejected after the clean cutover.
 
 Clean cutover uses one released manifest. It does not export, import, dual-write,
 CDC, or reconcile state from the retired stack.

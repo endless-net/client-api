@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	relayauth "github.com/unng-lab/endlessnet-relay/protocol/v1"
+	relayauth "github.com/endless-net/relay/protocol/v1"
 )
 
 const (
-	mapSignatureVersion             = 5
-	mapSignatureAlgorithm           = "ed25519-network-map-v5"
+	mapSignatureVersion             = 4
+	mapSignatureAlgorithm           = "ed25519-network-map-v4"
 	DefaultNetworkMapSignatureTTL   = 24 * time.Hour
 	maxNetworkMapSignatureClockSkew = 5 * time.Minute
 )
@@ -27,7 +27,6 @@ type networkMapSigningPayload struct {
 	KeyID               string               `json:"key_id"`
 	IssuedAt            time.Time            `json:"issued_at"`
 	ExpiresAt           time.Time            `json:"expires_at"`
-	Revision            MapRevision          `json:"revision"`
 	RegistrationBinding string               `json:"registration_binding,omitempty"`
 	Network             Network              `json:"network"`
 	Node                Node                 `json:"node"`
@@ -37,18 +36,10 @@ type networkMapSigningPayload struct {
 }
 
 func SignNetworkMap(privateKey ed25519.PrivateKey, response RegisterNodeResponse) (*MapSignature, error) {
-	return SignNetworkMapSnapshot(privateKey, response.Snapshot())
+	return SignNetworkMapAt(privateKey, response, time.Now().UTC(), DefaultNetworkMapSignatureTTL)
 }
 
 func SignNetworkMapAt(privateKey ed25519.PrivateKey, response RegisterNodeResponse, issuedAt time.Time, ttl time.Duration) (*MapSignature, error) {
-	return SignNetworkMapSnapshotAt(privateKey, response.Snapshot(), issuedAt, ttl)
-}
-
-func SignNetworkMapSnapshot(privateKey ed25519.PrivateKey, snapshot NetworkMapSnapshot) (*MapSignature, error) {
-	return SignNetworkMapSnapshotAt(privateKey, snapshot, time.Now().UTC(), DefaultNetworkMapSignatureTTL)
-}
-
-func SignNetworkMapSnapshotAt(privateKey ed25519.PrivateKey, snapshot NetworkMapSnapshot, issuedAt time.Time, ttl time.Duration) (*MapSignature, error) {
 	if len(privateKey) != ed25519.PrivateKeySize {
 		return nil, errors.New("invalid map signing private key")
 	}
@@ -56,16 +47,12 @@ func SignNetworkMapSnapshotAt(privateKey ed25519.PrivateKey, snapshot NetworkMap
 	if !ok {
 		return nil, errors.New("invalid map signing public key")
 	}
-	return SignNetworkMapSnapshotWithProvider(publicKey, snapshot, issuedAt, ttl, func(payload []byte) ([]byte, error) {
+	return SignNetworkMapWithProvider(publicKey, response, issuedAt, ttl, func(payload []byte) ([]byte, error) {
 		return ed25519.Sign(privateKey, payload), nil
 	})
 }
 
 func SignNetworkMapWithProvider(publicKey ed25519.PublicKey, response RegisterNodeResponse, issuedAt time.Time, ttl time.Duration, signer func([]byte) ([]byte, error)) (*MapSignature, error) {
-	return SignNetworkMapSnapshotWithProvider(publicKey, response.Snapshot(), issuedAt, ttl, signer)
-}
-
-func SignNetworkMapSnapshotWithProvider(publicKey ed25519.PublicKey, snapshot NetworkMapSnapshot, issuedAt time.Time, ttl time.Duration, signer func([]byte) ([]byte, error)) (*MapSignature, error) {
 	if len(publicKey) != ed25519.PublicKeySize {
 		return nil, errors.New("invalid map signing public key")
 	}
@@ -82,7 +69,7 @@ func SignNetworkMapSnapshotWithProvider(publicKey ed25519.PublicKey, snapshot Ne
 	if err != nil {
 		return nil, err
 	}
-	payload, err := canonicalNetworkMapPayload(snapshot, keyID, issuedAt, expiresAt)
+	payload, err := canonicalNetworkMapPayload(response, keyID, issuedAt, expiresAt)
 	if err != nil {
 		return nil, err
 	}
@@ -106,29 +93,21 @@ func SignNetworkMapSnapshotWithProvider(publicKey ed25519.PublicKey, snapshot Ne
 }
 
 func VerifyNetworkMapSignatureWithTrustBundle(response RegisterNodeResponse, trust SigningTrustBundle) error {
-	return VerifyNetworkMapSnapshotSignatureWithTrustBundle(response.Snapshot(), trust)
-}
-
-func VerifyNetworkMapSnapshotSignatureWithTrustBundle(snapshot NetworkMapSnapshot, trust SigningTrustBundle) error {
-	if snapshot.MapSignature == nil {
+	if response.MapSignature == nil {
 		return errors.New("network map signature is missing")
 	}
-	key, err := trust.Resolve(snapshot.MapSignature.KeyID, time.Now().UTC())
+	key, err := trust.Resolve(response.MapSignature.KeyID, time.Now().UTC())
 	if err != nil {
 		return err
 	}
-	return VerifyNetworkMapSnapshotSignatureAt(snapshot, key.PublicKey, time.Now().UTC())
+	return VerifyNetworkMapSignatureAt(response, key.PublicKey, time.Now().UTC())
 }
 
 func VerifyNetworkMapSignatureAt(response RegisterNodeResponse, expectedPublicKey string, now time.Time) error {
-	return VerifyNetworkMapSnapshotSignatureAt(response.Snapshot(), expectedPublicKey, now)
-}
-
-func VerifyNetworkMapSnapshotSignatureAt(snapshot NetworkMapSnapshot, expectedPublicKey string, now time.Time) error {
-	if snapshot.MapSignature == nil {
+	if response.MapSignature == nil {
 		return errors.New("network map signature is missing")
 	}
-	signature := snapshot.MapSignature
+	signature := response.MapSignature
 	if signature.Version != mapSignatureVersion {
 		return errors.New("unsupported network map signature version")
 	}
@@ -172,7 +151,7 @@ func VerifyNetworkMapSnapshotSignatureAt(snapshot NetworkMapSnapshot, expectedPu
 	if !now.Before(expiresAt) {
 		return errors.New("network map signature expired")
 	}
-	payload, err := canonicalNetworkMapPayload(snapshot, signature.KeyID, issuedAt, expiresAt)
+	payload, err := canonicalNetworkMapPayload(response, signature.KeyID, issuedAt, expiresAt)
 	if err != nil {
 		return err
 	}
@@ -186,13 +165,13 @@ func VerifyNetworkMapSnapshotSignatureAt(snapshot NetworkMapSnapshot, expectedPu
 	return nil
 }
 
-func canonicalNetworkMapPayload(snapshot NetworkMapSnapshot, keyID string, issuedAt, expiresAt time.Time) ([]byte, error) {
+func canonicalNetworkMapPayload(response RegisterNodeResponse, keyID string, issuedAt, expiresAt time.Time) ([]byte, error) {
 	if strings.TrimSpace(keyID) == "" {
 		return nil, errors.New("network map signing key id is required")
 	}
-	peers := append([]Peer(nil), snapshot.Peers...)
-	stunEndpoints := append([]STUNEndpoint(nil), snapshot.STUNEndpoints...)
-	relays := append([]relayauth.Endpoint(nil), snapshot.Relays...)
+	peers := append([]Peer(nil), response.Peers...)
+	stunEndpoints := append([]STUNEndpoint(nil), response.STUNEndpoints...)
+	relays := append([]relayauth.Endpoint(nil), response.Relays...)
 	sort.Slice(peers, func(i, j int) bool {
 		if peers[i].ID == peers[j].ID {
 			return peers[i].Hostname < peers[j].Hostname
@@ -216,10 +195,9 @@ func canonicalNetworkMapPayload(snapshot NetworkMapSnapshot, keyID string, issue
 		KeyID:               strings.TrimSpace(keyID),
 		IssuedAt:            issuedAt.UTC(),
 		ExpiresAt:           expiresAt.UTC(),
-		Revision:            snapshot.Revision,
-		RegistrationBinding: strings.TrimSpace(snapshot.RegistrationBinding),
-		Network:             snapshot.Network,
-		Node:                snapshot.Node,
+		RegistrationBinding: strings.TrimSpace(response.RegistrationBinding),
+		Network:             response.Network,
+		Node:                response.Node,
 		Peers:               peers,
 		STUNEndpoints:       stunEndpoints,
 		Relays:              relays,

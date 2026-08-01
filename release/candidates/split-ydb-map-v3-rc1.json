@@ -85,39 +85,44 @@
   ],
   "modules": [
     {
-      "path": "github.com/unng-lab/endlessnet/clientapi/v2",
-      "version": "v2.0.0-rc.3",
-      "sum": "h1:EjQn4keDZe189giXBWIsvR4Ddk6NBQ5l1eqrERjgxM4="
+      "path": "github.com/endless-net/client-api/clientapi",
+      "version": "v1.1.1",
+      "sum": "h1:oj/7X4hUtCi+H79tyB/ac2ieBDP/VYeBBtR582Qd2u0="
     },
     {
-      "path": "github.com/unng-lab/endlessnet-servicekit",
-      "version": "v1.0.0-rc.4",
-      "sum": "h1:hC1v2oU4vFR8fm5QShzfd8NpSco+8JtU4vujCNw0QHo="
+      "path": "github.com/endless-net/service-kit",
+      "version": "v1.0.1",
+      "sum": "h1:OiZ4MUtc/0yIXKCvM6jwMJxxc8DDzLNjSJTuzUBCTgA="
     },
     {
-      "path": "github.com/unng-lab/endlessnet-identity/identityapi",
-      "version": "v1.0.0-rc.1",
-      "sum": "h1:kU4ArJt6rh5WJiPJtphLIh2G9ug4Qm6KrL8NeJ8Xnho="
-    },
-    {
-      "path": "github.com/unng-lab/endlessnet-coordinator/coordinatorapi",
+      "path": "github.com/endless-net/identity/identityapi",
       "version": "v1.0.0-rc.2",
-      "sum": "h1:OzS/7xDOcqH/M+KSmATvdTAZymftLXPUtO/M4Q685+g="
+      "sum": "h1:aVyRahbpLUadhCtMoou5VRj7qCcsVRYAtJV/YQnA6jQ="
     },
     {
-      "path": "github.com/unng-lab/endlessnet-billing/billingapi",
+      "path": "github.com/endless-net/coordinator/coordinatorapi",
+      "version": "v1.0.0-rc.3",
+      "sum": "h1:7G8hiMDaoT2gQ6chQa1M/lskJYd19ET+a8hvCRax1O0="
+    },
+    {
+      "path": "github.com/endless-net/billing/billingapi",
+      "version": "v1.0.0-rc.3",
+      "sum": "h1:AMWfJAjEp9v03cfGQyrZYrVHQYYH4yaePZg/pl3y91A="
+    },
+    {
+      "path": "github.com/endless-net/management/managementapi",
       "version": "v1.0.0-rc.2",
-      "sum": "h1:dgB0M8LvkFHaykV7CYyMqeESvpLZKw85WuqP1MnKzX8="
+      "sum": "h1:VQFWsxwVB8qVzfDZRY/pcunQCkd0uIXjr7xYh8tug1M="
     },
     {
-      "path": "github.com/unng-lab/endlessnet-management/managementapi",
-      "version": "v1.0.0-rc.1",
-      "sum": "h1:oajcXUx0HBS5UAQPuCQEStULkgMJDLBdV12Q+xOEPnw="
+      "path": "github.com/endless-net/signing/signingapi",
+      "version": "v1.0.0",
+      "sum": "h1:ptpB1EHgP9JExPKjMTJzo0hrQDBzR/cu1NyKGQX8WOY="
     },
     {
-      "path": "github.com/unng-lab/endlessnet-signing/signingapi",
-      "version": "v1.0.0-rc.2",
-      "sum": "h1:7PGbYP+l2WKLbtuBL9vPCVtQn+JsQikwlyqjpRnEnWM="
+      "path": "github.com/endless-net/relay",
+      "version": "v1.1.4",
+      "sum": "h1:1Oh+AU4iab/83yNDA3YY3ekBFzjvLzEEQuB1b5cY70k="
     }
   ]
 }
