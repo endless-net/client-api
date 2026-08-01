@@ -260,12 +260,14 @@ func (a *API) UpdateNodeEndpointState(nodeID string, req UpdateNodeEndpointReque
 	return out, a.request(http.MethodPatch, path, req, &out)
 }
 
-func (a *API) ReadMapStreamEvent(nodeID string, fromRevision uint64, timeout time.Duration) (MapStreamEvent, error) {
+func (a *API) ReadMapStreamEvent(nodeID string, cursor MapCursor, timeout time.Duration) (MapStreamEvent, error) {
 	capabilities := MapStreamSupportedCapabilities()
 	path := fmt.Sprintf(
-		"/maps/%s/stream?from_revision=%d&timeout=%s",
+		"/maps/%s/stream?from_network_revision=%d&from_global_revision=%d&from_map_hash=%s&timeout=%s",
 		url.PathEscape(nodeID),
-		fromRevision,
+		cursor.Revision.Network,
+		cursor.Revision.Global,
+		url.QueryEscape(strings.TrimSpace(cursor.MapHash)),
 		url.QueryEscape(timeout.String()),
 	)
 	var failures []string
@@ -325,10 +327,13 @@ func (a *API) ReadMapStreamEvent(nodeID string, fromRevision uint64, timeout tim
 			if !mapStreamCapabilitiesEqual(event.Capabilities, capabilities) {
 				return MapStreamEvent{}, fmt.Errorf("map stream event capabilities = %v, want %v", event.Capabilities, capabilities)
 			}
+			if err := validateMapStreamEvent(event); err != nil {
+				return MapStreamEvent{}, err
+			}
 			switch event.Type {
 			case "heartbeat":
 				continue
-			case "snapshot", "resync":
+			case "snapshot", "delta", "checkpoint", "resync":
 				return event, nil
 			default:
 				return MapStreamEvent{}, fmt.Errorf("unsupported map stream event type %q", event.Type)
@@ -336,6 +341,48 @@ func (a *API) ReadMapStreamEvent(nodeID string, fromRevision uint64, timeout tim
 		}
 	}
 	return MapStreamEvent{}, failoverError(http.MethodGet, path, failures)
+}
+
+func validateMapStreamEvent(event MapStreamEvent) error {
+	if strings.TrimSpace(event.EventID) == "" {
+		return errors.New("map stream event_id is required")
+	}
+	switch event.Type {
+	case "heartbeat":
+		if event.Snapshot != nil || event.Delta != nil {
+			return errors.New("map stream heartbeat must not include a snapshot or delta")
+		}
+	case "snapshot", "resync":
+		if !event.HasFullMap() {
+			return fmt.Errorf("map stream %s event is missing a complete snapshot", event.Type)
+		}
+		if event.Delta != nil {
+			return fmt.Errorf("map stream %s event must not include a delta", event.Type)
+		}
+		if event.ResultSignature == nil {
+			return fmt.Errorf("map stream %s event is missing result_signature", event.Type)
+		}
+	case "delta":
+		if event.Delta == nil {
+			return errors.New("map stream delta event is missing delta")
+		}
+		if event.Snapshot != nil {
+			return errors.New("map stream delta event must not include a snapshot")
+		}
+		if strings.TrimSpace(event.BaseHash) == "" {
+			return errors.New("map stream delta event is missing base_hash")
+		}
+		if event.ResultSignature == nil {
+			return errors.New("map stream delta event is missing result_signature")
+		}
+	case "checkpoint":
+		if event.Snapshot != nil || event.Delta != nil {
+			return errors.New("map stream checkpoint must not include a snapshot or delta")
+		}
+	default:
+		return fmt.Errorf("unsupported map stream event type %q", event.Type)
+	}
+	return nil
 }
 
 func decodeStrictMapStreamEvent(raw []byte, event *MapStreamEvent) error {
