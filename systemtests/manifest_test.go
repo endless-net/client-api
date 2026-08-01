@@ -32,7 +32,8 @@ func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
 		t.Fatalf("candidate manifests: files=%v err=%v", files, err)
 	}
 	required := map[string]bool{
-		"gateway": false, "identity": false, "coordinator": false, "billing": false,
+		"gateway": false, "admin": false, "infrastructure": false,
+		"identity": false, "coordinator": false, "billing": false,
 		"management": false, "signing": false, "mcp": false, "relay": false,
 		"stun": false, "client": false, "observability": false,
 	}

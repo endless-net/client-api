@@ -19,7 +19,19 @@
     {
       "name": "gateway",
       "repository": "endless-net/gateway",
-      "git_commit": "863eb89f8ad0e17732d4c76c09049f06eed76556",
+      "git_commit": "307afe527ec8cc3e340ab97e2e6fc49ce3097d52",
+      "image": null
+    },
+    {
+      "name": "admin",
+      "repository": "endless-net/admin",
+      "git_commit": "cca0118d7d660bd48e20dcaf1367fdc2a803ea55",
+      "image": null
+    },
+    {
+      "name": "infrastructure",
+      "repository": "endless-net/infrastructure",
+      "git_commit": "953804cf4ca9ae23342ef0f05a430d7e55c21d39",
       "image": null
     },
     {
@@ -43,7 +55,7 @@
     {
       "name": "management",
       "repository": "endless-net/management",
-      "git_commit": "fd34bd4be819eba9916f4221a3fa1d675be142ca",
+      "git_commit": "4ab0a61bf066ad35a1d1dbc5c4e637f461ebf333",
       "image": null
     },
     {

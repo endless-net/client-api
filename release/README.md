@@ -5,6 +5,10 @@ OCI digests. A candidate becomes `released` only after the cross-repository
 system suite passes. Released manifests never contain tags or mutable image
 references.
 
+The independent Admin Web artifact is a first-class `admin` component. Its
+runtime policy is pinned separately as `infrastructure`; it is never folded into
+the `management` component or selected by a Management release.
+
 Schema version 1 uses canonical `endless-net/*` repository coordinates. Legacy
 pre-cutover repository coordinates are rejected after the clean cutover.
 
