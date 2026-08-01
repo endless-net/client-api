@@ -1,7 +1,7 @@
 github.com/endless-net/billing/billingapi v1.0.0-rc.3 h1:AMWfJAjEp9v03cfGQyrZYrVHQYYH4yaePZg/pl3y91A=
 github.com/endless-net/billing/billingapi v1.0.0-rc.3/go.mod h1:TSeHQlIjaiKNrGFVFUPzCOTzOR1Pc0PuBom0fFMwALw=
-github.com/endless-net/client-api/clientapi v1.1.1 h1:4UgFc7ORoSiIDYEaeKaA6ULii43xNzH73yYkVlCbbhs=
-github.com/endless-net/client-api/clientapi v1.1.1/go.mod h1:WfCT8T23ZlNR2M4og4e3HFMo4l1EAveSj5xXQUTgvNU=
+github.com/endless-net/client-api/clientapi v1.2.0 h1:/bHn9FMqm0DWQSusBA1wqO2d87V3J6D232bk4RgfyLI=
+github.com/endless-net/client-api/clientapi v1.2.0/go.mod h1:WfCT8T23ZlNR2M4og4e3HFMo4l1EAveSj5xXQUTgvNU=
 github.com/endless-net/coordinator/coordinatorapi v1.0.0-rc.3 h1:7G8hiMDaoT2gQ6chQa1M/lskJYd19ET+a8hvCRax1O0=
 github.com/endless-net/coordinator/coordinatorapi v1.0.0-rc.3/go.mod h1:P0yV2gKX/cyBcOA5kx/sWdf/5beKtUz+Fn5l9JyTxhY=
 github.com/endless-net/identity/identityapi v1.0.0-rc.2 h1:aVyRahbpLUadhCtMoou5VRj7qCcsVRYAtJV/YQnA6jQ=

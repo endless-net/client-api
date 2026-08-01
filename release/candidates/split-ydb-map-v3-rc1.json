@@ -86,8 +86,8 @@
   "modules": [
     {
       "path": "github.com/endless-net/client-api/clientapi",
-      "version": "v1.1.1",
-      "sum": "h1:4UgFc7ORoSiIDYEaeKaA6ULii43xNzH73yYkVlCbbhs="
+      "version": "v1.2.0",
+      "sum": "h1:/bHn9FMqm0DWQSusBA1wqO2d87V3J6D232bk4RgfyLI="
     },
     {
       "path": "github.com/endless-net/service-kit",

@@ -15,8 +15,8 @@ import (
 )
 
 func TestPinnedModulesShareCompatibilityBaseline(t *testing.T) {
-	if clientapi.MapStreamProtocolVersion != 2 {
-		t.Fatalf("map protocol = %d, want 2", clientapi.MapStreamProtocolVersion)
+	if clientapi.MapStreamProtocolVersion != 3 {
+		t.Fatalf("map protocol = %d, want 3", clientapi.MapStreamProtocolVersion)
 	}
 	now := time.Unix(1, 0).UTC()
 	envelope := event.Envelope{
