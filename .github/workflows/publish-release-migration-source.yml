@@ -1,4 +1,4 @@
-name: Publish frozen server release-control migration source
+name: Publish frozen server release-control migration audit
 
 "on":
   workflow_run:
@@ -52,19 +52,31 @@ jobs:
           test "$(jq -er '.target.repository' "$inventory")" = "endless-net/releases"
           test "$(jq -er '.completion.status' "$inventory")" = "not_complete"
           test "$(jq -r '.completion.production_authorized' "$inventory")" = "false"
+
+          record_inventory="$inventory"
+          previous_inventory="$(jq -r '.previous_inventory.path // empty' "$inventory")"
+          if [[ -n "$previous_inventory" ]]; then
+            test -f "$previous_inventory"
+            expected_previous_digest="$(jq -er '.previous_inventory.sha256' "$inventory")"
+            actual_previous_digest="sha256:$(sha256sum "$previous_inventory" | cut -d' ' -f1)"
+            test "$actual_previous_digest" = "$expected_previous_digest"
+            record_inventory="$previous_inventory"
+          fi
           {
             echo "publish=true"
             echo "inventory=$inventory"
             echo "schema=$schema"
+            echo "record_inventory=$record_inventory"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Assemble digest-verified migration source
+      - name: Assemble digest-verified migration audit
         if: steps.migration.outputs.publish == 'true'
         id: bundle
         shell: bash
         env:
           INVENTORY: ${{ steps.migration.outputs.inventory }}
           INVENTORY_SCHEMA: ${{ steps.migration.outputs.schema }}
+          RECORD_INVENTORY: ${{ steps.migration.outputs.record_inventory }}
           CI_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
@@ -73,13 +85,21 @@ jobs:
           cp "$INVENTORY" "$bundle/$INVENTORY"
           cp "$INVENTORY_SCHEMA" "$bundle/$INVENTORY_SCHEMA"
 
+          if [[ "$RECORD_INVENTORY" != "$INVENTORY" ]]; then
+            record_schema="$(dirname "$RECORD_INVENTORY")/inventory.schema.json"
+            test -f "$record_schema"
+            mkdir -p "$bundle/$(dirname "$RECORD_INVENTORY")"
+            cp "$RECORD_INVENTORY" "$bundle/$RECORD_INVENTORY"
+            cp "$record_schema" "$bundle/$record_schema"
+          fi
+
           while IFS=$'\t' read -r source_path expected_digest; do
             test -f "$source_path"
             actual_digest="sha256:$(sha256sum "$source_path" | cut -d' ' -f1)"
             test "$actual_digest" = "$expected_digest"
             mkdir -p "$bundle/$(dirname "$source_path")"
             cp "$source_path" "$bundle/$source_path"
-          done < <(jq -r '.records[] | [.source_path, .sha256] | @tsv' "$INVENTORY")
+          done < <(jq -r '.records[] | [.source_path, (.source_sha256 // .sha256)] | @tsv' "$RECORD_INVENTORY")
 
           while IFS= read -r source_path; do
             test -f "$source_path"
@@ -93,10 +113,11 @@ jobs:
             --arg source_revision "$SOURCE_SHA" \
             --arg target_repository "$(jq -er '.target.repository' "$INVENTORY")" \
             --arg target_baseline "$(jq -er '.target.baseline_revision' "$INVENTORY")" \
+            --arg target_implementation "$(jq -er '.target.implementation_revision // .target.baseline_revision' "$INVENTORY")" \
             --arg authority_revision "$(jq -er '.authority.revision' "$INVENTORY")" \
             --arg inventory_digest "$inventory_digest" \
             --arg ci_run "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${CI_RUN_ID}" \
-            '{schema_version: 1, purpose: "server_release_control_migration_source", source_repository: $source_repository, source_revision: $source_revision, target_repository: $target_repository, target_baseline: $target_baseline, authority_revision: $authority_revision, inventory_digest: $inventory_digest, ci_run: $ci_run, production_authorized: false}' \
+            '{schema_version: 1, purpose: "server_release_control_migration_source", source_repository: $source_repository, source_revision: $source_revision, target_repository: $target_repository, target_baseline: $target_baseline, target_implementation: $target_implementation, authority_revision: $authority_revision, inventory_digest: $inventory_digest, ci_run: $ci_run, production_authorized: false}' \
             > "$bundle/publication.json"
           sums="$RUNNER_TEMP/server-release-migration-SHA256SUMS"
           (
@@ -118,7 +139,7 @@ jobs:
           compression-level: 0
           overwrite: false
 
-      - name: Record non-production migration handoff
+      - name: Record non-production migration audit
         if: steps.migration.outputs.publish == 'true'
         env:
           INVENTORY_DIGEST: ${{ steps.bundle.outputs.inventory_digest }}
@@ -127,12 +148,12 @@ jobs:
           ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
         run: |
           {
-            echo "### Frozen server release migration source"
+            echo "### Frozen server release migration audit"
             echo
             echo "- Source revision: \`$SOURCE_SHA\`"
             echo "- Inventory: \`$INVENTORY_DIGEST\`"
             echo "- Artifact: [\`$ARTIFACT_ID\`]($ARTIFACT_URL) (\`$ARTIFACT_DIGEST\`)"
             echo "- Production authorized: \`false\`"
             echo
-            echo "This bundle is a copy source for endless-net/releases; it is not a promoted release."
+            echo "This bundle is a frozen compatibility archive and migration audit; canonical server release records come from endless-net/releases. It is not a promoted release."
           } >> "$GITHUB_STEP_SUMMARY"

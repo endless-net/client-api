@@ -19,7 +19,13 @@ producer-owned repositories; Infrastructure alone owns production desired state
 and deployment execution.
 
 The records under `release/` remain byte-for-byte available so current consumers
-are not broken while the copy and consumer cutover are proved. They are a
-migration source, not an authorized production input. The ownership migration
-is incomplete until Releases, System Tests, and Infrastructure provide the
-evidence listed in `release/migration/v1/inventory.json`.
+are not broken while their cutovers are proved. They are a frozen compatibility
+source, not an authorized production input. New server-release consumers must
+use the versioned schemas, fixtures, candidates, evidence, and released
+envelopes from `endless-net/releases`.
+
+The destination implementation is pinned at
+[`endless-net/releases@89e6129dd7304a05bb2b7f18c771d776058b3dcc`](https://github.com/endless-net/releases/tree/89e6129dd7304a05bb2b7f18c771d776058b3dcc).
+The ownership handoff is implemented, but production cutover remains incomplete
+until System Tests and Infrastructure provide the evidence listed in
+`release/migration/v2/inventory.json`.

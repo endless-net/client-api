@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release-migration/v2/inventory.schema.json",
+  "title": "EndlessNet server release-control migration inventory v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "state",
+    "authority",
+    "source",
+    "target",
+    "previous_inventory",
+    "destination_contract",
+    "legacy_compatibility",
+    "retained_tooling",
+    "cutover_gates",
+    "completion"
+  ],
+  "properties": {
+    "$schema": {"const": "./inventory.schema.json"},
+    "schema_version": {"const": 2},
+    "state": {"const": "destination_implemented_consumer_cutover_pending"},
+    "authority": {"$ref": "#/$defs/authority"},
+    "source": {"$ref": "#/$defs/source"},
+    "target": {"$ref": "#/$defs/target"},
+    "previous_inventory": {"$ref": "#/$defs/previousInventory"},
+    "destination_contract": {"$ref": "#/$defs/destinationContract"},
+    "legacy_compatibility": {"$ref": "#/$defs/legacyCompatibility"},
+    "retained_tooling": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/retainedTool"}
+    },
+    "cutover_gates": {
+      "type": "array",
+      "minItems": 5,
+      "items": {"$ref": "#/$defs/gate"}
+    },
+    "completion": {"$ref": "#/$defs/completion"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "repositoryPath": {
+      "type": "string",
+      "pattern": "^[0-9A-Za-z._/-]+$"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "decisions", "deployment"],
+      "properties": {
+        "repository": {"const": "endless-net/architecture"},
+        "revision": {"const": "a4a4798de03ca93d626dd242b55884aa3d478c67"},
+        "decisions": {"const": ["D-020", "D-025"]},
+        "deployment": {"const": "docs/ru/deployment.md"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "ownership_stop_revision", "role"],
+      "properties": {
+        "repository": {"const": "endless-net/client-api"},
+        "revision": {"const": "b1fe788fc2f0dd1772a2a6a5dfe2759e83c1d249"},
+        "ownership_stop_revision": {"const": "70848029f2460b1edd18fa3bf17f5f0a37a4e108"},
+        "role": {"const": "frozen_legacy_compatibility_source"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "baseline_revision", "implementation_revision", "role"],
+      "properties": {
+        "repository": {"const": "endless-net/releases"},
+        "baseline_revision": {"const": "51775a764544b8aad44a9fc44a9e67da543034cf"},
+        "implementation_revision": {"const": "89e6129dd7304a05bb2b7f18c771d776058b3dcc"},
+        "role": {"const": "server_release_control_owner"}
+      }
+    },
+    "previousInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "path", "sha256", "disposition"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "path": {"const": "release/migration/v1/inventory.json"},
+        "sha256": {"const": "sha256:ee76d710faff7c1e739bb6af54a9d88af59f0a7afc075164150f49009a796ee8"},
+        "disposition": {"const": "preserved_historical_handoff"}
+      }
+    },
+    "implementationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "path", "sha256"],
+      "properties": {
+        "class": {
+          "enum": ["schema", "fixture", "tooling", "workflow", "candidate", "provenance"]
+        },
+        "path": {"$ref": "#/$defs/repositoryPath"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "evidence_paths"],
+      "properties": {
+        "id": {
+          "enum": [
+            "v1_schemas",
+            "semantic_tooling",
+            "exact_fixtures",
+            "append_only_gate",
+            "actor_recording_protected_promotion",
+            "pilot_candidate"
+          ]
+        },
+        "status": {"const": "verified"},
+        "evidence_paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        }
+      }
+    },
+    "digestReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "pattern": "^https://github\\.com/endless-net/releases/blob/89e6129dd7304a05bb2b7f18c771d776058b3dcc/[0-9A-Za-z._/-]+$"
+        },
+        "digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "consumerResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemas", "fixtures", "validation", "production"],
+      "properties": {
+        "schemas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["base_uri", "repository_path", "revision", "copy_into_consumers"],
+          "properties": {
+            "base_uri": {"const": "https://endlessnet.ru/contracts/release/v1/"},
+            "repository_path": {"const": "schemas/v1"},
+            "revision": {"const": "89e6129dd7304a05bb2b7f18c771d776058b3dcc"},
+            "copy_into_consumers": {"const": false}
+          }
+        },
+        "fixtures": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository_path", "revision", "usage"],
+          "properties": {
+            "repository_path": {"const": "fixtures/v1"},
+            "revision": {"const": "89e6129dd7304a05bb2b7f18c771d776058b3dcc"},
+            "usage": {"const": "versioned_cross_repository_contract"}
+          }
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "environment_class",
+            "source_kind",
+            "resolver_command",
+            "candidate",
+            "candidate_provenance"
+          ],
+          "properties": {
+            "environment_class": {"const": "validation"},
+            "source_kind": {"const": "candidate"},
+            "resolver_command": {"const": "go run ./cmd/releasecontract resolve-candidate"},
+            "candidate": {"$ref": "#/$defs/digestReference"},
+            "candidate_provenance": {"$ref": "#/$defs/digestReference"}
+          }
+        },
+        "production": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["environment_class", "source_kind", "resolver_command", "repository_path", "released_record"],
+          "properties": {
+            "environment_class": {"const": "production"},
+            "source_kind": {"const": "released"},
+            "resolver_command": {"const": "go run ./cmd/releasecontract resolve-release"},
+            "repository_path": {"const": "released"},
+            "released_record": {"type": "null"}
+          }
+        }
+      }
+    },
+    "pilot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "release",
+        "status",
+        "candidate",
+        "candidate_provenance",
+        "system_test_evidence",
+        "released_envelope",
+        "allowed_environment_classes",
+        "production_eligible"
+      ],
+      "properties": {
+        "release": {"const": "gateway-23121de-d025-pilot-rc1"},
+        "status": {"const": "candidate"},
+        "candidate": {"$ref": "#/$defs/digestReference"},
+        "candidate_provenance": {"$ref": "#/$defs/digestReference"},
+        "system_test_evidence": {"type": "null"},
+        "released_envelope": {"type": "null"},
+        "allowed_environment_classes": {"const": ["validation"]},
+        "production_eligible": {"const": false}
+      }
+    },
+    "destinationContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "revision", "records", "capabilities", "consumer_resolution", "pilot"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "revision": {"const": "89e6129dd7304a05bb2b7f18c771d776058b3dcc"},
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/implementationRecord"}
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {"$ref": "#/$defs/capability"}
+        },
+        "consumer_resolution": {"$ref": "#/$defs/consumerResolution"},
+        "pilot": {"$ref": "#/$defs/pilot"}
+      }
+    },
+    "legacyCompatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_inventory",
+        "disposition",
+        "active_promotion_owner",
+        "canonical_for_new_server_releases",
+        "consumer_policy"
+      ],
+      "properties": {
+        "record_inventory": {"const": "release/migration/v1/inventory.json"},
+        "disposition": {"const": "preserve_frozen_in_place"},
+        "active_promotion_owner": {"const": false},
+        "canonical_for_new_server_releases": {"const": false},
+        "consumer_policy": {"const": "legacy_read_compatibility_only_until_evidenced_cutover"}
+      }
+    },
+    "retainedTool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_path", "disposition", "target_owner"],
+      "properties": {
+        "source_path": {"type": "string", "pattern": "^systemtests/[0-9A-Za-z._/-]+$"},
+        "disposition": {"const": "deprecated_compatibility_gate_until_consumer_evidence"},
+        "target_owner": {"const": "endless-net/releases"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "path", "sha256"],
+      "properties": {
+        "repository": {"enum": ["endless-net/client-api", "endless-net/releases"]},
+        "revision": {"$ref": "#/$defs/commit"},
+        "path": {"$ref": "#/$defs/repositoryPath"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "owner", "status", "requirement", "evidence"],
+      "properties": {
+        "id": {
+          "enum": [
+            "releases_destination_contract",
+            "releases_append_only_promotion",
+            "client_api_active_promotion_stopped",
+            "system_tests_consumer",
+            "infrastructure_consumer",
+            "client_api_tooling_retirement"
+          ]
+        },
+        "owner": {
+          "enum": [
+            "endless-net/releases",
+            "endless-net/system-tests",
+            "endless-net/infrastructure",
+            "endless-net/client-api"
+          ]
+        },
+        "status": {"enum": ["verified", "pending"]},
+        "requirement": {"type": "string", "minLength": 1},
+        "evidence": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/evidence"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "verified"}}},
+          "then": {"properties": {"evidence": {"minItems": 1}}}
+        },
+        {
+          "if": {"properties": {"status": {"const": "pending"}}},
+          "then": {"properties": {"evidence": {"maxItems": 0}}}
+        }
+      ]
+    },
+    "completion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "production_authorized", "reason"],
+      "properties": {
+        "status": {"const": "not_complete"},
+        "production_authorized": {"const": false},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

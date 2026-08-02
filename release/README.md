@@ -8,35 +8,59 @@ server manifest schemas, candidates, evidence, approval, promotion, or released
 envelopes.
 
 Authority is pinned in the versioned migration inventory to architecture commit
-`a4a4798de03ca93d626dd242b55884aa3d478c67`. The target repository baseline is
-`endless-net/releases@51775a764544b8aad44a9fc44a9e67da543034cf`.
+`a4a4798de03ca93d626dd242b55884aa3d478c67`. The Releases implementation is
+pinned at
+[`89e6129dd7304a05bb2b7f18c771d776058b3dcc`](https://github.com/endless-net/releases/tree/89e6129dd7304a05bb2b7f18c771d776058b3dcc).
 
 ## Migration state
 
-State is `copy_pending`; production is not authorized.
+State is `destination_implemented_consumer_cutover_pending`; production is not
+authorized.
 
-Creating the private repository established the ownership boundary but did not
-complete the migration. The following evidence is still required:
+Releases now owns the v1 schemas, semantic validator, exact fixtures,
+append-only history gate, actor-recording protected promotion workflow, and the
+`gateway-23121de-d025-pilot-rc1` candidate with its provenance. Client API's
+active candidate publication and promotion ownership is stopped.
 
-1. Releases copies every listed record byte-for-byte and verifies its digest.
-2. Releases provides protected append-only validation and approval-aware
-   promotion preserving the exact tested server component set.
-3. System Tests resolves a candidate from Releases by digest and publishes
+The remaining work is consumer cutover, not recreation of the contract here:
+
+1. System Tests resolves a candidate from Releases by digest and publishes
    passing evidence bound to that digest.
-4. Infrastructure accepts only a released envelope from Releases and rejects
+2. Infrastructure accepts only a released envelope from Releases and rejects
    these legacy candidates at production entry points.
-5. Client API retires its retained release tooling only after the preceding
-   copy and consumer evidence exists.
+3. Client API retires its retained release tooling only after both consumer
+   cutovers have immutable evidence.
 
-The machine-readable source of truth is
-[`migration/v1/inventory.json`](migration/v1/inventory.json), validated by
-[`migration/v1/inventory.schema.json`](migration/v1/inventory.schema.json).
-Every gate is explicitly `pending`, and its evidence is `null`.
+The current machine-readable source of truth is
+[`migration/v2/inventory.json`](migration/v2/inventory.json), validated by
+[`migration/v2/inventory.schema.json`](migration/v2/inventory.schema.json). It
+records exact destination file digests, the consumer resolution contract, and
+which gates are verified or pending. The original
+[`migration/v1/inventory.json`](migration/v1/inventory.json) remains unchanged
+as the historical pre-implementation handoff.
+
+## Canonical consumer contract
+
+Consumers must use the Releases v1 schemas and fixtures from the same pinned
+revision; they must not copy schemas into their own repositories.
+
+- Validation consumers resolve
+  [`gateway-23121de-d025-pilot-rc1`](https://github.com/endless-net/releases/blob/89e6129dd7304a05bb2b7f18c771d776058b3dcc/candidates/gateway-23121de-d025-pilot-rc1.json)
+  and its
+  [candidate provenance](https://github.com/endless-net/releases/blob/89e6129dd7304a05bb2b7f18c771d776058b3dcc/candidate-provenance/gateway-23121de-d025-pilot-rc1.json)
+  by the digests in the v2 inventory. A candidate is valid only for the
+  `validation` environment class.
+- Production consumers resolve only an immutable record under the Releases
+  `released/` path and then use `resolve-release`. At the pinned revision there
+  is no released record for the pilot, so it is not a production input.
+- Cross-repository decoder tests use
+  [`fixtures/v1`](https://github.com/endless-net/releases/tree/89e6129dd7304a05bb2b7f18c771d776058b3dcc/fixtures/v1)
+  as the versioned handoff contract.
 
 ## Frozen compatibility source
 
 The existing files remain at their historical paths to avoid breaking strict
-consumers during the copy phase:
+consumers during the evidenced cutover:
 
 - `manifest.schema.json` and `evidence.schema.json`;
 - `candidates/` and `evidence/` operational records;
@@ -57,25 +81,27 @@ only.
 
 After a green `main` revision adds a versioned migration inventory, the workflow
 in `.github/workflows/publish-release-migration-source.yml` publishes a
-commit-addressed `server-release-migration-source` artifact. It verifies each
-inventory digest, copies the frozen records and retained validator sources,
+commit-addressed migration audit artifact. It verifies the referenced historical
+inventory and frozen source digests, includes retained compatibility gates,
 writes `SHA256SUMS`, and marks `production_authorized: false`.
 
-This artifact exists only so Releases can perform and prove the copy. It is not
-a candidate publication, approval, promotion, released manifest, Infrastructure
-desired state, or production deployment request.
+This artifact preserves an auditable handoff and rollback reference. It is not
+a canonical server contract, candidate publication, approval, promotion,
+released manifest, Infrastructure desired state, or production deployment
+request. Canonical server release-control records now come from Releases.
 
 ## Retained legacy tooling
 
 `systemtests/releasecontract`, `systemtests/cmd/releasecontract`, and their exact
-fixtures/tests remain temporarily so current gates keep working and Releases can
-port the semantic checks. They are deprecated migration sources. Client API no
-longer runs candidate publication or server promotion automation.
+fixtures/tests remain temporarily so existing Client API gates and consumers
+keep working during cutover. They are deprecated compatibility sources; the
+implemented owner is Releases. Client API no longer runs candidate publication
+or server promotion automation.
 
 Do not remove the records or retained gates until immutable evidence completes
-every inventory cutover gate. Do not interpret the ownership documentation, the
-migration artifact, or a green client-api CI run as proof that Releases,
-System Tests, Infrastructure, or production cutover is complete.
+the System Tests and Infrastructure cutover gates. Do not interpret the
+ownership documentation, the migration artifact, or a green Client API or
+Releases CI run as proof that consumer or production cutover is complete.
 
 ## Historical record notes
 

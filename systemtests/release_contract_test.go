@@ -58,6 +58,88 @@ type releaseMigrationInventory struct {
 	} `json:"completion"`
 }
 
+type releaseMigrationInventoryV2 struct {
+	State  string `json:"state"`
+	Source struct {
+		Repository            string `json:"repository"`
+		Revision              string `json:"revision"`
+		OwnershipStopRevision string `json:"ownership_stop_revision"`
+		Role                  string `json:"role"`
+	} `json:"source"`
+	Target struct {
+		Repository             string `json:"repository"`
+		BaselineRevision       string `json:"baseline_revision"`
+		ImplementationRevision string `json:"implementation_revision"`
+		Role                   string `json:"role"`
+	} `json:"target"`
+	PreviousInventory struct {
+		Path        string `json:"path"`
+		SHA256      string `json:"sha256"`
+		Disposition string `json:"disposition"`
+	} `json:"previous_inventory"`
+	DestinationContract struct {
+		Revision string `json:"revision"`
+		Records  []struct {
+			Class  string `json:"class"`
+			Path   string `json:"path"`
+			SHA256 string `json:"sha256"`
+		} `json:"records"`
+		Capabilities []struct {
+			ID            string   `json:"id"`
+			Status        string   `json:"status"`
+			EvidencePaths []string `json:"evidence_paths"`
+		} `json:"capabilities"`
+		ConsumerResolution struct {
+			Schemas struct {
+				Revision          string `json:"revision"`
+				CopyIntoConsumers bool   `json:"copy_into_consumers"`
+			} `json:"schemas"`
+			Fixtures struct {
+				Revision string `json:"revision"`
+			} `json:"fixtures"`
+			Validation struct {
+				EnvironmentClass    string                          `json:"environment_class"`
+				SourceKind          string                          `json:"source_kind"`
+				Candidate           releasecontract.DigestReference `json:"candidate"`
+				CandidateProvenance releasecontract.DigestReference `json:"candidate_provenance"`
+			} `json:"validation"`
+			Production struct {
+				EnvironmentClass string `json:"environment_class"`
+				SourceKind       string `json:"source_kind"`
+				ReleasedRecord   any    `json:"released_record"`
+			} `json:"production"`
+		} `json:"consumer_resolution"`
+		Pilot struct {
+			Release                   string                          `json:"release"`
+			Status                    string                          `json:"status"`
+			Candidate                 releasecontract.DigestReference `json:"candidate"`
+			CandidateProvenance       releasecontract.DigestReference `json:"candidate_provenance"`
+			SystemTestEvidence        any                             `json:"system_test_evidence"`
+			ReleasedEnvelope          any                             `json:"released_envelope"`
+			AllowedEnvironmentClasses []string                        `json:"allowed_environment_classes"`
+			ProductionEligible        bool                            `json:"production_eligible"`
+		} `json:"pilot"`
+	} `json:"destination_contract"`
+	LegacyCompatibility struct {
+		RecordInventory               string `json:"record_inventory"`
+		Disposition                   string `json:"disposition"`
+		ActivePromotionOwner          bool   `json:"active_promotion_owner"`
+		CanonicalForNewServerReleases bool   `json:"canonical_for_new_server_releases"`
+	} `json:"legacy_compatibility"`
+	RetainedTooling []struct {
+		SourcePath string `json:"source_path"`
+	} `json:"retained_tooling"`
+	CutoverGates []struct {
+		ID       string `json:"id"`
+		Status   string `json:"status"`
+		Evidence []any  `json:"evidence"`
+	} `json:"cutover_gates"`
+	Completion struct {
+		Status               string `json:"status"`
+		ProductionAuthorized bool   `json:"production_authorized"`
+	} `json:"completion"`
+}
+
 func TestReleaseContractV1SchemasAcceptExactFixtures(t *testing.T) {
 	compiler := releaseSchemaCompiler(t)
 	fixtures := map[string]string{
@@ -179,6 +261,156 @@ func TestServerReleaseMigrationInventoryIsExactAndIncomplete(t *testing.T) {
 		if target := strings.TrimPrefix(path, "release/"); record.target != target {
 			t.Errorf("migration target for %s = %s, want %s", path, record.target, target)
 		}
+	}
+}
+
+func TestServerReleaseMigrationInventoryV2PointsAtReleasesAndKeepsCutoverIncomplete(t *testing.T) {
+	compiler := releaseSchemaCompiler(t)
+	schema, err := compiler.Compile("https://endlessnet.ru/contracts/release-migration/v2/inventory.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile("../release/migration/v2/inventory.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document any
+	if err := releasecontract.DecodeStrict(raw, &document); err != nil {
+		t.Fatal(err)
+	}
+	if err := schema.Validate(document); err != nil {
+		t.Fatal(err)
+	}
+
+	var inventory releaseMigrationInventoryV2
+	if err := json.Unmarshal(raw, &inventory); err != nil {
+		t.Fatal(err)
+	}
+	const releasesRevision = "89e6129dd7304a05bb2b7f18c771d776058b3dcc"
+	if inventory.State != "destination_implemented_consumer_cutover_pending" ||
+		inventory.Source.Repository != "endless-net/client-api" ||
+		inventory.Source.Revision != "b1fe788fc2f0dd1772a2a6a5dfe2759e83c1d249" ||
+		inventory.Source.OwnershipStopRevision != "70848029f2460b1edd18fa3bf17f5f0a37a4e108" ||
+		inventory.Source.Role != "frozen_legacy_compatibility_source" ||
+		inventory.Target.Repository != "endless-net/releases" ||
+		inventory.Target.BaselineRevision != "51775a764544b8aad44a9fc44a9e67da543034cf" ||
+		inventory.Target.ImplementationRevision != releasesRevision ||
+		inventory.Target.Role != "server_release_control_owner" ||
+		inventory.DestinationContract.Revision != releasesRevision ||
+		inventory.Completion.Status != "not_complete" || inventory.Completion.ProductionAuthorized {
+		t.Fatalf("migration inventory overstates or misdirects cutover: %+v", inventory)
+	}
+
+	previousRaw, err := os.ReadFile("../" + inventory.PreviousInventory.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inventory.PreviousInventory.Path != "release/migration/v1/inventory.json" ||
+		inventory.PreviousInventory.SHA256 != releasecontract.Digest(previousRaw) ||
+		inventory.PreviousInventory.Disposition != "preserved_historical_handoff" {
+		t.Fatalf("historical handoff was not preserved exactly: %+v", inventory.PreviousInventory)
+	}
+
+	records := make(map[string]string, len(inventory.DestinationContract.Records))
+	for _, record := range inventory.DestinationContract.Records {
+		if _, duplicate := records[record.Path]; duplicate {
+			t.Fatalf("duplicate Releases implementation record %q", record.Path)
+		}
+		records[record.Path] = record.SHA256
+	}
+	if len(records) != 25 {
+		t.Fatalf("Releases implementation record count = %d, want 25", len(records))
+	}
+	criticalRecords := map[string]string{
+		".github/workflows/ci.yml":                                 "sha256:1686592a4e39925e2b210e328acdafa9d9b2199e573c3e1efaca8139d15fc7a5",
+		".github/workflows/promote.yml":                            "sha256:0d38274423c1e6b40ef0cb061f2fd4bc11a7a64da199ad26e9ad38297f975a64",
+		"internal/releasecontract/contract.go":                     "sha256:d3ca6b7dc0fef578313b728baf964a76b40f223656812f1ee91d2ab63aa59b5e",
+		"internal/releasecontract/contract_test.go":                "sha256:c2dbaa6bc26f5566353a431c20351737d4c74e6a56f5a7687e8a0a63defade7d",
+		"schemas/v1/common.schema.json":                            "sha256:6bb1cf132c610b2f42b91362ea9cbb23c3a5ce75f7a1ab9f3b9c0a21ee549cbd",
+		"fixtures/v1/validation-resolution.json":                   "sha256:e5d3ad3cbb1f174605663a1cc563ec082445a7a470e934a3d15b991097d761fe",
+		"fixtures/v1/production-resolution.json":                   "sha256:474a61aa748b508e7f55c7097c3399129f4682a87d829c7ed2e139036d6eeb5d",
+		"candidates/gateway-23121de-d025-pilot-rc1.json":           "sha256:fc037453d1b41f350556b409c709070cc54c9f2c09dff5638d3c93d348eb31fb",
+		"candidate-provenance/gateway-23121de-d025-pilot-rc1.json": "sha256:3bfbb55386c8fc30775ac94f2ea84dd77897ab7e7c445c166669a97ba13fd01e",
+	}
+	for path, digest := range criticalRecords {
+		if records[path] != digest {
+			t.Errorf("Releases record %s digest = %s, want %s", path, records[path], digest)
+		}
+	}
+
+	capabilities := make(map[string]bool, len(inventory.DestinationContract.Capabilities))
+	for _, capability := range inventory.DestinationContract.Capabilities {
+		if capability.Status != "verified" || capabilities[capability.ID] {
+			t.Fatalf("invalid or duplicate destination capability: %+v", capability)
+		}
+		capabilities[capability.ID] = true
+		for _, path := range capability.EvidencePaths {
+			if _, ok := records[path]; !ok {
+				t.Errorf("capability %s cites unpinned path %s", capability.ID, path)
+			}
+		}
+	}
+	for _, id := range []string{
+		"v1_schemas",
+		"semantic_tooling",
+		"exact_fixtures",
+		"append_only_gate",
+		"actor_recording_protected_promotion",
+		"pilot_candidate",
+	} {
+		if !capabilities[id] {
+			t.Errorf("missing verified Releases capability %q", id)
+		}
+	}
+
+	resolution := inventory.DestinationContract.ConsumerResolution
+	pilot := inventory.DestinationContract.Pilot
+	if resolution.Schemas.Revision != releasesRevision || resolution.Schemas.CopyIntoConsumers ||
+		resolution.Fixtures.Revision != releasesRevision ||
+		resolution.Validation.EnvironmentClass != "validation" || resolution.Validation.SourceKind != "candidate" ||
+		resolution.Production.EnvironmentClass != "production" || resolution.Production.SourceKind != "released" ||
+		resolution.Production.ReleasedRecord != nil ||
+		pilot.Release != "gateway-23121de-d025-pilot-rc1" || pilot.Status != "candidate" ||
+		pilot.Candidate != resolution.Validation.Candidate ||
+		pilot.CandidateProvenance != resolution.Validation.CandidateProvenance ||
+		pilot.SystemTestEvidence != nil || pilot.ReleasedEnvelope != nil || pilot.ProductionEligible ||
+		!reflect.DeepEqual(pilot.AllowedEnvironmentClasses, []string{"validation"}) {
+		t.Fatalf("consumer resolution policy permits an unproved production input: %+v", resolution)
+	}
+
+	if inventory.LegacyCompatibility.RecordInventory != "release/migration/v1/inventory.json" ||
+		inventory.LegacyCompatibility.Disposition != "preserve_frozen_in_place" ||
+		inventory.LegacyCompatibility.ActivePromotionOwner ||
+		inventory.LegacyCompatibility.CanonicalForNewServerReleases {
+		t.Fatalf("legacy Client API ownership was not stopped safely: %+v", inventory.LegacyCompatibility)
+	}
+	for _, tool := range inventory.RetainedTooling {
+		if _, err := os.Stat("../" + tool.SourcePath); err != nil {
+			t.Errorf("retained compatibility gate %s: %v", tool.SourcePath, err)
+		}
+	}
+
+	wantGates := map[string]string{
+		"releases_destination_contract":       "verified",
+		"releases_append_only_promotion":      "verified",
+		"client_api_active_promotion_stopped": "verified",
+		"system_tests_consumer":               "pending",
+		"infrastructure_consumer":             "pending",
+		"client_api_tooling_retirement":       "pending",
+	}
+	for _, gate := range inventory.CutoverGates {
+		want, ok := wantGates[gate.ID]
+		if !ok || gate.Status != want {
+			t.Fatalf("unexpected migration gate: %+v", gate)
+		}
+		if (gate.Status == "verified" && len(gate.Evidence) == 0) ||
+			(gate.Status == "pending" && len(gate.Evidence) != 0) {
+			t.Fatalf("migration gate has inconsistent evidence: %+v", gate)
+		}
+		delete(wantGates, gate.ID)
+	}
+	if len(wantGates) != 0 {
+		t.Fatalf("missing migration gates: %+v", wantGates)
 	}
 }
 
@@ -450,6 +682,7 @@ func releaseSchemaCompiler(t *testing.T) *jsonschema.Compiler {
 		"https://endlessnet.ru/contracts/release/v1/released-envelope.schema.json":    "../release/schemas/v1/released-envelope.schema.json",
 		"https://endlessnet.ru/contracts/release/v1/resolution.schema.json":           "../release/schemas/v1/resolution.schema.json",
 		"https://endlessnet.ru/contracts/release-migration/v1/inventory.schema.json":  "../release/migration/v1/inventory.schema.json",
+		"https://endlessnet.ru/contracts/release-migration/v2/inventory.schema.json":  "../release/migration/v2/inventory.schema.json",
 	}
 	for identifier, path := range resources {
 		raw, err := os.ReadFile(path)
