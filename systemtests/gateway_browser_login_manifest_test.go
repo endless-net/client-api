@@ -5,7 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"testing"
@@ -17,6 +19,7 @@ const (
 	gatewayBrowserLoginRelease            = "gateway-browser-login-v2-rc1"
 	gatewayBrowserLoginManifestPath       = "../release/candidates/gateway-browser-login-v2-rc1.json"
 	gatewayBrowserLoginEvidencePath       = "../release/evidence/gateway-browser-login-v2-rc1.json"
+	systemTestsF4ffRevision               = "f4ff29a13d973c4067c0a3787355bc197dd8c40a"
 )
 
 type expectedComponent struct {
@@ -152,6 +155,40 @@ type provenance struct {
 	ProvenanceDigest          string `json:"provenance_digest,omitempty"`
 }
 
+// systemTestsF4ffReleaseManifest is the strict compatibility-manifest decode
+// shape used by cmd/manifestcheck at systemTestsF4ffRevision. Keep this narrow:
+// producer validation remains owned by endless-net/system-tests.
+// Source: https://github.com/endless-net/system-tests/blob/f4ff29a13d973c4067c0a3787355bc197dd8c40a/cmd/manifestcheck/main.go
+type systemTestsF4ffReleaseManifest struct {
+	Schema        string             `json:"$schema"`
+	SchemaVersion int                `json:"schema_version"`
+	Release       string             `json:"release"`
+	Status        string             `json:"status"`
+	Components    []releaseComponent `json:"components"`
+	Modules       []releaseModule    `json:"modules"`
+}
+
+func TestGatewayBrowserLoginCandidateMatchesSystemTestsF4ffManifestCheckShape(t *testing.T) {
+	raw, err := os.ReadFile(gatewayBrowserLoginManifestPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var consumerManifest systemTestsF4ffReleaseManifest
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&consumerManifest); err != nil {
+		t.Fatalf("System Tests %s manifestcheck rejected candidate: %v", systemTestsF4ffRevision, err)
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
+		t.Fatalf("System Tests %s manifestcheck found trailing JSON: %v", systemTestsF4ffRevision, err)
+	}
+	if consumerManifest.SchemaVersion != 1 || consumerManifest.Release != gatewayBrowserLoginRelease ||
+		consumerManifest.Status != "candidate" || consumerManifest.Modules == nil {
+		t.Fatalf("System Tests %s manifestcheck received an unsupported header", systemTestsF4ffRevision)
+	}
+}
+
 func TestGatewayBrowserLoginCandidateAndEvidence(t *testing.T) {
 	manifestRaw, err := os.ReadFile(gatewayBrowserLoginManifestPath)
 	if err != nil {
@@ -164,7 +201,7 @@ func TestGatewayBrowserLoginCandidateAndEvidence(t *testing.T) {
 	if manifest.Release != gatewayBrowserLoginRelease || manifest.Status != "candidate" {
 		t.Fatalf("unexpected candidate header: release=%q status=%q", manifest.Release, manifest.Status)
 	}
-	if err := validateGatewayBrowserLoginContractPins(manifest); err != nil {
+	if err := validateGatewayBrowserLoginPins(manifest); err != nil {
 		t.Fatal(err)
 	}
 
@@ -192,18 +229,14 @@ func TestGatewayBrowserLoginCandidateAndEvidence(t *testing.T) {
 
 func TestGatewayBrowserLoginRejectsSubstitution(t *testing.T) {
 	manifest := releaseManifest{
-		Contracts: []releaseContract{{
-			Name: gatewayBrowserLoginContractName, Version: 2,
-			ArchitectureRepository: "endless-net/architecture",
-			ArchitectureCommit:     gatewayBrowserLoginArchitectureCommit,
-		}},
+		Release: gatewayBrowserLoginRelease,
 	}
 	for name, expected := range gatewayBrowserLoginComponents {
 		manifest.Components = append(manifest.Components, releaseComponent{
 			Name: name, Repository: expected.repository, GitCommit: expected.commit, Image: expected.image,
 		})
 	}
-	if err := validateGatewayBrowserLoginContractPins(manifest); err != nil {
+	if err := validateGatewayBrowserLoginPins(manifest); err != nil {
 		t.Fatalf("valid fixture rejected: %v", err)
 	}
 	for index := range manifest.Components {
@@ -212,7 +245,7 @@ func TestGatewayBrowserLoginRejectsSubstitution(t *testing.T) {
 			break
 		}
 	}
-	if err := validateGatewayBrowserLoginContractPins(manifest); err == nil {
+	if err := validateGatewayBrowserLoginPins(manifest); err == nil {
 		t.Fatal("mismatched or branch-head Gateway commit was accepted")
 	}
 	for index := range manifest.Components {
@@ -222,24 +255,13 @@ func TestGatewayBrowserLoginRejectsSubstitution(t *testing.T) {
 			break
 		}
 	}
-	if err := validateGatewayBrowserLoginContractPins(manifest); err == nil {
+	if err := validateGatewayBrowserLoginPins(manifest); err == nil {
 		t.Fatal("mutable Gateway tag was accepted")
 	}
 }
 
-func validateGatewayBrowserLoginContractPins(manifest releaseManifest) error {
-	claimed := false
-	for _, contract := range manifest.Contracts {
-		if contract.Name != gatewayBrowserLoginContractName {
-			continue
-		}
-		claimed = true
-		if contract.Version != 2 || contract.ArchitectureRepository != "endless-net/architecture" ||
-			contract.ArchitectureCommit != gatewayBrowserLoginArchitectureCommit {
-			return fmt.Errorf("%s must pin version 2 at architecture commit %s", gatewayBrowserLoginContractName, gatewayBrowserLoginArchitectureCommit)
-		}
-	}
-	if !claimed {
+func validateGatewayBrowserLoginPins(manifest releaseManifest) error {
+	if manifest.Release != gatewayBrowserLoginRelease {
 		return nil
 	}
 	components := make(map[string]releaseComponent, len(manifest.Components))

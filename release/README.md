@@ -34,6 +34,12 @@ document under `release/evidence/` records the producer CI, publication,
 artifact, archive, and provenance identifiers without adding producer-owned
 fields to the compatibility manifest schema.
 
+Schema v1 keeps `contracts` optional. The gateway-browser-login candidate omits
+that extension so the strict System Tests consumer at
+`f4ff29a13d973c4067c0a3787355bc197dd8c40a` can decode it; the release name,
+schema conditional, and evidence document still enforce the architecture and
+exact component bindings.
+
 After CI succeeds for a push to `main` that changes exactly one candidate, the
 publication workflow revalidates the candidate/evidence binding and uploads a
 commit-addressed Actions artifact preserving the `release/` paths for the

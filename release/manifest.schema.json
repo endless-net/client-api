@@ -123,31 +123,13 @@
     },
     {
       "if": {
-        "required": ["contracts"],
+        "required": ["release"],
         "properties": {
-          "contracts": {
-            "contains": {
-              "type": "object",
-              "required": ["name"],
-              "properties": {"name": {"const": "gateway-browser-login"}}
-            }
-          }
+          "release": {"const": "gateway-browser-login-v2-rc1"}
         }
       },
       "then": {
         "properties": {
-          "contracts": {
-            "contains": {
-              "type": "object",
-              "required": ["name", "version", "architecture_repository", "architecture_commit"],
-              "properties": {
-                "name": {"const": "gateway-browser-login"},
-                "version": {"const": 2},
-                "architecture_repository": {"const": "endless-net/architecture"},
-                "architecture_commit": {"const": "62175d5e97e3a5a57dcb0f2ab2c377c5eb7cd4ac"}
-              }
-            }
-          },
           "components": {
             "allOf": [
               {

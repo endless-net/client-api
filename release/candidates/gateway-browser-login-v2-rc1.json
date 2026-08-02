@@ -71,13 +71,5 @@
       "image": "ghcr.io/endless-net/system-tests-oidc-fixture@sha256:a9fc121fbf5d7437c4abf3091f7a24a45b53d7ebe3bffdb98ff1a4dbe3fc6f03"
     }
   ],
-  "modules": [],
-  "contracts": [
-    {
-      "name": "gateway-browser-login",
-      "version": 2,
-      "architecture_repository": "endless-net/architecture",
-      "architecture_commit": "62175d5e97e3a5a57dcb0f2ab2c377c5eb7cd4ac"
-    }
-  ]
+  "modules": []
 }

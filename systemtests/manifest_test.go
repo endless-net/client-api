@@ -114,7 +114,7 @@ func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
 		if err := validateRecoveryContractPins(manifest); err != nil {
 			t.Fatalf("%s: %v", file, err)
 		}
-		if err := validateGatewayBrowserLoginContractPins(manifest); err != nil {
+		if err := validateGatewayBrowserLoginPins(manifest); err != nil {
 			t.Fatalf("%s: %v", file, err)
 		}
 	}

@@ -4,7 +4,7 @@
   "release": "gateway-browser-login-v2-rc1",
   "manifest": {
     "path": "release/candidates/gateway-browser-login-v2-rc1.json",
-    "sha256": "sha256:955ec212ff3948272ac528ce90e37fdef8cf9f7ffd53ea00a8f07411fc40f687"
+    "sha256": "sha256:0f1976e0bb539b122e8c2823a8d2e2c58be89041b5d7bec933653c2341dd7238"
   },
   "contract": {
     "name": "gateway-browser-login",
