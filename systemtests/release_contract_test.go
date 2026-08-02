@@ -2,6 +2,7 @@ package systemtests
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -24,6 +25,37 @@ type releaseContractFixture struct {
 	systemTest    releasecontract.SystemTestEvidence
 	request       releasecontract.PromotionRequest
 	envelope      releasecontract.ReleasedEnvelope
+}
+
+type releaseMigrationInventory struct {
+	State     string `json:"state"`
+	Authority struct {
+		Repository string `json:"repository"`
+		Revision   string `json:"revision"`
+	} `json:"authority"`
+	Source struct {
+		Repository string `json:"repository"`
+		Revision   string `json:"revision"`
+		Role       string `json:"role"`
+	} `json:"source"`
+	Target struct {
+		Repository       string `json:"repository"`
+		BaselineRevision string `json:"baseline_revision"`
+		Role             string `json:"role"`
+	} `json:"target"`
+	Records []struct {
+		SourcePath string `json:"source_path"`
+		TargetPath string `json:"target_path"`
+		SHA256     string `json:"sha256"`
+	} `json:"records"`
+	CutoverGates []struct {
+		Status   string `json:"status"`
+		Evidence any    `json:"evidence"`
+	} `json:"cutover_gates"`
+	Completion struct {
+		Status               string `json:"status"`
+		ProductionAuthorized bool   `json:"production_authorized"`
+	} `json:"completion"`
 }
 
 func TestReleaseContractV1SchemasAcceptExactFixtures(t *testing.T) {
@@ -50,6 +82,103 @@ func TestReleaseContractV1SchemasAcceptExactFixtures(t *testing.T) {
 				t.Fatalf("%s rejected by %s: %v", fixtureName, compileName, err)
 			}
 		})
+	}
+}
+
+func TestServerReleaseMigrationInventoryIsExactAndIncomplete(t *testing.T) {
+	compiler := releaseSchemaCompiler(t)
+	schema, err := compiler.Compile("https://endlessnet.ru/contracts/release-migration/v1/inventory.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile("../release/migration/v1/inventory.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document any
+	if err := releasecontract.DecodeStrict(raw, &document); err != nil {
+		t.Fatal(err)
+	}
+	if err := schema.Validate(document); err != nil {
+		t.Fatal(err)
+	}
+	var inventory releaseMigrationInventory
+	if err := json.Unmarshal(raw, &inventory); err != nil {
+		t.Fatal(err)
+	}
+	if inventory.State != "copy_pending" ||
+		inventory.Authority.Repository != "endless-net/architecture" ||
+		inventory.Authority.Revision != "a4a4798de03ca93d626dd242b55884aa3d478c67" ||
+		inventory.Source.Repository != "endless-net/client-api" ||
+		inventory.Source.Revision != "b1fe788fc2f0dd1772a2a6a5dfe2759e83c1d249" ||
+		inventory.Source.Role != "frozen_migration_source" ||
+		inventory.Target.Repository != "endless-net/releases" ||
+		inventory.Target.BaselineRevision != "51775a764544b8aad44a9fc44a9e67da543034cf" ||
+		inventory.Completion.Status != "not_complete" ||
+		inventory.Completion.ProductionAuthorized {
+		t.Fatalf("migration inventory overstates cutover: %+v", inventory)
+	}
+	for _, gate := range inventory.CutoverGates {
+		if gate.Status != "pending" || gate.Evidence != nil {
+			t.Fatalf("migration gate unexpectedly completed: %+v", gate)
+		}
+	}
+
+	type recordIdentity struct {
+		target string
+		digest string
+	}
+	records := make(map[string]recordIdentity, len(inventory.Records))
+	targets := make(map[string]bool, len(inventory.Records))
+	for _, record := range inventory.Records {
+		if _, duplicate := records[record.SourcePath]; duplicate || targets[record.TargetPath] {
+			t.Fatalf("duplicate migration path: %+v", record)
+		}
+		records[record.SourcePath] = recordIdentity{target: record.TargetPath, digest: record.SHA256}
+		targets[record.TargetPath] = true
+	}
+
+	expected := map[string]bool{
+		"release/manifest.schema.json": false,
+		"release/evidence.schema.json": false,
+	}
+	for _, directory := range []string{
+		"../release/candidates",
+		"../release/evidence",
+		"../release/schemas/v1",
+		"../release/fixtures/v1",
+	} {
+		entries, err := os.ReadDir(directory)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, entry := range entries {
+			if entry.IsDir() {
+				t.Fatalf("unexpected nested legacy source directory %s", filepath.Join(directory, entry.Name()))
+			}
+			repositoryPath := strings.TrimPrefix(filepath.ToSlash(filepath.Join(directory, entry.Name())), "../")
+			expected[repositoryPath] = false
+		}
+	}
+	if len(records) != len(expected) {
+		t.Fatalf("migration inventory has %d records, want %d", len(records), len(expected))
+	}
+	for path := range expected {
+		record, ok := records[path]
+		if !ok {
+			t.Errorf("migration inventory is missing %s", path)
+			continue
+		}
+		contents, err := os.ReadFile("../" + path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if digest := releasecontract.Digest(contents); digest != record.digest {
+			t.Errorf("migration digest for %s = %s, want %s", path, record.digest, digest)
+		}
+		if target := strings.TrimPrefix(path, "release/"); record.target != target {
+			t.Errorf("migration target for %s = %s, want %s", path, record.target, target)
+		}
 	}
 }
 
@@ -220,20 +349,24 @@ func TestSchemaRejectsEnvironmentAndProvenanceViolations(t *testing.T) {
 	}
 }
 
-func TestImmutableReleaseRecordsCannotBeEdited(t *testing.T) {
+func TestFrozenLegacyServerReleaseSourceCannotChange(t *testing.T) {
 	for _, changes := range []string{
 		"M\trelease/candidates/example.json",
+		"A\trelease/candidates/new.json",
 		"D\trelease/releases/example.json",
 		"R100\trelease/releases/old.json\trelease/releases/new.json",
 		"M\trelease/candidate-provenance/example.json",
 		"M\trelease/system-test-evidence/example.json",
+		"A\trelease/schemas/v2/manifest.schema.json",
+		"M\trelease/fixtures/v1/candidate.json",
+		"M\trelease/manifest.schema.json",
 	} {
 		if err := releasecontract.ValidateImmutableChanges(changes); err == nil {
 			t.Fatalf("immutable change was accepted: %q", changes)
 		}
 	}
-	if err := releasecontract.ValidateImmutableChanges("A\trelease/releases/new.json\nM\trelease/README.md"); err != nil {
-		t.Fatalf("new released record was rejected: %v", err)
+	if err := releasecontract.ValidateImmutableChanges("A\trelease/migration/v1/inventory.json\nM\trelease/README.md"); err != nil {
+		t.Fatalf("migration metadata change was rejected: %v", err)
 	}
 
 	path := filepath.Join(t.TempDir(), "released.json")
@@ -316,6 +449,7 @@ func releaseSchemaCompiler(t *testing.T) *jsonschema.Compiler {
 		"https://endlessnet.ru/contracts/release/v1/promotion-request.schema.json":    "../release/schemas/v1/promotion-request.schema.json",
 		"https://endlessnet.ru/contracts/release/v1/released-envelope.schema.json":    "../release/schemas/v1/released-envelope.schema.json",
 		"https://endlessnet.ru/contracts/release/v1/resolution.schema.json":           "../release/schemas/v1/resolution.schema.json",
+		"https://endlessnet.ru/contracts/release-migration/v1/inventory.schema.json":  "../release/migration/v1/inventory.schema.json",
 	}
 	for identifier, path := range resources {
 		raw, err := os.ReadFile(path)

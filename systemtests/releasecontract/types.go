@@ -1,5 +1,10 @@
 // Package releasecontract implements the semantic checks which JSON Schema
-// cannot express for the EndlessNet D-025 release contract.
+// cannot express for the historical EndlessNet D-025 release contract.
+//
+// Deprecated: server release-control ownership moved to the private
+// github.com/endless-net/releases repository. This package is retained as a
+// frozen migration source until Releases, System Tests, and Infrastructure
+// provide copy and consumer-cutover evidence.
 package releasecontract
 
 type DigestReference struct {

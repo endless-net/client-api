@@ -333,17 +333,17 @@ func ValidateImmutableChanges(changes string) error {
 		status := fields[0]
 		for _, path := range fields[1:] {
 			path = strings.ReplaceAll(path, "\\", "/")
-			if immutableReleasePath(path) && status != "A" {
-				return fmt.Errorf("immutable release record %q has forbidden git status %q", path, status)
+			if frozenLegacyReleasePath(path) {
+				return fmt.Errorf("frozen legacy server-release source %q has forbidden git status %q", path, status)
 			}
 		}
 	}
 	return nil
 }
 
-func immutableReleasePath(path string) bool {
-	if !strings.HasSuffix(path, ".json") {
-		return false
+func frozenLegacyReleasePath(path string) bool {
+	if path == "release/manifest.schema.json" || path == "release/evidence.schema.json" {
+		return true
 	}
 	for _, prefix := range []string{
 		"release/candidates/",
@@ -351,6 +351,8 @@ func immutableReleasePath(path string) bool {
 		"release/system-test-evidence/",
 		"release/releases/",
 		"release/evidence/",
+		"release/schemas/",
+		"release/fixtures/",
 	} {
 		if strings.HasPrefix(path, prefix) {
 			return true

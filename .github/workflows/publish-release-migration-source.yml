@@ -1,0 +1,138 @@
+name: Publish frozen server release-control migration source
+
+"on":
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  publish-migration-source:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Locate versioned migration inventory
+        id: migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mapfile -t inventories < <(
+            git diff-tree --no-commit-id --name-only -r "$SOURCE_SHA^" "$SOURCE_SHA" -- 'release/migration/*/inventory.json'
+          )
+          if (( ${#inventories[@]} == 0 )); then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if (( ${#inventories[@]} != 1 )); then
+            printf 'expected one changed migration inventory, got %s\n' "${#inventories[@]}" >&2
+            exit 1
+          fi
+          inventory="${inventories[0]}"
+          schema="$(dirname "$inventory")/inventory.schema.json"
+          test -f "$schema"
+          test "$(jq -er '.source.repository' "$inventory")" = "endless-net/client-api"
+          source_revision="$(jq -er '.source.revision' "$inventory")"
+          git cat-file -e "${source_revision}^{commit}"
+          git merge-base --is-ancestor "$source_revision" "$SOURCE_SHA"
+          test "$(jq -er '.target.repository' "$inventory")" = "endless-net/releases"
+          test "$(jq -er '.completion.status' "$inventory")" = "not_complete"
+          test "$(jq -r '.completion.production_authorized' "$inventory")" = "false"
+          {
+            echo "publish=true"
+            echo "inventory=$inventory"
+            echo "schema=$schema"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Assemble digest-verified migration source
+        if: steps.migration.outputs.publish == 'true'
+        id: bundle
+        shell: bash
+        env:
+          INVENTORY: ${{ steps.migration.outputs.inventory }}
+          INVENTORY_SCHEMA: ${{ steps.migration.outputs.schema }}
+          CI_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          bundle="$RUNNER_TEMP/server-release-migration-source"
+          mkdir -p "$bundle/$(dirname "$INVENTORY")"
+          cp "$INVENTORY" "$bundle/$INVENTORY"
+          cp "$INVENTORY_SCHEMA" "$bundle/$INVENTORY_SCHEMA"
+
+          while IFS=$'\t' read -r source_path expected_digest; do
+            test -f "$source_path"
+            actual_digest="sha256:$(sha256sum "$source_path" | cut -d' ' -f1)"
+            test "$actual_digest" = "$expected_digest"
+            mkdir -p "$bundle/$(dirname "$source_path")"
+            cp "$source_path" "$bundle/$source_path"
+          done < <(jq -r '.records[] | [.source_path, .sha256] | @tsv' "$INVENTORY")
+
+          while IFS= read -r source_path; do
+            test -f "$source_path"
+            mkdir -p "$bundle/$(dirname "$source_path")"
+            cp "$source_path" "$bundle/$source_path"
+          done < <(jq -r '.retained_tooling[].source_path' "$INVENTORY")
+
+          inventory_digest="sha256:$(sha256sum "$INVENTORY" | cut -d' ' -f1)"
+          jq -n \
+            --arg source_repository "$GITHUB_REPOSITORY" \
+            --arg source_revision "$SOURCE_SHA" \
+            --arg target_repository "$(jq -er '.target.repository' "$INVENTORY")" \
+            --arg target_baseline "$(jq -er '.target.baseline_revision' "$INVENTORY")" \
+            --arg authority_revision "$(jq -er '.authority.revision' "$INVENTORY")" \
+            --arg inventory_digest "$inventory_digest" \
+            --arg ci_run "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${CI_RUN_ID}" \
+            '{schema_version: 1, purpose: "server_release_control_migration_source", source_repository: $source_repository, source_revision: $source_revision, target_repository: $target_repository, target_baseline: $target_baseline, authority_revision: $authority_revision, inventory_digest: $inventory_digest, ci_run: $ci_run, production_authorized: false}' \
+            > "$bundle/publication.json"
+          sums="$RUNNER_TEMP/server-release-migration-SHA256SUMS"
+          (
+            cd "$bundle"
+            find . -type f -print0 | sort -z | xargs -0 sha256sum
+          ) > "$sums"
+          mv "$sums" "$bundle/SHA256SUMS"
+          echo "inventory_digest=$inventory_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Upload commit-addressed migration source
+        if: steps.migration.outputs.publish == 'true'
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: endlessnet-server-release-migration-source-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/server-release-migration-source
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+          overwrite: false
+
+      - name: Record non-production migration handoff
+        if: steps.migration.outputs.publish == 'true'
+        env:
+          INVENTORY_DIGEST: ${{ steps.bundle.outputs.inventory_digest }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+        run: |
+          {
+            echo "### Frozen server release migration source"
+            echo
+            echo "- Source revision: \`$SOURCE_SHA\`"
+            echo "- Inventory: \`$INVENTORY_DIGEST\`"
+            echo "- Artifact: [\`$ARTIFACT_ID\`]($ARTIFACT_URL) (\`$ARTIFACT_DIGEST\`)"
+            echo "- Production authorized: \`false\`"
+            echo
+            echo "This bundle is a copy source for endless-net/releases; it is not a promoted release."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -103,7 +103,7 @@ jobs:
         with:
           go-version-file: systemtests/go.mod
           cache-dependency-path: systemtests/go.sum
-      - name: Reject edits to immutable release records
+      - name: Reject changes to frozen legacy server-release source
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: go run ./cmd/releasecontract verify-history --base "$BASE_SHA" --head "$GITHUB_SHA"

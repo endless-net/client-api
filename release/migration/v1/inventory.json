@@ -1,0 +1,253 @@
+{
+  "$schema": "./inventory.schema.json",
+  "schema_version": 1,
+  "state": "copy_pending",
+  "authority": {
+    "repository": "endless-net/architecture",
+    "revision": "a4a4798de03ca93d626dd242b55884aa3d478c67",
+    "decisions": ["D-020", "D-025"],
+    "deployment": "docs/ru/deployment.md"
+  },
+  "source": {
+    "repository": "endless-net/client-api",
+    "revision": "b1fe788fc2f0dd1772a2a6a5dfe2759e83c1d249",
+    "role": "frozen_migration_source"
+  },
+  "target": {
+    "repository": "endless-net/releases",
+    "baseline_revision": "51775a764544b8aad44a9fc44a9e67da543034cf",
+    "role": "server_release_control_owner"
+  },
+  "records": [
+    {
+      "kind": "schema",
+      "source_path": "release/manifest.schema.json",
+      "target_path": "manifest.schema.json",
+      "sha256": "sha256:23d5642ca99444e63bb3ff4612d0ba823d19a436a0af174072a0640c7177f321",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/evidence.schema.json",
+      "target_path": "evidence.schema.json",
+      "sha256": "sha256:c2f74dd81ad520fb6c827259601cf26bfb3f199c3c063f9c53d1eaf172db80b3",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "candidate",
+      "source_path": "release/candidates/gateway-browser-login-v2-rc1.json",
+      "target_path": "candidates/gateway-browser-login-v2-rc1.json",
+      "sha256": "sha256:0f1976e0bb539b122e8c2823a8d2e2c58be89041b5d7bec933653c2341dd7238",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "candidate",
+      "source_path": "release/candidates/split-ydb-map-v3-rc1.json",
+      "target_path": "candidates/split-ydb-map-v3-rc1.json",
+      "sha256": "sha256:3d77ede1a78789bc181e90e2d7b49656aa47f87034d498c1baa5ae2edc55165d",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "evidence",
+      "source_path": "release/evidence/gateway-browser-login-v2-rc1.json",
+      "target_path": "evidence/gateway-browser-login-v2-rc1.json",
+      "sha256": "sha256:4e45c7862f1f86cab48c3f11a9b1585b0f8c8ac8ffb80f4434c0459f59a2e54e",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/schemas/v1/candidate.schema.json",
+      "target_path": "schemas/v1/candidate.schema.json",
+      "sha256": "sha256:3f047527a885754d004e98927208860c4c7d68b31761f9fbd479e97318ab7b22",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/schemas/v1/candidate-provenance.schema.json",
+      "target_path": "schemas/v1/candidate-provenance.schema.json",
+      "sha256": "sha256:74f0d18a61b015483b5c9df95cb98189a1171ed159863c024433365e91ae4e3a",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/schemas/v1/common.schema.json",
+      "target_path": "schemas/v1/common.schema.json",
+      "sha256": "sha256:aea8d861b2c80d79d96fb58133b04e14a2803df110641d0e44811a9fa6799443",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/schemas/v1/promotion-request.schema.json",
+      "target_path": "schemas/v1/promotion-request.schema.json",
+      "sha256": "sha256:7e44064b22655d76fef068f4d731f42df723d254da2e97934f26f7eab8207ef9",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/schemas/v1/released-envelope.schema.json",
+      "target_path": "schemas/v1/released-envelope.schema.json",
+      "sha256": "sha256:da826880882c8e2819522cf8ed0400f556896462faca0cf521ec8fc946b345fe",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/schemas/v1/resolution.schema.json",
+      "target_path": "schemas/v1/resolution.schema.json",
+      "sha256": "sha256:619c5b823ebe3b4a2bf47646dbf22811c84628ee057a2bd7c4f8b8203f2c3fab",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "schema",
+      "source_path": "release/schemas/v1/system-test-evidence.schema.json",
+      "target_path": "schemas/v1/system-test-evidence.schema.json",
+      "sha256": "sha256:f693d74cbecd690d490333d4c1a225b2a8c822d874bcd148b2964261246634e0",
+      "transfer": "copy_exact",
+      "operational_record": true
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/README.md",
+      "target_path": "fixtures/v1/README.md",
+      "sha256": "sha256:a64a5e89438da2d69199acd9af96bd2085af33121d52fe272feb2fe74ac4252e",
+      "transfer": "copy_exact",
+      "operational_record": false
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/candidate.json",
+      "target_path": "fixtures/v1/candidate.json",
+      "sha256": "sha256:4c6674c535814a3120caedb506578d6bca0151a30d35e8d4d9a5a7fad8b89ead",
+      "transfer": "copy_exact",
+      "operational_record": false
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/candidate-provenance.json",
+      "target_path": "fixtures/v1/candidate-provenance.json",
+      "sha256": "sha256:24de383a1a13f5de7119730724ac7aef2a38ed570f2e695aec718a5b68cc8757",
+      "transfer": "copy_exact",
+      "operational_record": false
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/system-test-evidence.json",
+      "target_path": "fixtures/v1/system-test-evidence.json",
+      "sha256": "sha256:7b03010e16539ae4974fd793c535f82f9f4001a6bee622b0081c293c604fa94f",
+      "transfer": "copy_exact",
+      "operational_record": false
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/promotion-request.json",
+      "target_path": "fixtures/v1/promotion-request.json",
+      "sha256": "sha256:6d9cb055cc8411faf1d77534bdd7679307f7cdef0105c782cfd97a89df2e7914",
+      "transfer": "copy_exact",
+      "operational_record": false
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/released-envelope.json",
+      "target_path": "fixtures/v1/released-envelope.json",
+      "sha256": "sha256:6b85f6fa4aa3c2af42270416b1852b1e2a4e8e2b7d0c0016324877c2530adeee",
+      "transfer": "copy_exact",
+      "operational_record": false
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/validation-resolution.json",
+      "target_path": "fixtures/v1/validation-resolution.json",
+      "sha256": "sha256:b075639dd49cfd6c5623c149a0ce79a33bc7778a81b45027a4e1ea22b9fb3a84",
+      "transfer": "copy_exact",
+      "operational_record": false
+    },
+    {
+      "kind": "fixture",
+      "source_path": "release/fixtures/v1/production-resolution.json",
+      "target_path": "fixtures/v1/production-resolution.json",
+      "sha256": "sha256:6ffb85c8e09f58883c6de1e3d677a11060483175efbd80c3805141df4f04f3e6",
+      "transfer": "copy_exact",
+      "operational_record": false
+    }
+  ],
+  "absent_record_classes": [
+    "candidate_provenance",
+    "system_test_evidence",
+    "approval",
+    "released_envelope"
+  ],
+  "retained_tooling": [
+    {
+      "source_path": "systemtests/releasecontract/contract.go",
+      "disposition": "retain_until_consumer_evidence",
+      "target_owner": "endless-net/releases"
+    },
+    {
+      "source_path": "systemtests/releasecontract/types.go",
+      "disposition": "retain_until_consumer_evidence",
+      "target_owner": "endless-net/releases"
+    },
+    {
+      "source_path": "systemtests/cmd/releasecontract/main.go",
+      "disposition": "retain_until_consumer_evidence",
+      "target_owner": "endless-net/releases"
+    },
+    {
+      "source_path": "systemtests/release_contract_test.go",
+      "disposition": "retain_until_consumer_evidence",
+      "target_owner": "endless-net/releases"
+    }
+  ],
+  "cutover_gates": [
+    {
+      "id": "releases_copy",
+      "owner": "endless-net/releases",
+      "status": "pending",
+      "requirement": "Copy every inventory record byte-for-byte, verify each digest, and publish protected append-only validation.",
+      "evidence": null
+    },
+    {
+      "id": "releases_promotion",
+      "owner": "endless-net/releases",
+      "status": "pending",
+      "requirement": "Implement approval-aware promotion in Releases and prove the released envelope preserves the tested server component set.",
+      "evidence": null
+    },
+    {
+      "id": "system_tests_consumer",
+      "owner": "endless-net/system-tests",
+      "status": "pending",
+      "requirement": "Resolve the candidate from Releases by digest and publish passing evidence bound to that exact digest.",
+      "evidence": null
+    },
+    {
+      "id": "infrastructure_consumer",
+      "owner": "endless-net/infrastructure",
+      "status": "pending",
+      "requirement": "Resolve only a released envelope from Releases by digest and reject client-api legacy candidates for production.",
+      "evidence": null
+    },
+    {
+      "id": "client_api_retirement",
+      "owner": "endless-net/client-api",
+      "status": "pending",
+      "requirement": "Retire legacy release tooling only after the Releases copy and both consumer cutovers have immutable evidence.",
+      "evidence": null
+    }
+  ],
+  "completion": {
+    "status": "not_complete",
+    "production_authorized": false,
+    "reason": "The Releases copy, protected promotion, System Tests evidence path, and Infrastructure resolver have not all been proven."
+  }
+}

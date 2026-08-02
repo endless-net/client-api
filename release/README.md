@@ -1,121 +1,94 @@
-# Compatibility manifests
+# Frozen server release migration source
 
-CI assembles a candidate from exact Git commits, module checksums, and immutable
-artifact digests. A candidate is content-addressed as the SHA-256 of its exact
-bytes and is usable only by an isolated validation environment. After the
-cross-repository system suite passes those exact bytes, promotion creates a new
-immutable released envelope. Production never consumes a candidate directly.
+Server release-control ownership moved to the private
+[`endless-net/releases`](https://github.com/endless-net/releases) repository.
+Under architecture decisions D-020 and D-025, `client-api` continues to own
+public/client and browser contracts plus contract gates, but it no longer owns
+server manifest schemas, candidates, evidence, approval, promotion, or released
+envelopes.
 
-## D-025 contract layout
+Authority is pinned in the versioned migration inventory to architecture commit
+`a4a4798de03ca93d626dd242b55884aa3d478c67`. The target repository baseline is
+`endless-net/releases@51775a764544b8aad44a9fc44a9e67da543034cf`.
 
-The original `manifest.schema.json` and candidate object remain unchanged for
-strict existing consumers. Its historical `released` enum value remains in the
-schema for compatibility, but is not an operational production input. D-025 is
-an additive versioned contract under `schemas/v1/`:
+## Migration state
 
-- `candidate.schema.json` narrows the legacy manifest to `status: candidate`;
-- `candidate-provenance.schema.json` binds every resolved component and module
-  to producer build provenance;
-- `system-test-evidence.schema.json` binds a passing System Tests run to the
-  exact candidate digest;
-- `promotion-request.schema.json` supplies immutable references to those three
-  records and promotion provenance;
-- `released-envelope.schema.json` carries the unchanged resolved set and the
-  exact tested candidate digest;
-- `resolution.schema.json` is the normalized machine contract consumed by
-  Infrastructure.
+State is `copy_pending`; production is not authorized.
 
-New operational records use these paths:
+Creating the private repository established the ownership boundary but did not
+complete the migration. The following evidence is still required:
 
-```text
-release/candidates/<release>.json
-release/candidate-provenance/<release>.json
-release/system-test-evidence/<release>.json
-release/releases/<release>.json
-```
+1. Releases copies every listed record byte-for-byte and verifies its digest.
+2. Releases provides protected append-only validation and approval-aware
+   promotion preserving the exact tested server component set.
+3. System Tests resolves a candidate from Releases by digest and publishes
+   passing evidence bound to that digest.
+4. Infrastructure accepts only a released envelope from Releases and rejects
+   these legacy candidates at production entry points.
+5. Client API retires its retained release tooling only after the preceding
+   copy and consumer evidence exists.
 
-All four paths are append-only. CI rejects modifying, renaming, or deleting an
-existing record. A corrected component, digest, provenance statement, or test
-run therefore creates a new release name and candidate. The promotion writer
-also opens its output with create-only semantics and cannot overwrite a record.
+The machine-readable source of truth is
+[`migration/v1/inventory.json`](migration/v1/inventory.json), validated by
+[`migration/v1/inventory.schema.json`](migration/v1/inventory.schema.json).
+Every gate is explicitly `pending`, and its evidence is `null`.
 
-## Promotion and resolution
+## Frozen compatibility source
 
-The semantic validator in `systemtests/releasecontract` supplements JSON Schema
-where cross-document equality is required. Promotion recomputes the digest of
-each input, checks complete component/module provenance, requires a passing
-System Tests result, rejects mutable artifact tags, and copies the candidate's
-`components`, `modules`, and `contracts` arrays without reinterpretation.
+The existing files remain at their historical paths to avoid breaking strict
+consumers during the copy phase:
 
-From `systemtests/`, an operator or CI job creates a released envelope with:
+- `manifest.schema.json` and `evidence.schema.json`;
+- `candidates/` and `evidence/` operational records;
+- `schemas/v1/` D-025 schema handoff;
+- `fixtures/v1/` exact decoder and policy fixtures.
 
-```text
-go run ./cmd/releasecontract promote \
-  --candidate ../release/candidates/<release>.json \
-  --candidate-provenance ../release/candidate-provenance/<release>.json \
-  --system-test-evidence ../release/system-test-evidence/<release>.json \
-  --request <promotion-request.json> \
-  --output ../release/releases/<release>.json
-```
+These paths are frozen. CI rejects additions, edits, renames, or deletions under
+the legacy server-release source. A new server candidate, schema version,
+evidence record, approval, or released envelope belongs only in Releases.
 
-`resolve-candidate` emits a `validation` resolution and accepts only a
-candidate plus its complete provenance. `resolve-release` revalidates every
-referenced record and emits a `production` resolution only from a released
-envelope. Infrastructure must verify the source record digest before using the
-normalized resolved set; it must reject `environment_class: validation` at all
-production entry points.
+There are no operational candidate-provenance records, System Tests promotion
+evidence records, approvals, or released envelopes in this repository. The
+released envelope under `fixtures/v1/` is synthetic test data and cannot
+authorize deployment. Existing candidates remain `candidate` and validation
+only.
 
-The exact handoff fixtures are in `fixtures/v1/`. Infrastructure and System
-Tests should run their decoders and policy gates against those commit-addressed
-fixtures. They should consume the schemas from the same published contract
-bundle rather than maintain copied schemas in their repositories.
+## Handoff publication
 
-The independent Admin Web artifact is a first-class `admin` component. Its
-runtime policy is pinned separately as `infrastructure`; it is never folded into
-the `management` component or selected by a Management release.
+After a green `main` revision adds a versioned migration inventory, the workflow
+in `.github/workflows/publish-release-migration-source.yml` publishes a
+commit-addressed `server-release-migration-source` artifact. It verifies each
+inventory digest, copies the frozen records and retained validator sources,
+writes `SHA256SUMS`, and marks `production_authorized: false`.
 
-Schema version 1 uses canonical `endless-net/*` repository coordinates. Legacy
-pre-cutover repository coordinates are rejected after the clean cutover.
+This artifact exists only so Releases can perform and prove the copy. It is not
+a candidate publication, approval, promotion, released manifest, Infrastructure
+desired state, or production deployment request.
 
-Manifests that claim the `client-signing-identity-recovery` contract include a
-`contracts` entry at version 1 and architecture commit
-`6cf37091846920e238bef631ef8951d395c084a1`. The schema and compatibility gate
-then require:
+## Retained legacy tooling
 
-- a checksummed v2 pin of
-  `github.com/endless-net/client-api/clientapi/v2`;
-- exact component commits for Client API, Coordinator, Gateway, Client, Client
-  UI, and System Tests.
+`systemtests/releasecontract`, `systemtests/cmd/releasecontract`, and their exact
+fixtures/tests remain temporarily so current gates keep working and Releases can
+port the semantic checks. They are deprecated migration sources. Client API no
+longer runs candidate publication or server promotion automation.
 
-This declaration is added only to the immutable candidate that runs the
-recovery acceptance suite. Older candidates that do not claim the contract do
-not acquire a false recovery guarantee.
+Do not remove the records or retained gates until immutable evidence completes
+every inventory cutover gate. Do not interpret the ownership documentation, the
+migration artifact, or a green client-api CI run as proof that Releases,
+System Tests, Infrastructure, or production cutover is complete.
 
-The `gateway-browser-login` version 2 contract is bound to architecture commit
-`62175d5e97e3a5a57dcb0f2ab2c377c5eb7cd4ac`. Its candidate pins the exact
-Gateway, Admin, Identity, supporting service, client, and OIDC fixture revisions
-and artifacts accepted by the System Tests run-manifest validator. The matching
-document under `release/evidence/` records the producer CI, publication,
-artifact, archive, and provenance identifiers without adding producer-owned
-fields to the compatibility manifest schema.
+## Historical record notes
 
-Schema v1 keeps `contracts` optional. The gateway-browser-login candidate omits
-that extension so the strict System Tests consumer at
-`f4ff29a13d973c4067c0a3787355bc197dd8c40a` can decode it; the release name,
-schema conditional, and evidence document still enforce the architecture and
-exact component bindings.
+The independent Admin Web artifact remains a first-class historical `admin`
+component; its runtime policy is pinned separately as `infrastructure`.
 
-After CI succeeds for a push to `main` that adds exactly one candidate, the
-publication workflow revalidates the candidate/provenance binding and uploads a
-commit-addressed Actions artifact preserving the `release/` paths. The bundle
-includes the candidate, provenance, versioned schemas, validation resolution,
-`publication.json`, and `SHA256SUMS`. Publication does not promote a candidate;
-the separate passing System Tests evidence remains mandatory.
+The `client-signing-identity-recovery` contract declaration pins architecture
+commit `6cf37091846920e238bef631ef8951d395c084a1` and requires the checksummed
+`github.com/endless-net/client-api/clientapi/v2` module plus exact participating
+component commits.
 
-Infrastructure owns the environment-specific schema-v3 run manifest. It must
-reuse these component pins and add the deployed origins, account, exact client
-artifact URL/hash, and browser-login discovery assertions before invoking the
-live acceptance suite.
-
-Clean cutover uses one released manifest. It does not export, import, dual-write,
-CDC, or reconcile state from the retired stack.
+The `gateway-browser-login-v2-rc1` candidate and matching evidence preserve the
+exact Gateway, Admin, Identity, supporting service, client, and OIDC fixture
+revisions accepted by the historical System Tests consumer at
+`f4ff29a13d973c4067c0a3787355bc197dd8c40a`. Their continued presence proves
+only legacy candidate compatibility, not promotion or production readiness.
