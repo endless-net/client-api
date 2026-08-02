@@ -47,12 +47,18 @@ jobs:
           manifest="${candidates[0]}"
           release="$(jq -er '.release' "$manifest")"
           [[ "$release" =~ ^[0-9A-Za-z._-]+$ ]]
+          provenance="release/candidate-provenance/${release}.json"
+          test -f "$provenance"
           evidence="release/evidence/${release}.json"
-          test -f "$evidence"
-          test "$(jq -er '.manifest.path' "$evidence")" = "$manifest"
+          if [[ -f "$evidence" ]]; then
+            test "$(jq -er '.manifest.path' "$evidence")" = "$manifest"
+          else
+            evidence=""
+          fi
           {
             echo "publish=true"
             echo "manifest=$manifest"
+            echo "provenance=$provenance"
             echo "evidence=$evidence"
             echo "release=$release"
           } >> "$GITHUB_OUTPUT"
@@ -85,34 +91,60 @@ jobs:
         shell: bash
         env:
           MANIFEST: ${{ steps.candidate.outputs.manifest }}
+          PROVENANCE: ${{ steps.candidate.outputs.provenance }}
           EVIDENCE: ${{ steps.candidate.outputs.evidence }}
           RELEASE: ${{ steps.candidate.outputs.release }}
           CI_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
           bundle="$RUNNER_TEMP/compatibility-candidate"
-          mkdir -p "$bundle/$(dirname "$MANIFEST")" "$bundle/$(dirname "$EVIDENCE")"
+          mkdir -p "$bundle/$(dirname "$MANIFEST")" "$bundle/$(dirname "$PROVENANCE")" "$bundle/release"
           cp "$MANIFEST" "$bundle/$MANIFEST"
-          cp "$EVIDENCE" "$bundle/$EVIDENCE"
-          cp release/manifest.schema.json release/evidence.schema.json "$bundle/release/"
+          cp "$PROVENANCE" "$bundle/$PROVENANCE"
+          cp -R release/schemas "$bundle/release/"
+          cp release/manifest.schema.json "$bundle/release/"
           manifest_digest="sha256:$(sha256sum "$MANIFEST" | cut -d' ' -f1)"
-          evidence_digest="sha256:$(sha256sum "$EVIDENCE" | cut -d' ' -f1)"
-          test "$(jq -er '.manifest.sha256' "$EVIDENCE")" = "$manifest_digest"
+          provenance_digest="sha256:$(sha256sum "$PROVENANCE" | cut -d' ' -f1)"
+          test "$(jq -er '.candidate_digest' "$PROVENANCE")" = "$manifest_digest"
+          candidate_uri="https://github.com/${GITHUB_REPOSITORY}/blob/${SOURCE_SHA}/${MANIFEST}"
+          provenance_uri="https://github.com/${GITHUB_REPOSITORY}/blob/${SOURCE_SHA}/${PROVENANCE}"
+          (
+            cd systemtests
+            go run ./cmd/releasecontract resolve-candidate \
+              --candidate "../$MANIFEST" \
+              --candidate-provenance "../$PROVENANCE" \
+              --candidate-uri "$candidate_uri" \
+              --candidate-provenance-uri "$provenance_uri"
+          ) > "$bundle/resolution.json"
+          resolution_digest="sha256:$(sha256sum "$bundle/resolution.json" | cut -d' ' -f1)"
+          evidence_digest=""
+          if [[ -n "$EVIDENCE" ]]; then
+            mkdir -p "$bundle/$(dirname "$EVIDENCE")"
+            cp "$EVIDENCE" "$bundle/$EVIDENCE"
+            cp release/evidence.schema.json "$bundle/release/"
+            evidence_digest="sha256:$(sha256sum "$EVIDENCE" | cut -d' ' -f1)"
+            test "$(jq -er '.manifest.sha256' "$EVIDENCE")" = "$manifest_digest"
+          fi
           jq -n \
             --arg release "$RELEASE" \
             --arg source_repository "${GITHUB_REPOSITORY}" \
             --arg source_revision "$SOURCE_SHA" \
             --arg ci_run "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${CI_RUN_ID}" \
             --arg manifest_digest "$manifest_digest" \
+            --arg provenance_digest "$provenance_digest" \
             --arg evidence_digest "$evidence_digest" \
-            '{schema_version: 1, release: $release, source_repository: $source_repository, source_revision: $source_revision, ci_run: $ci_run, manifest_digest: $manifest_digest, evidence_digest: $evidence_digest}' \
+            --arg resolution_digest "$resolution_digest" \
+            '{schema_version: 1, release: $release, source_repository: $source_repository, source_revision: $source_revision, ci_run: $ci_run, manifest_digest: $manifest_digest, provenance_digest: $provenance_digest, evidence_digest: (if $evidence_digest == "" then null else $evidence_digest end), resolution_digest: $resolution_digest}' \
             > "$bundle/publication.json"
           (
             cd "$bundle"
-            sha256sum "$MANIFEST" "$EVIDENCE" release/manifest.schema.json release/evidence.schema.json publication.json > SHA256SUMS
+            find release -type f -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+            sha256sum resolution.json publication.json >> SHA256SUMS
           )
           echo "manifest_digest=$manifest_digest" >> "$GITHUB_OUTPUT"
+          echo "provenance_digest=$provenance_digest" >> "$GITHUB_OUTPUT"
           echo "evidence_digest=$evidence_digest" >> "$GITHUB_OUTPUT"
+          echo "resolution_digest=$resolution_digest" >> "$GITHUB_OUTPUT"
 
       - name: Upload commit-addressed candidate
         if: steps.candidate.outputs.publish == 'true'
@@ -131,7 +163,9 @@ jobs:
         env:
           RELEASE: ${{ steps.candidate.outputs.release }}
           MANIFEST_DIGEST: ${{ steps.bundle.outputs.manifest_digest }}
+          PROVENANCE_DIGEST: ${{ steps.bundle.outputs.provenance_digest }}
           EVIDENCE_DIGEST: ${{ steps.bundle.outputs.evidence_digest }}
+          RESOLUTION_DIGEST: ${{ steps.bundle.outputs.resolution_digest }}
           ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
           ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
           ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
@@ -142,6 +176,8 @@ jobs:
             echo "- Release: \`$RELEASE\`"
             echo "- Revision: \`$SOURCE_SHA\`"
             echo "- Manifest: \`$MANIFEST_DIGEST\`"
+            echo "- Provenance: \`$PROVENANCE_DIGEST\`"
             echo "- Evidence: \`$EVIDENCE_DIGEST\`"
+            echo "- Validation resolution: \`$RESOLUTION_DIGEST\`"
             echo "- Artifact: [\`$ARTIFACT_ID\`]($ARTIFACT_URL) (\`$ARTIFACT_DIGEST\`)"
           } >> "$GITHUB_STEP_SUMMARY"

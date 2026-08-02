@@ -1,0 +1,60 @@
+{
+  "$schema": "https://endlessnet.ru/contracts/release/v1/released-envelope.schema.json",
+  "schema_version": 1,
+  "release": "d025-contract-v1-fixture",
+  "status": "released",
+  "candidate": {
+    "uri": "https://github.com/endless-net/client-api/blob/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/release/fixtures/v1/candidate.json",
+    "digest": "sha256:4c6674c535814a3120caedb506578d6bca0151a30d35e8d4d9a5a7fad8b89ead"
+  },
+  "resolved": {
+    "components": [
+      {
+        "name": "gateway",
+        "repository": "endless-net/gateway",
+        "git_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "image": "ghcr.io/endless-net/gateway@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      {
+        "name": "infrastructure",
+        "repository": "endless-net/infrastructure",
+        "git_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "image": "ghcr.io/endless-net/infrastructure-release@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      }
+    ],
+    "modules": [
+      {
+        "path": "github.com/endless-net/client-api/clientapi",
+        "version": "v1.2.0",
+        "sum": "h1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      }
+    ],
+    "contracts": [
+      {
+        "name": "production-rollout",
+        "version": 1,
+        "architecture_repository": "endless-net/architecture",
+        "architecture_commit": "cccccccccccccccccccccccccccccccccccccccc"
+      }
+    ]
+  },
+  "provenance": {
+    "candidate_provenance": {
+      "uri": "https://github.com/endless-net/client-api/blob/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/release/fixtures/v1/candidate-provenance.json",
+      "digest": "sha256:24de383a1a13f5de7119730724ac7aef2a38ed570f2e695aec718a5b68cc8757"
+    },
+    "system_tests": {
+      "evidence": {
+        "uri": "https://github.com/endless-net/system-tests/blob/dddddddddddddddddddddddddddddddddddddddd/fixtures/release/v1/system-test-evidence.json",
+        "digest": "sha256:7b03010e16539ae4974fd793c535f82f9f4001a6bee622b0081c293c604fa94f"
+      },
+      "repository": "endless-net/system-tests",
+      "git_commit": "dddddddddddddddddddddddddddddddddddddddd",
+      "run": "https://github.com/endless-net/system-tests/actions/runs/2001"
+    },
+    "promotion": {
+      "repository": "endless-net/client-api",
+      "run": "https://github.com/endless-net/client-api/actions/runs/3001"
+    }
+  }
+}

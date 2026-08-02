@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release/v1/released-envelope.schema.json",
+  "title": "EndlessNet immutable released envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "release", "status", "candidate", "resolved", "provenance"],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "schema_version": {"const": 1},
+    "release": {"type": "string", "pattern": "^[0-9A-Za-z._-]+$"},
+    "status": {"const": "released"},
+    "candidate": {"$ref": "common.schema.json#/$defs/digestReference"},
+    "resolved": {
+      "allOf": [
+        {"$ref": "common.schema.json#/$defs/resolvedSet"},
+        {
+          "properties": {
+            "components": {
+              "items": {
+                "properties": {
+                  "image": {"$ref": "common.schema.json#/$defs/immutableArtifactReference"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "provenance": {"$ref": "common.schema.json#/$defs/releaseProvenance"}
+  }
+}

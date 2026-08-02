@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release/v1/candidate.schema.json",
+  "title": "EndlessNet validation candidate v1",
+  "allOf": [
+    {"$ref": "https://endlessnet.ru/contracts/release-manifest.schema.json"},
+    {
+      "properties": {
+        "status": {"const": "candidate"}
+      }
+    }
+  ]
+}

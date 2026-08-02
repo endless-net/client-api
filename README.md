@@ -7,7 +7,8 @@ released EndlessNet components. It intentionally contains no runtime binary.
   `github.com/endless-net/client-api/clientapi/v2` recovery contract;
 - `contracts/` — browser OpenAPI and runtime configuration contracts;
 - `architecture/` — cross-service boundaries and interaction rules;
-- `release/` — immutable compatibility-manifest schema and candidates;
+- `release/` — immutable compatibility candidates, released envelopes, and the
+  Infrastructure resolution contract;
 - `systemtests/` — cross-repository contract and system gates.
 
 Service implementations live in their producer-owned repositories. The release

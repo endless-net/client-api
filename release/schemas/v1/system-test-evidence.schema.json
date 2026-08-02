@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release/v1/system-test-evidence.schema.json",
+  "title": "EndlessNet candidate system-test evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "candidate_digest", "result", "suite"],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "schema_version": {"const": 1},
+    "candidate_digest": {"$ref": "common.schema.json#/$defs/sha256Digest"},
+    "result": {"const": "passed"},
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "git_commit", "run"],
+      "properties": {
+        "repository": {"const": "endless-net/system-tests"},
+        "git_commit": {"$ref": "common.schema.json#/$defs/gitCommit"},
+        "run": {"$ref": "common.schema.json#/$defs/actionsRun"}
+      }
+    }
+  }
+}

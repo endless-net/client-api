@@ -73,8 +73,7 @@ func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
 		if err := decoder.Decode(&manifest); err != nil {
 			t.Fatalf("%s: %v", file, err)
 		}
-		if manifest.SchemaVersion != 1 || manifest.Release == "" ||
-			manifest.Status != "candidate" && manifest.Status != "released" {
+		if manifest.SchemaVersion != 1 || manifest.Release == "" || manifest.Status != "candidate" {
 			t.Fatalf("%s has invalid header", file)
 		}
 		names, repositories := map[string]bool{}, map[string]bool{}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release/v1/candidate-provenance.schema.json",
+  "title": "EndlessNet candidate provenance v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "release", "candidate_digest", "components", "modules"],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "schema_version": {"const": 1},
+    "release": {"type": "string", "pattern": "^[0-9A-Za-z._-]+$"},
+    "candidate_digest": {"$ref": "common.schema.json#/$defs/sha256Digest"},
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "repository", "git_commit", "artifact", "build"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[0-9A-Za-z._-]+$"},
+          "repository": {"$ref": "common.schema.json#/$defs/repository"},
+          "git_commit": {"$ref": "common.schema.json#/$defs/gitCommit"},
+          "artifact": {"$ref": "common.schema.json#/$defs/digestReference"},
+          "build": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["repository", "source_commit", "run", "attestation_digest"],
+            "properties": {
+              "repository": {"$ref": "common.schema.json#/$defs/repository"},
+              "source_commit": {"$ref": "common.schema.json#/$defs/gitCommit"},
+              "run": {"$ref": "common.schema.json#/$defs/actionsRun"},
+              "attestation_digest": {"$ref": "common.schema.json#/$defs/sha256Digest"}
+            }
+          }
+        }
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "version", "sum", "source"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "version": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"},
+          "sum": {"type": "string", "pattern": "^h1:[A-Za-z0-9+/=]+$"},
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["repository", "git_commit", "run"],
+            "properties": {
+              "repository": {"$ref": "common.schema.json#/$defs/repository"},
+              "git_commit": {"$ref": "common.schema.json#/$defs/gitCommit"},
+              "run": {"$ref": "common.schema.json#/$defs/actionsRun"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -91,6 +91,8 @@ jobs:
         working-directory: systemtests
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
       - name: Configure private modules
         env:
           MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
@@ -101,6 +103,10 @@ jobs:
         with:
           go-version-file: systemtests/go.mod
           cache-dependency-path: systemtests/go.sum
+      - name: Reject edits to immutable release records
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: go run ./cmd/releasecontract verify-history --base "$BASE_SHA" --head "$GITHUB_SHA"
       - run: go mod verify
       - run: go vet ./...
       - run: go test -short ./...

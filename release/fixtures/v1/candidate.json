@@ -1,0 +1,35 @@
+{
+  "$schema": "../../schemas/v1/candidate.schema.json",
+  "schema_version": 1,
+  "release": "d025-contract-v1-fixture",
+  "status": "candidate",
+  "components": [
+    {
+      "name": "gateway",
+      "repository": "endless-net/gateway",
+      "git_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "image": "ghcr.io/endless-net/gateway@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "name": "infrastructure",
+      "repository": "endless-net/infrastructure",
+      "git_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "image": "ghcr.io/endless-net/infrastructure-release@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "modules": [
+    {
+      "path": "github.com/endless-net/client-api/clientapi",
+      "version": "v1.2.0",
+      "sum": "h1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    }
+  ],
+  "contracts": [
+    {
+      "name": "production-rollout",
+      "version": 1,
+      "architecture_repository": "endless-net/architecture",
+      "architecture_commit": "cccccccccccccccccccccccccccccccccccccccc"
+    }
+  ]
+}

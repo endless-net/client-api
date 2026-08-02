@@ -1,0 +1,11 @@
+{
+  "$schema": "../../schemas/v1/system-test-evidence.schema.json",
+  "schema_version": 1,
+  "candidate_digest": "sha256:4c6674c535814a3120caedb506578d6bca0151a30d35e8d4d9a5a7fad8b89ead",
+  "result": "passed",
+  "suite": {
+    "repository": "endless-net/system-tests",
+    "git_commit": "dddddddddddddddddddddddddddddddddddddddd",
+    "run": "https://github.com/endless-net/system-tests/actions/runs/2001"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release/v1/common.schema.json",
+  "title": "EndlessNet release contract common definitions v1",
+  "$defs": {
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "gitCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^endless-net/[0-9A-Za-z._-]+$"
+    },
+    "immutableArtifactReference": {
+      "type": "string",
+      "pattern": "^\\S+@sha256:[0-9a-f]{64}$"
+    },
+    "immutableResourceURI": {
+      "type": "string",
+      "anyOf": [
+        {
+          "pattern": "^https://github\\.com/endless-net/[0-9A-Za-z._-]+/blob/[0-9a-f]{40}/[^?#]+$"
+        },
+        {
+          "pattern": "^\\S+@sha256:[0-9a-f]{64}$"
+        }
+      ]
+    },
+    "digestReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": {"$ref": "#/$defs/immutableResourceURI"},
+        "digest": {"$ref": "#/$defs/sha256Digest"}
+      }
+    },
+    "actionsRun": {
+      "type": "string",
+      "pattern": "^https://github\\.com/endless-net/[0-9A-Za-z._-]+/actions/runs/[1-9][0-9]*$"
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "repository", "git_commit", "image"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[0-9A-Za-z._-]+$"},
+        "repository": {"$ref": "#/$defs/repository"},
+        "git_commit": {"$ref": "#/$defs/gitCommit"},
+        "image": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/immutableArtifactReference"}
+          ]
+        }
+      }
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "version", "sum"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "version": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "sum": {"type": "string", "pattern": "^h1:[A-Za-z0-9+/=]+$"}
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "architecture_repository", "architecture_commit"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "architecture_repository": {"const": "endless-net/architecture"},
+        "architecture_commit": {"$ref": "#/$defs/gitCommit"}
+      }
+    },
+    "resolvedSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["components", "modules"],
+      "properties": {
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/component"}
+        },
+        "modules": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/module"}
+        },
+        "contracts": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/contract"}
+        }
+      }
+    },
+    "systemTestProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence", "repository", "git_commit", "run"],
+      "properties": {
+        "evidence": {"$ref": "#/$defs/digestReference"},
+        "repository": {"const": "endless-net/system-tests"},
+        "git_commit": {"$ref": "#/$defs/gitCommit"},
+        "run": {"$ref": "#/$defs/actionsRun"}
+      }
+    },
+    "promotionProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "run"],
+      "properties": {
+        "repository": {"const": "endless-net/client-api"},
+        "run": {"$ref": "#/$defs/actionsRun"}
+      }
+    },
+    "releaseProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_provenance", "system_tests", "promotion"],
+      "properties": {
+        "candidate_provenance": {"$ref": "#/$defs/digestReference"},
+        "system_tests": {"$ref": "#/$defs/systemTestProvenance"},
+        "promotion": {"$ref": "#/$defs/promotionProvenance"}
+      }
+    }
+  }
+}

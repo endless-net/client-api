@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release/v1/resolution.schema.json",
+  "title": "EndlessNet Infrastructure release resolution v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "environment_class", "source", "release", "candidate_digest", "resolved", "provenance"],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "schema_version": {"const": 1},
+    "environment_class": {"enum": ["validation", "production"]},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "record"],
+      "properties": {
+        "kind": {"enum": ["candidate", "released"]},
+        "record": {"$ref": "common.schema.json#/$defs/digestReference"}
+      }
+    },
+    "release": {"type": "string", "pattern": "^[0-9A-Za-z._-]+$"},
+    "candidate_digest": {"$ref": "common.schema.json#/$defs/sha256Digest"},
+    "resolved": {"$ref": "common.schema.json#/$defs/resolvedSet"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_provenance"],
+      "properties": {
+        "candidate_provenance": {"$ref": "common.schema.json#/$defs/digestReference"},
+        "system_tests": {"$ref": "common.schema.json#/$defs/systemTestProvenance"},
+        "promotion": {"$ref": "common.schema.json#/$defs/promotionProvenance"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"environment_class": {"const": "validation"}}},
+      "then": {
+        "properties": {
+          "source": {"properties": {"kind": {"const": "candidate"}}},
+          "provenance": {"maxProperties": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"environment_class": {"const": "production"}}},
+      "then": {
+        "properties": {
+          "source": {"properties": {"kind": {"const": "released"}}},
+          "resolved": {
+            "properties": {
+              "components": {
+                "items": {
+                  "properties": {
+                    "image": {"$ref": "common.schema.json#/$defs/immutableArtifactReference"}
+                  }
+                }
+              }
+            }
+          },
+          "provenance": {"required": ["candidate_provenance", "system_tests", "promotion"]}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "../../schemas/v1/candidate-provenance.schema.json",
+  "schema_version": 1,
+  "release": "d025-contract-v1-fixture",
+  "candidate_digest": "sha256:4c6674c535814a3120caedb506578d6bca0151a30d35e8d4d9a5a7fad8b89ead",
+  "components": [
+    {
+      "name": "gateway",
+      "repository": "endless-net/gateway",
+      "git_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "artifact": {
+        "uri": "ghcr.io/endless-net/gateway@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "build": {
+        "repository": "endless-net/gateway",
+        "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "run": "https://github.com/endless-net/gateway/actions/runs/1001",
+        "attestation_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+      }
+    },
+    {
+      "name": "infrastructure",
+      "repository": "endless-net/infrastructure",
+      "git_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "artifact": {
+        "uri": "ghcr.io/endless-net/infrastructure-release@sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "build": {
+        "repository": "endless-net/infrastructure",
+        "source_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "run": "https://github.com/endless-net/infrastructure/actions/runs/1002",
+        "attestation_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+      }
+    }
+  ],
+  "modules": [
+    {
+      "path": "github.com/endless-net/client-api/clientapi",
+      "version": "v1.2.0",
+      "sum": "h1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "source": {
+        "repository": "endless-net/client-api",
+        "git_commit": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "run": "https://github.com/endless-net/client-api/actions/runs/1003"
+      }
+    }
+  ]
+}

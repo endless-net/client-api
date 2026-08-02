@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release/v1/promotion-request.schema.json",
+  "title": "EndlessNet release promotion request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "candidate", "candidate_provenance", "system_test_evidence", "promotion"],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "schema_version": {"const": 1},
+    "candidate": {"$ref": "common.schema.json#/$defs/digestReference"},
+    "candidate_provenance": {"$ref": "common.schema.json#/$defs/digestReference"},
+    "system_test_evidence": {"$ref": "common.schema.json#/$defs/digestReference"},
+    "promotion": {"$ref": "common.schema.json#/$defs/promotionProvenance"}
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "../../schemas/v1/promotion-request.schema.json",
+  "schema_version": 1,
+  "candidate": {
+    "uri": "https://github.com/endless-net/client-api/blob/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/release/fixtures/v1/candidate.json",
+    "digest": "sha256:4c6674c535814a3120caedb506578d6bca0151a30d35e8d4d9a5a7fad8b89ead"
+  },
+  "candidate_provenance": {
+    "uri": "https://github.com/endless-net/client-api/blob/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/release/fixtures/v1/candidate-provenance.json",
+    "digest": "sha256:24de383a1a13f5de7119730724ac7aef2a38ed570f2e695aec718a5b68cc8757"
+  },
+  "system_test_evidence": {
+    "uri": "https://github.com/endless-net/system-tests/blob/dddddddddddddddddddddddddddddddddddddddd/fixtures/release/v1/system-test-evidence.json",
+    "digest": "sha256:7b03010e16539ae4974fd793c535f82f9f4001a6bee622b0081c293c604fa94f"
+  },
+  "promotion": {
+    "repository": "endless-net/client-api",
+    "run": "https://github.com/endless-net/client-api/actions/runs/3001"
+  }
+}
