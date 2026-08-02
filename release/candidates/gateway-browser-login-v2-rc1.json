@@ -1,0 +1,83 @@
+{
+  "$schema": "../manifest.schema.json",
+  "schema_version": 1,
+  "release": "gateway-browser-login-v2-rc1",
+  "status": "candidate",
+  "components": [
+    {
+      "name": "gateway",
+      "repository": "endless-net/gateway",
+      "git_commit": "0ab32cc3df4169a58bb60eea4a29c9545a8f72f7",
+      "image": "https://github.com/endless-net/gateway/actions/runs/30739618344/artifacts/8830831857@sha256:a46bdbb94ebc4c23fca60c5f96f894f34cc2fe7c72e93038fc71a73d989e6858"
+    },
+    {
+      "name": "admin",
+      "repository": "endless-net/admin",
+      "git_commit": "cca0118d7d660bd48e20dcaf1367fdc2a803ea55",
+      "image": "ghcr.io/endless-net/endlessnet-admin-web@sha256:b6a37f40ef7b71b90dfc4f5167d6f23d95d3d53b6dd0dafb8b139f5bb47ee651"
+    },
+    {
+      "name": "identity",
+      "repository": "endless-net/identity",
+      "git_commit": "64d768d3ad5cc41e6f5c875747e6a7bd44d752d1",
+      "image": "ghcr.io/endless-net/identity@sha256:48df9459c0d8da6e17b1fcb5890e7424a10308979e449b5f25abfff44b246ede"
+    },
+    {
+      "name": "billing",
+      "repository": "endless-net/billing",
+      "git_commit": "fffd30550a6eb5dfd62c5b8978bc9699a20f6cc5",
+      "image": "ghcr.io/endless-net/billing@sha256:6cbe6418b8e08b7b84a5161321779cdaa9d319b508b5e17cb16eda275a12ff53"
+    },
+    {
+      "name": "coordinator",
+      "repository": "endless-net/coordinator",
+      "git_commit": "8c939bd22b6b5e6dbff6b35f058135ed7ead491c",
+      "image": "ghcr.io/endless-net/coordinator@sha256:f69c3610e0bd43cd192e07a16a74ca062e0bed607a3d96f39fbb128e805f7cf1"
+    },
+    {
+      "name": "signing",
+      "repository": "endless-net/signing",
+      "git_commit": "9866a6aff84f98de34010bcf3ea9e33fe90425fb",
+      "image": "ghcr.io/endless-net/signing@sha256:46a2918a5a6ec4daf26037c1b6774457e1a1b13ada3da9fac3d0bbc44461360f"
+    },
+    {
+      "name": "management",
+      "repository": "endless-net/management",
+      "git_commit": "4ab0a61bf066ad35a1d1dbc5c4e637f461ebf333",
+      "image": "https://github.com/endless-net/management/actions/runs/30715074238/artifacts/8823085344@sha256:9ada3efeb8536943d6d5fec24ed29d0322241b87deb3fd4309ed74efc716d33f"
+    },
+    {
+      "name": "relay",
+      "repository": "endless-net/relay",
+      "git_commit": "5b9c3237a346a9b8c02dd44b712850ec230f1bdb",
+      "image": "ghcr.io/endless-net/relay-public@sha256:9e62284925ae501bc12fb48b76aa39275447946bd13daa9992e28b62737c1ab3"
+    },
+    {
+      "name": "stun",
+      "repository": "endless-net/stun",
+      "git_commit": "7a88454004103e44b3a0fba85da1396e6df992b6",
+      "image": "ghcr.io/endless-net/stun-public@sha256:3251da018cdcc0213abaa8987023cad127172dcc27ff3429b3f1ddd1be2406f3"
+    },
+    {
+      "name": "client",
+      "repository": "endless-net/client",
+      "git_commit": "7ca528475b794eead1e3d482690cc2437c6d854a",
+      "image": null
+    },
+    {
+      "name": "system-tests-oidc-fixture",
+      "repository": "endless-net/system-tests",
+      "git_commit": "f4ff29a13d973c4067c0a3787355bc197dd8c40a",
+      "image": "ghcr.io/endless-net/system-tests-oidc-fixture@sha256:a9fc121fbf5d7437c4abf3091f7a24a45b53d7ebe3bffdb98ff1a4dbe3fc6f03"
+    }
+  ],
+  "modules": [],
+  "contracts": [
+    {
+      "name": "gateway-browser-login",
+      "version": 2,
+      "architecture_repository": "endless-net/architecture",
+      "architecture_commit": "62175d5e97e3a5a57dcb0f2ab2c377c5eb7cd4ac"
+    }
+  ]
+}

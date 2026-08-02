@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release-evidence.schema.json",
+  "title": "EndlessNet compatibility release evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "release", "manifest", "contract", "gateway", "admin", "identity", "system_tests"],
+  "properties": {
+    "$schema": {"type": "string", "minLength": 1},
+    "schema_version": {"const": 1},
+    "release": {"type": "string", "minLength": 1},
+    "manifest": {"$ref": "#/$defs/manifest"},
+    "contract": {"$ref": "#/$defs/contract"},
+    "gateway": {"$ref": "#/$defs/gateway"},
+    "admin": {"$ref": "#/$defs/admin"},
+    "identity": {"$ref": "#/$defs/identity"},
+    "system_tests": {"$ref": "#/$defs/systemTests"}
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "run": {"type": "integer", "minimum": 1},
+    "immutableReference": {"type": "string", "pattern": "^.+@sha256:[0-9a-f]{64}$"},
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^release/candidates/[0-9A-Za-z._-]+\\.json$"},
+        "sha256": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "architecture_repository", "architecture_commit"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "architecture_repository": {"const": "endless-net/architecture"},
+        "architecture_commit": {"$ref": "#/$defs/commit"}
+      }
+    },
+    "actionsArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "digest"],
+      "properties": {
+        "id": {"type": "integer", "minimum": 1},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["verified", "not-produced-private-repository"]},
+        "rekor_index": {"type": "integer", "minimum": 0},
+        "attestation_manifest_digest": {"$ref": "#/$defs/digest"},
+        "provenance_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "source_commit", "publisher_commit", "ci_run", "publication_run", "artifact", "archive_digest", "binary_sha256", "provenance"],
+      "properties": {
+        "repository": {"const": "endless-net/gateway"},
+        "source_commit": {"$ref": "#/$defs/commit"},
+        "publisher_commit": {"$ref": "#/$defs/commit"},
+        "ci_run": {"$ref": "#/$defs/run"},
+        "publication_run": {"$ref": "#/$defs/run"},
+        "artifact": {"$ref": "#/$defs/actionsArtifact"},
+        "archive_digest": {"$ref": "#/$defs/digest"},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "provenance": {"$ref": "#/$defs/provenance"}
+      }
+    },
+    "admin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "source_commit", "publication_run", "image", "archive_sha256", "tested_artifact", "descriptor_artifact", "provenance"],
+      "properties": {
+        "repository": {"const": "endless-net/admin"},
+        "source_commit": {"$ref": "#/$defs/commit"},
+        "publication_run": {"$ref": "#/$defs/run"},
+        "image": {"$ref": "#/$defs/immutableReference"},
+        "archive_sha256": {"$ref": "#/$defs/sha256"},
+        "tested_artifact": {"$ref": "#/$defs/actionsArtifact"},
+        "descriptor_artifact": {"$ref": "#/$defs/actionsArtifact"},
+        "provenance": {"$ref": "#/$defs/provenance"}
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "source_commit", "publisher_commit", "source_ci_run", "publisher_ci_run", "publication_run", "image", "archive_digest", "build_artifact", "publication_artifact", "publication_record_sha256", "provenance"],
+      "properties": {
+        "repository": {"const": "endless-net/identity"},
+        "source_commit": {"$ref": "#/$defs/commit"},
+        "publisher_commit": {"$ref": "#/$defs/commit"},
+        "source_ci_run": {"$ref": "#/$defs/run"},
+        "publisher_ci_run": {"$ref": "#/$defs/run"},
+        "publication_run": {"$ref": "#/$defs/run"},
+        "image": {"$ref": "#/$defs/immutableReference"},
+        "archive_digest": {"$ref": "#/$defs/digest"},
+        "build_artifact": {"$ref": "#/$defs/actionsArtifact"},
+        "publication_artifact": {"$ref": "#/$defs/actionsArtifact"},
+        "publication_record_sha256": {"$ref": "#/$defs/sha256"},
+        "provenance": {"$ref": "#/$defs/provenance"}
+      }
+    },
+    "systemTests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "source_commit", "publisher_commit", "ci_run", "publication_run", "fixture_image", "fixture_binary_sha256", "fixture_publication_artifact", "provenance"],
+      "properties": {
+        "repository": {"const": "endless-net/system-tests"},
+        "source_commit": {"$ref": "#/$defs/commit"},
+        "publisher_commit": {"$ref": "#/$defs/commit"},
+        "ci_run": {"$ref": "#/$defs/run"},
+        "publication_run": {"$ref": "#/$defs/run"},
+        "fixture_image": {"$ref": "#/$defs/immutableReference"},
+        "fixture_binary_sha256": {"$ref": "#/$defs/sha256"},
+        "fixture_publication_artifact": {"$ref": "#/$defs/actionsArtifact"},
+        "provenance": {"$ref": "#/$defs/provenance"}
+      }
+    }
+  }
+}

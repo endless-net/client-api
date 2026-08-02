@@ -1,0 +1,147 @@
+name: Publish immutable compatibility candidate
+
+"on":
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  publish:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Locate candidate changed by the green revision
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mapfile -t candidates < <(
+            git diff-tree --no-commit-id --name-only -r "$SOURCE_SHA^" "$SOURCE_SHA" -- 'release/candidates/*.json'
+          )
+          if (( ${#candidates[@]} == 0 )); then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if (( ${#candidates[@]} != 1 )); then
+            printf 'expected one changed candidate, got %s\n' "${#candidates[@]}" >&2
+            exit 1
+          fi
+          manifest="${candidates[0]}"
+          release="$(jq -er '.release' "$manifest")"
+          [[ "$release" =~ ^[0-9A-Za-z._-]+$ ]]
+          evidence="release/evidence/${release}.json"
+          test -f "$evidence"
+          test "$(jq -er '.manifest.path' "$evidence")" = "$manifest"
+          {
+            echo "publish=true"
+            echo "manifest=$manifest"
+            echo "evidence=$evidence"
+            echo "release=$release"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Configure private modules
+        if: steps.candidate.outputs.publish == 'true'
+        working-directory: systemtests
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        if: steps.candidate.outputs.publish == 'true'
+        with:
+          go-version-file: systemtests/go.mod
+          cache-dependency-path: systemtests/go.sum
+
+      - name: Revalidate compatibility and provenance bindings
+        if: steps.candidate.outputs.publish == 'true'
+        working-directory: systemtests
+        run: |
+          go mod verify
+          go test -short ./...
+
+      - name: Assemble immutable publication
+        if: steps.candidate.outputs.publish == 'true'
+        id: bundle
+        shell: bash
+        env:
+          MANIFEST: ${{ steps.candidate.outputs.manifest }}
+          EVIDENCE: ${{ steps.candidate.outputs.evidence }}
+          RELEASE: ${{ steps.candidate.outputs.release }}
+          CI_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          bundle="$RUNNER_TEMP/compatibility-candidate"
+          mkdir -p "$bundle/$(dirname "$MANIFEST")" "$bundle/$(dirname "$EVIDENCE")"
+          cp "$MANIFEST" "$bundle/$MANIFEST"
+          cp "$EVIDENCE" "$bundle/$EVIDENCE"
+          cp release/manifest.schema.json release/evidence.schema.json "$bundle/release/"
+          manifest_digest="sha256:$(sha256sum "$MANIFEST" | cut -d' ' -f1)"
+          evidence_digest="sha256:$(sha256sum "$EVIDENCE" | cut -d' ' -f1)"
+          test "$(jq -er '.manifest.sha256' "$EVIDENCE")" = "$manifest_digest"
+          jq -n \
+            --arg release "$RELEASE" \
+            --arg source_repository "${GITHUB_REPOSITORY}" \
+            --arg source_revision "$SOURCE_SHA" \
+            --arg ci_run "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${CI_RUN_ID}" \
+            --arg manifest_digest "$manifest_digest" \
+            --arg evidence_digest "$evidence_digest" \
+            '{schema_version: 1, release: $release, source_repository: $source_repository, source_revision: $source_revision, ci_run: $ci_run, manifest_digest: $manifest_digest, evidence_digest: $evidence_digest}' \
+            > "$bundle/publication.json"
+          (
+            cd "$bundle"
+            sha256sum "$MANIFEST" "$EVIDENCE" release/manifest.schema.json release/evidence.schema.json publication.json > SHA256SUMS
+          )
+          echo "manifest_digest=$manifest_digest" >> "$GITHUB_OUTPUT"
+          echo "evidence_digest=$evidence_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Upload commit-addressed candidate
+        if: steps.candidate.outputs.publish == 'true'
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: endlessnet-compatibility-${{ steps.candidate.outputs.release }}-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/compatibility-candidate
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+          overwrite: false
+
+      - name: Record publication
+        if: steps.candidate.outputs.publish == 'true'
+        env:
+          RELEASE: ${{ steps.candidate.outputs.release }}
+          MANIFEST_DIGEST: ${{ steps.bundle.outputs.manifest_digest }}
+          EVIDENCE_DIGEST: ${{ steps.bundle.outputs.evidence_digest }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+        run: |
+          {
+            echo "### Immutable compatibility candidate"
+            echo
+            echo "- Release: \`$RELEASE\`"
+            echo "- Revision: \`$SOURCE_SHA\`"
+            echo "- Manifest: \`$MANIFEST_DIGEST\`"
+            echo "- Evidence: \`$EVIDENCE_DIGEST\`"
+            echo "- Artifact: [\`$ARTIFACT_ID\`]($ARTIFACT_URL) (\`$ARTIFACT_DIGEST\`)"
+          } >> "$GITHUB_STEP_SUMMARY"

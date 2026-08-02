@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "release", "status", "components", "modules"],
   "properties": {
+    "$schema": {"type": "string", "minLength": 1},
     "schema_version": {"const": 1},
     "release": {"type": "string", "minLength": 1},
     "status": {"enum": ["candidate", "released"]},
@@ -116,6 +117,95 @@
                 "sum": {"type": "string", "pattern": "^h1:[A-Za-z0-9+/=]+$"}
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["contracts"],
+        "properties": {
+          "contracts": {
+            "contains": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {"name": {"const": "gateway-browser-login"}}
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "contracts": {
+            "contains": {
+              "type": "object",
+              "required": ["name", "version", "architecture_repository", "architecture_commit"],
+              "properties": {
+                "name": {"const": "gateway-browser-login"},
+                "version": {"const": 2},
+                "architecture_repository": {"const": "endless-net/architecture"},
+                "architecture_commit": {"const": "62175d5e97e3a5a57dcb0f2ab2c377c5eb7cd4ac"}
+              }
+            }
+          },
+          "components": {
+            "allOf": [
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["name", "repository", "git_commit", "image"],
+                  "properties": {
+                    "name": {"const": "gateway"},
+                    "repository": {"const": "endless-net/gateway"},
+                    "git_commit": {"const": "0ab32cc3df4169a58bb60eea4a29c9545a8f72f7"},
+                    "image": {"const": "https://github.com/endless-net/gateway/actions/runs/30739618344/artifacts/8830831857@sha256:a46bdbb94ebc4c23fca60c5f96f894f34cc2fe7c72e93038fc71a73d989e6858"}
+                  }
+                }
+              },
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["name", "repository", "git_commit", "image"],
+                  "properties": {
+                    "name": {"const": "admin"},
+                    "repository": {"const": "endless-net/admin"},
+                    "git_commit": {"const": "cca0118d7d660bd48e20dcaf1367fdc2a803ea55"},
+                    "image": {"const": "ghcr.io/endless-net/endlessnet-admin-web@sha256:b6a37f40ef7b71b90dfc4f5167d6f23d95d3d53b6dd0dafb8b139f5bb47ee651"}
+                  }
+                }
+              },
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["name", "repository", "git_commit", "image"],
+                  "properties": {
+                    "name": {"const": "identity"},
+                    "repository": {"const": "endless-net/identity"},
+                    "git_commit": {"const": "64d768d3ad5cc41e6f5c875747e6a7bd44d752d1"},
+                    "image": {"const": "ghcr.io/endless-net/identity@sha256:48df9459c0d8da6e17b1fcb5890e7424a10308979e449b5f25abfff44b246ede"}
+                  }
+                }
+              },
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["name", "repository", "git_commit", "image"],
+                  "properties": {
+                    "name": {"const": "system-tests-oidc-fixture"},
+                    "repository": {"const": "endless-net/system-tests"},
+                    "git_commit": {"const": "f4ff29a13d973c4067c0a3787355bc197dd8c40a"},
+                    "image": {"const": "ghcr.io/endless-net/system-tests-oidc-fixture@sha256:a9fc121fbf5d7437c4abf3091f7a24a45b53d7ebe3bffdb98ff1a4dbe3fc6f03"}
+                  }
+                }
+              },
+              {"contains": {"type": "object", "required": ["name", "repository"], "properties": {"name": {"const": "billing"}, "repository": {"const": "endless-net/billing"}}}},
+              {"contains": {"type": "object", "required": ["name", "repository"], "properties": {"name": {"const": "coordinator"}, "repository": {"const": "endless-net/coordinator"}}}},
+              {"contains": {"type": "object", "required": ["name", "repository"], "properties": {"name": {"const": "signing"}, "repository": {"const": "endless-net/signing"}}}},
+              {"contains": {"type": "object", "required": ["name", "repository"], "properties": {"name": {"const": "management"}, "repository": {"const": "endless-net/management"}}}},
+              {"contains": {"type": "object", "required": ["name", "repository"], "properties": {"name": {"const": "relay"}, "repository": {"const": "endless-net/relay"}}}},
+              {"contains": {"type": "object", "required": ["name", "repository"], "properties": {"name": {"const": "stun"}, "repository": {"const": "endless-net/stun"}}}},
+              {"contains": {"type": "object", "required": ["name", "repository"], "properties": {"name": {"const": "client"}, "repository": {"const": "endless-net/client"}}}}
+            ]
           }
         }
       }

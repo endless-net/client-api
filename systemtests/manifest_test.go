@@ -1,6 +1,7 @@
 package systemtests
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -37,6 +38,7 @@ type releaseContract struct {
 }
 
 type releaseManifest struct {
+	Schema        string             `json:"$schema,omitempty"`
 	SchemaVersion int                `json:"schema_version"`
 	Release       string             `json:"release"`
 	Status        string             `json:"status"`
@@ -66,7 +68,9 @@ func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
 			t.Fatal(readErr)
 		}
 		var manifest releaseManifest
-		if err := json.Unmarshal(raw, &manifest); err != nil {
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&manifest); err != nil {
 			t.Fatalf("%s: %v", file, err)
 		}
 		if manifest.SchemaVersion != 1 || manifest.Release == "" ||
@@ -108,6 +112,9 @@ func TestCandidateManifestsAreCompleteAndImmutable(t *testing.T) {
 			contractNames[contract.Name] = true
 		}
 		if err := validateRecoveryContractPins(manifest); err != nil {
+			t.Fatalf("%s: %v", file, err)
+		}
+		if err := validateGatewayBrowserLoginContractPins(manifest); err != nil {
 			t.Fatalf("%s: %v", file, err)
 		}
 	}

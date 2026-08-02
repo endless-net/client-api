@@ -26,5 +26,25 @@ This declaration is added only to the immutable candidate that runs the
 recovery acceptance suite. Older candidates that do not claim the contract do
 not acquire a false recovery guarantee.
 
+The `gateway-browser-login` version 2 contract is bound to architecture commit
+`62175d5e97e3a5a57dcb0f2ab2c377c5eb7cd4ac`. Its candidate pins the exact
+Gateway, Admin, Identity, supporting service, client, and OIDC fixture revisions
+and artifacts accepted by the System Tests run-manifest validator. The matching
+document under `release/evidence/` records the producer CI, publication,
+artifact, archive, and provenance identifiers without adding producer-owned
+fields to the compatibility manifest schema.
+
+After CI succeeds for a push to `main` that changes exactly one candidate, the
+publication workflow revalidates the candidate/evidence binding and uploads a
+commit-addressed Actions artifact preserving the `release/` paths for the
+manifest, evidence, and both schemas, plus `publication.json` and `SHA256SUMS`.
+It never promotes a candidate to `released`; that status still requires the
+cross-repository acceptance gate.
+
+Infrastructure owns the environment-specific schema-v3 run manifest. It must
+reuse these component pins and add the deployed origins, account, exact client
+artifact URL/hash, and browser-login discovery assertions before invoking the
+live acceptance suite.
+
 Clean cutover uses one released manifest. It does not export, import, dual-write,
 CDC, or reconcile state from the retired stack.

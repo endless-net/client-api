@@ -1,0 +1,91 @@
+{
+  "$schema": "../evidence.schema.json",
+  "schema_version": 1,
+  "release": "gateway-browser-login-v2-rc1",
+  "manifest": {
+    "path": "release/candidates/gateway-browser-login-v2-rc1.json",
+    "sha256": "sha256:955ec212ff3948272ac528ce90e37fdef8cf9f7ffd53ea00a8f07411fc40f687"
+  },
+  "contract": {
+    "name": "gateway-browser-login",
+    "version": 2,
+    "architecture_repository": "endless-net/architecture",
+    "architecture_commit": "62175d5e97e3a5a57dcb0f2ab2c377c5eb7cd4ac"
+  },
+  "gateway": {
+    "repository": "endless-net/gateway",
+    "source_commit": "0ab32cc3df4169a58bb60eea4a29c9545a8f72f7",
+    "publisher_commit": "0ab32cc3df4169a58bb60eea4a29c9545a8f72f7",
+    "ci_run": 30739588233,
+    "publication_run": 30739618344,
+    "artifact": {
+      "id": 8830831857,
+      "digest": "sha256:a46bdbb94ebc4c23fca60c5f96f894f34cc2fe7c72e93038fc71a73d989e6858"
+    },
+    "archive_digest": "sha256:d2c85abe141fe89e200cc1fe53c8ba47251f62654d771fa94dfc62d8f730cdcf",
+    "binary_sha256": "0fb8b3512e2307695a4dee18ee5aeb705d6f73ca19867c7a33e6b2e40a7a3ddc",
+    "provenance": {
+      "status": "verified",
+      "rekor_index": 2321192030
+    }
+  },
+  "admin": {
+    "repository": "endless-net/admin",
+    "source_commit": "cca0118d7d660bd48e20dcaf1367fdc2a803ea55",
+    "publication_run": 30708281871,
+    "image": "ghcr.io/endless-net/endlessnet-admin-web@sha256:b6a37f40ef7b71b90dfc4f5167d6f23d95d3d53b6dd0dafb8b139f5bb47ee651",
+    "archive_sha256": "32476e4ede4e1a1b875d3fca18aeedc30dc4eeb0ab457e6e79223991c9657402",
+    "tested_artifact": {
+      "id": 8821100019,
+      "digest": "sha256:f618227d9f0277354bed95a318fc77c932b84b8a4742b10198d793d1e0cc42c2"
+    },
+    "descriptor_artifact": {
+      "id": 8821101722,
+      "digest": "sha256:1a90f2b2f098279cf4e1e225588fa059bfc82654a40a73db3132985e84b0efe9"
+    },
+    "provenance": {
+      "status": "not-produced-private-repository"
+    }
+  },
+  "identity": {
+    "repository": "endless-net/identity",
+    "source_commit": "64d768d3ad5cc41e6f5c875747e6a7bd44d752d1",
+    "publisher_commit": "66b88d5b74c208fb47012fe199c65afeef43111b",
+    "source_ci_run": 30715720621,
+    "publisher_ci_run": 30717817761,
+    "publication_run": 30717819869,
+    "image": "ghcr.io/endless-net/identity@sha256:48df9459c0d8da6e17b1fcb5890e7424a10308979e449b5f25abfff44b246ede",
+    "archive_digest": "sha256:06ea147c9a78b87731a392fe2520c548a9dc566c799c444ce6c54f6445aaf0da",
+    "build_artifact": {
+      "id": 8823912868,
+      "digest": "sha256:bfe8ade43d9a283fb0284e05eed4dadb8c9f423582d251c87515af08fb5b06f4"
+    },
+    "publication_artifact": {
+      "id": 8823912992,
+      "digest": "sha256:5235cc4d767071eb0b7559a1439a42bb0ad5399cccab248657ffb24c27c7d730"
+    },
+    "publication_record_sha256": "4818ae2e71fdd537573d1c5b00b3a1542883784e580a1d6dc2d96218491a0e2a",
+    "provenance": {
+      "status": "verified",
+      "rekor_index": 2314531454,
+      "provenance_digest": "sha256:af374e3f33cbf977abc3f7002304e5a20d8502ce677c2c11569dabca3cf73374"
+    }
+  },
+  "system_tests": {
+    "repository": "endless-net/system-tests",
+    "source_commit": "f4ff29a13d973c4067c0a3787355bc197dd8c40a",
+    "publisher_commit": "f4ff29a13d973c4067c0a3787355bc197dd8c40a",
+    "ci_run": 30739665586,
+    "publication_run": 30739698224,
+    "fixture_image": "ghcr.io/endless-net/system-tests-oidc-fixture@sha256:a9fc121fbf5d7437c4abf3091f7a24a45b53d7ebe3bffdb98ff1a4dbe3fc6f03",
+    "fixture_binary_sha256": "17a50055c10a3ff932ebb026c4c29070d76a255fdb5a45263fff31ab0437c3c3",
+    "fixture_publication_artifact": {
+      "id": 8830853301,
+      "digest": "sha256:c0d1cd057aa4e8bad3f93102d76e58432655c5605a86231e53fbe01138a66ff0"
+    },
+    "provenance": {
+      "status": "verified",
+      "attestation_manifest_digest": "sha256:4cfbf3231e0ced3daa1bd3a795526523c377aba39201333d8f355e7a4e24b824"
+    }
+  }
+}
