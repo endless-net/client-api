@@ -20,7 +20,6 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: clientapi/go.mod
-          cache-dependency-path: clientapi/go.sum
       - name: Verify modules
         run: go mod verify
       - name: Verify dependency licenses
@@ -49,7 +48,6 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: clientapi/v2/go.mod
-          cache-dependency-path: clientapi/v2/go.sum
       - name: Verify modules
         run: go mod verify
       - name: Verify dependency licenses
@@ -102,7 +100,6 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: systemtests/go.mod
-          cache-dependency-path: systemtests/go.sum
       - name: Reject changes to frozen legacy server-release source
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
