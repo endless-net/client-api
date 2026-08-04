@@ -13,3 +13,9 @@
 - Work only within this repository.
 - Before reading from or writing to any path outside this repository, request
   and receive the user's explicit permission.
+
+## Compatibility policy
+
+- Do not preserve legacy behavior, obsolete interfaces, or backward
+  compatibility. Prefer the current design, including breaking changes when
+  they are required.
