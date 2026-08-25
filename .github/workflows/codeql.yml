@@ -1,0 +1,53 @@
+name: CodeQL
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze Go
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: clientapi/go.mod
+          cache: false
+      - name: Configure private modules
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: go
+          build-mode: manual
+      - name: Build Go modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          for module in clientapi clientapi/v2 contracts systemtests; do
+            (
+              cd "$module"
+              go build ./...
+            )
+          done
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:go
