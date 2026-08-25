@@ -1,6 +1,6 @@
 module github.com/endless-net/client-api/clientapi
 
-go 1.26.5
+go 1.27.0
 
 require (
 	github.com/endless-net/relay v1.1.4

@@ -1,6 +1,6 @@
 module github.com/endless-net/client-api/systemtests
 
-go 1.26.5
+go 1.27.0
 
 require (
 	github.com/endless-net/billing/billingapi v1.0.0-rc.3
