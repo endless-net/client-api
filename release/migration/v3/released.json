@@ -1,0 +1,13 @@
+{
+  "$schema": "./component-release.schema.json",
+  "schema_version": 2,
+  "kind": "released",
+  "component": "gateway",
+  "repository": "endless-net/gateway",
+  "git_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "artifact": "https://github.com/endless-net/gateway/releases/download/gateway-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d025/gateway-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d025.tar.gz@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "candidate": {"uri": "https://github.com/endless-net/releases/blob/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/candidates/gateway-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d025.json", "digest": "sha256:8b7f5f629e892da92172481b129c759cda9e5f34a0874c4a5a95ef7b26c1d4f9"},
+  "candidate_provenance": {"uri": "https://github.com/endless-net/releases/blob/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/candidate-provenance/gateway-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d025.json", "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+  "compatibility_evidence": [{"provider": "gateway", "consumer": "identity", "contract": "browser-auth", "version": 1, "evidence": {"uri": "https://github.com/endless-net/system-tests/blob/cccccccccccccccccccccccccccccccccccccccc/evidence/gateway-browser-auth.json", "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}],
+  "promotion": {"repository": "endless-net/releases", "run": "https://github.com/endless-net/releases/actions/runs/1", "approved_by": "release-approver"}
+}

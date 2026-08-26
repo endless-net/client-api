@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release-migration/v3/inventory.schema.json",
+  "title": "EndlessNet D-025 component release migration inventory v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "state", "authority", "source", "target", "previous_inventory", "component_contract", "retained_tooling", "cutover_gates", "completion"],
+  "properties": {
+    "$schema": {"const": "./inventory.schema.json"},
+    "schema_version": {"const": 3},
+    "state": {"const": "d025_component_release_contract_pending"},
+    "authority": {"type": "object", "additionalProperties": false, "required": ["repository", "revision", "decisions", "contracts"], "properties": {"repository": {"const": "endless-net/architecture"}, "revision": {"const": "a7a42114af6f38b389ffbce85678999e69021e70"}, "decisions": {"const": ["D-024", "D-025"]}, "contracts": {"const": "docs/ru/contracts-and-automation.md"}}},
+    "source": {"type": "object", "additionalProperties": false, "required": ["repository", "revision", "role"], "properties": {"repository": {"const": "endless-net/client-api"}, "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "role": {"const": "frozen_legacy_compatibility_source"}}},
+    "target": {"type": "object", "additionalProperties": false, "required": ["repository", "baseline_revision", "role"], "properties": {"repository": {"const": "endless-net/releases"}, "baseline_revision": {"const": "5aa643e511b3fd9dc8288be8e28e5a877880fe94"}, "role": {"const": "component_release_control_owner"}}},
+    "previous_inventory": {"type": "object", "additionalProperties": false, "required": ["path", "sha256", "disposition"], "properties": {"path": {"const": "release/migration/v2/inventory.json"}, "sha256": {"const": "sha256:ec975b09ac98d63c389a4ceadf4afee7899c94ee6fbc9cd1a395c9c7a5f47a16"}, "disposition": {"const": "preserved_superseded_server_set_handoff"}}},
+    "component_contract": {"type": "object", "additionalProperties": false, "required": ["schema", "record_scope", "candidate_owner", "released_owner", "validation", "production", "producer_signal", "ownership"], "properties": {
+      "schema": {"const": "release/migration/v3/component-release.schema.json"},
+      "record_scope": {"const": "one_deployable_producer_component"},
+      "candidate_owner": {"const": "endless-net/releases"},
+      "released_owner": {"const": "endless-net/releases"},
+      "validation": {"type": "object", "additionalProperties": false, "required": ["environment_class", "source_kind", "required_gates"], "properties": {"environment_class": {"const": "validation"}, "source_kind": {"const": "component_candidate"}, "required_gates": {"const": "affected_consumer_provider_edges_and_required_end_to_end"}}},
+      "production": {"type": "object", "additionalProperties": false, "required": ["source_kind", "desired_state", "record_digest"], "properties": {"source_kind": {"const": "released_component"}, "desired_state": {"const": "infrastructure_owned"}, "record_digest": {"const": "immutable_required"}}},
+      "producer_signal": {"type": "object", "additionalProperties": false, "required": ["destination", "payload", "deduplication", "forbidden_inputs"], "properties": {"destination": {"const": "endless-net/infrastructure"}, "payload": {"const": ["component", "released_record_digest", "manifest_commit", "event_id"]}, "deduplication": {"const": ["environment", "component", "released_record_digest", "config_generation"]}, "forbidden_inputs": {"const": ["host", "command", "artifact_override", "skip_checks", "credentials"]}}},
+      "ownership": {"type": "object", "additionalProperties": false, "required": ["public_browser_contracts", "deployment"], "properties": {"public_browser_contracts": {"const": "endless-net/client-api"}, "deployment": {"const": "endless-net/infrastructure"}}}
+    }},
+    "retained_tooling": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["source_path", "disposition"], "properties": {"source_path": {"type": "string", "pattern": "^systemtests/[0-9A-Za-z._/-]+$"}, "disposition": {"const": "compatibility_validator_for_component_cutover"}}}},
+    "cutover_gates": {"type": "array", "minItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["id", "owner", "status", "requirement", "evidence"], "properties": {"id": {"enum": ["releases_component_records", "system_tests_affected_edges", "infrastructure_component_signal", "client_api_public_contract_ownership"]}, "owner": {"enum": ["endless-net/releases", "endless-net/system-tests", "endless-net/infrastructure", "endless-net/client-api"]}, "status": {"enum": ["verified", "pending"]}, "requirement": {"type": "string", "minLength": 1}, "evidence": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["repository", "revision", "path", "sha256"], "properties": {"repository": {"type": "string", "pattern": "^endless-net/[0-9A-Za-z._-]+$"}, "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "path": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}}}}}},
+    "completion": {"type": "object", "additionalProperties": false, "required": ["status", "production_authorized", "reason"], "properties": {"status": {"const": "not_complete"}, "production_authorized": {"const": false}, "reason": {"type": "string", "minLength": 1}}}
+  }
+}

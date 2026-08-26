@@ -1,0 +1,11 @@
+{
+  "$schema": "./component-release.schema.json",
+  "schema_version": 2,
+  "kind": "released_component",
+  "environment": "production",
+  "component": "gateway",
+  "released_record": {"uri": "https://github.com/endless-net/releases/blob/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/released/gateway-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d025.json", "digest": "sha256:83a6f0b6bd2d9545f7e1903c5254041125d34e2ac52e5910b46d2c956f5a0a81"},
+  "manifest_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "event_id": "gateway-aaaaaaaa-d025:1",
+  "config_generation": "42"
+}

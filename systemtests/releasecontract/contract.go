@@ -29,6 +29,7 @@ var (
 	actionsRunPattern        = regexp.MustCompile(`^https://github\.com/endless-net/[0-9A-Za-z._-]+/actions/runs/[1-9][0-9]*$`)
 	versionPattern           = regexp.MustCompile(`^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$`)
 	sumPattern               = regexp.MustCompile(`^h1:[A-Za-z0-9+/=]+$`)
+	eventIDPattern           = regexp.MustCompile(`^[0-9A-Za-z._:-]+$`)
 )
 
 func Digest(raw []byte) string {
@@ -89,6 +90,119 @@ func ValidateCandidate(candidate Candidate) error {
 		contractNames[contract.Name] = true
 	}
 	return nil
+}
+
+// ValidateComponentCandidate validates a single producer record. In
+// particular, it intentionally has no required component set.
+func ValidateComponentCandidate(candidate ComponentCandidate) error {
+	if candidate.SchemaVersion != 2 || candidate.Kind != "candidate" ||
+		!releasePattern.MatchString(candidate.Component) || !repositoryPattern.MatchString(candidate.Repository) ||
+		!commitPattern.MatchString(candidate.GitCommit) || !artifactReferencePattern.MatchString(candidate.Artifact) {
+		return errors.New("component candidate identity is invalid")
+	}
+	if !releaseArtifactReferenceForComponent(candidate.Component, candidate.Repository, candidate.GitCommit, candidate.Artifact) {
+		return errors.New("component candidate artifact is not its immutable GitHub Release archive")
+	}
+	if candidate.Provenance.Build.Repository != candidate.Repository ||
+		candidate.Provenance.Build.SourceCommit != candidate.GitCommit ||
+		!actionsRunFor(candidate.Repository, candidate.Provenance.Build.Run) ||
+		!digestPattern.MatchString(candidate.Provenance.Build.AttestationDigest) ||
+		!digestPattern.MatchString(candidate.Provenance.AttestationDigest) {
+		return errors.New("component candidate provenance is incomplete")
+	}
+	if err := validateDigestReference(candidate.Provenance.ProducerRelease); err != nil {
+		return fmt.Errorf("producer release: %w", err)
+	}
+	modules := make(map[string]bool, len(candidate.Modules))
+	for index, module := range candidate.Modules {
+		if module.Path == "" || modules[module.Path] || !versionPattern.MatchString(module.Version) || !sumPattern.MatchString(module.Sum) {
+			return fmt.Errorf("module[%d] is invalid or duplicated", index)
+		}
+		modules[module.Path] = true
+	}
+	contracts := make(map[string]bool, len(candidate.Contracts))
+	for index, contract := range candidate.Contracts {
+		if contract.Name == "" || contracts[contract.Name] || contract.Version < 1 ||
+			contract.ArchitectureRepository != "endless-net/architecture" || !commitPattern.MatchString(contract.ArchitectureCommit) {
+			return fmt.Errorf("contract[%d] is invalid or duplicated", index)
+		}
+		contracts[contract.Name] = true
+	}
+	return validateCompatibilityGates(candidate.Component, candidate.CompatibilityGates)
+}
+
+func ValidateReleasedComponent(released ReleasedComponent, candidate ComponentCandidate, candidateRaw []byte) error {
+	if err := ValidateComponentCandidate(candidate); err != nil {
+		return err
+	}
+	if released.SchemaVersion != 2 || released.Kind != "released" ||
+		released.Component != candidate.Component || released.Repository != candidate.Repository ||
+		released.GitCommit != candidate.GitCommit || released.Artifact != candidate.Artifact ||
+		released.Candidate.Digest != Digest(candidateRaw) {
+		return errors.New("released component does not bind its exact candidate")
+	}
+	for name, reference := range map[string]DigestReference{
+		"candidate": released.Candidate, "candidate provenance": released.CandidateProvenance,
+	} {
+		if err := validateDigestReference(reference); err != nil {
+			return fmt.Errorf("%s: %w", name, err)
+		}
+	}
+	if released.Promotion.Repository != "endless-net/releases" || !actionsRunFor(released.Promotion.Repository, released.Promotion.Run) || released.Promotion.ApprovedBy == "" {
+		return errors.New("released component promotion provenance is incomplete")
+	}
+	want := make(map[string]bool, len(candidate.CompatibilityGates))
+	for _, gate := range candidate.CompatibilityGates {
+		want[compatibilityGateKey(gate.Provider, gate.Consumer, gate.Contract, gate.Version)] = true
+	}
+	seen := make(map[string]bool, len(released.CompatibilityEvidence))
+	for _, evidence := range released.CompatibilityEvidence {
+		key := compatibilityGateKey(evidence.Provider, evidence.Consumer, evidence.Contract, evidence.Version)
+		if !want[key] || seen[key] {
+			return errors.New("released component has an unexpected or duplicate compatibility gate")
+		}
+		if err := validateDigestReference(evidence.Evidence); err != nil {
+			return fmt.Errorf("compatibility evidence: %w", err)
+		}
+		seen[key] = true
+	}
+	if len(seen) != len(want) {
+		return errors.New("released component is missing affected compatibility evidence")
+	}
+	return nil
+}
+
+func ValidateInfrastructureSignal(signal InfrastructureSignal, released ReleasedComponent, releasedRaw []byte) error {
+	if signal.SchemaVersion != 2 || signal.Kind != "released_component" || signal.Environment != "production" ||
+		signal.Component != released.Component || !commitPattern.MatchString(signal.ManifestCommit) ||
+		!eventIDPattern.MatchString(signal.EventID) || signal.ConfigGeneration == "" ||
+		signal.ReleasedRecord.Digest != Digest(releasedRaw) {
+		return errors.New("infrastructure signal does not bind a released component")
+	}
+	if err := validateDigestReference(signal.ReleasedRecord); err != nil {
+		return fmt.Errorf("released record: %w", err)
+	}
+	return nil
+}
+
+func validateCompatibilityGates(component string, gates []CompatibilityGate) error {
+	seen := make(map[string]bool, len(gates))
+	for index, gate := range gates {
+		if gate.Provider != component || !releasePattern.MatchString(gate.Consumer) || gate.Consumer == component ||
+			gate.Contract == "" || gate.Version < 1 {
+			return fmt.Errorf("compatibility_gate[%d] is invalid", index)
+		}
+		key := compatibilityGateKey(gate.Provider, gate.Consumer, gate.Contract, gate.Version)
+		if seen[key] {
+			return fmt.Errorf("compatibility_gate[%d] is duplicated", index)
+		}
+		seen[key] = true
+	}
+	return nil
+}
+
+func compatibilityGateKey(provider, consumer, contract string, version int) string {
+	return fmt.Sprintf("%s\x00%s\x00%s\x00%d", provider, consumer, contract, version)
 }
 
 func ValidateCandidateProvenance(candidate Candidate, candidateDigest string, provenance CandidateProvenance) error {
@@ -377,6 +491,14 @@ func artifactDigest(reference string) string {
 		return ""
 	}
 	return reference[position+1:]
+}
+
+func releaseArtifactReferenceForComponent(component, repository, commit, reference string) bool {
+	if repository != "endless-net/"+component {
+		return false
+	}
+	prefix := "https://github.com/" + repository + "/releases/download/" + component + "-" + commit + "-d025/" + component + "-" + commit + "-d025.tar.gz@"
+	return strings.HasPrefix(reference, prefix) && artifactReferencePattern.MatchString(reference)
 }
 
 func actionsRunFor(repository, run string) bool {

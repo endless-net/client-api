@@ -110,6 +110,7 @@ type SystemTestEvidence struct {
 type PromotionProvenance struct {
 	Repository string `json:"repository"`
 	Run        string `json:"run"`
+	ApprovedBy string `json:"approved_by,omitempty"`
 }
 
 type PromotionRequest struct {
@@ -164,4 +165,71 @@ type Resolution struct {
 	CandidateDigest  string               `json:"candidate_digest"`
 	Resolved         ResolvedSet          `json:"resolved"`
 	Provenance       ResolutionProvenance `json:"provenance"`
+}
+
+// ComponentCandidate is the D-025 component-scoped validation input.  It is
+// deliberately not a server snapshot: one producer publishes one candidate.
+type ComponentCandidate struct {
+	Schema             string                       `json:"$schema"`
+	SchemaVersion      int                          `json:"schema_version"`
+	Kind               string                       `json:"kind"`
+	Component          string                       `json:"component"`
+	Repository         string                       `json:"repository"`
+	GitCommit          string                       `json:"git_commit"`
+	Artifact           string                       `json:"artifact"`
+	Modules            []Module                     `json:"modules,omitempty"`
+	Contracts          []Contract                   `json:"contracts,omitempty"`
+	CompatibilityGates []CompatibilityGate          `json:"compatibility_gates"`
+	Provenance         ComponentCandidateProvenance `json:"provenance"`
+}
+
+type CompatibilityGate struct {
+	Provider string `json:"provider"`
+	Consumer string `json:"consumer"`
+	Contract string `json:"contract"`
+	Version  int    `json:"version"`
+}
+
+type ComponentCandidateProvenance struct {
+	ProducerRelease   DigestReference `json:"producer_release"`
+	Build             BuildProvenance `json:"build"`
+	AttestationDigest string          `json:"attestation_digest"`
+}
+
+// ReleasedComponent is immutable proof that one candidate passed its affected
+// consumer/provider gates. It never implies a release of unrelated services.
+type ReleasedComponent struct {
+	Schema                string                  `json:"$schema"`
+	SchemaVersion         int                     `json:"schema_version"`
+	Kind                  string                  `json:"kind"`
+	Component             string                  `json:"component"`
+	Repository            string                  `json:"repository"`
+	GitCommit             string                  `json:"git_commit"`
+	Artifact              string                  `json:"artifact"`
+	Candidate             DigestReference         `json:"candidate"`
+	CandidateProvenance   DigestReference         `json:"candidate_provenance"`
+	CompatibilityEvidence []CompatibilityEvidence `json:"compatibility_evidence"`
+	Promotion             PromotionProvenance     `json:"promotion"`
+}
+
+type CompatibilityEvidence struct {
+	Provider string          `json:"provider"`
+	Consumer string          `json:"consumer"`
+	Contract string          `json:"contract"`
+	Version  int             `json:"version"`
+	Evidence DigestReference `json:"evidence"`
+}
+
+// InfrastructureSignal is the sole producer-to-deployer notification. It
+// carries no host, command, secret, or arbitrary artifact override.
+type InfrastructureSignal struct {
+	Schema           string          `json:"$schema"`
+	SchemaVersion    int             `json:"schema_version"`
+	Kind             string          `json:"kind"`
+	Environment      string          `json:"environment"`
+	Component        string          `json:"component"`
+	ReleasedRecord   DigestReference `json:"released_record"`
+	ManifestCommit   string          `json:"manifest_commit"`
+	EventID          string          `json:"event_id"`
+	ConfigGeneration string          `json:"config_generation"`
 }

@@ -13,18 +13,21 @@ binary and is not the server release-control owner.
 - `systemtests/` — cross-repository contract and system gates.
 
 The private [`endless-net/releases`](https://github.com/endless-net/releases)
-repository owns server manifest schemas, candidates, evidence, approvals,
-promotion, and released envelopes. Service implementations remain in their
+repository owns one-component server candidates, affected-edge evidence,
+approvals, promotion, and immutable released-component records. A released
+component references one exact tested candidate; it is not a mandatory
+seven-component server snapshot. Service implementations remain in their
 producer-owned repositories; Infrastructure alone owns production desired state
-and deployment execution.
+and deployment execution after receiving the released-component signal by
+digest.
 
 The records under `release/` remain byte-for-byte available so current consumers
 are not broken while their cutovers are proved. They are a frozen compatibility
 source, not an authorized production input. New server-release consumers must
-use the versioned schemas, fixtures, candidates, evidence, and released
-envelopes from `endless-net/releases`.
+use component-scoped candidate/released records from `endless-net/releases`;
+public and browser contracts remain owned here.
 
-The destination implementation is pinned at
+The superseded full-server-set destination implementation is pinned at
 [`endless-net/releases@89e6129dd7304a05bb2b7f18c771d776058b3dcc`](https://github.com/endless-net/releases/tree/89e6129dd7304a05bb2b7f18c771d776058b3dcc).
 The ownership handoff is implemented, but production cutover remains incomplete
 until System Tests and Infrastructure provide the evidence listed in

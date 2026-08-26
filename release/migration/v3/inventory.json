@@ -1,0 +1,37 @@
+{
+  "$schema": "./inventory.schema.json",
+  "schema_version": 3,
+  "state": "d025_component_release_contract_pending",
+  "authority": {
+    "repository": "endless-net/architecture",
+    "revision": "a7a42114af6f38b389ffbce85678999e69021e70",
+    "decisions": ["D-024", "D-025"],
+    "contracts": "docs/ru/contracts-and-automation.md"
+  },
+  "source": {"repository": "endless-net/client-api", "revision": "788507a5a821d11e57a57d1ac8abe044e3251837", "role": "frozen_legacy_compatibility_source"},
+  "target": {"repository": "endless-net/releases", "baseline_revision": "5aa643e511b3fd9dc8288be8e28e5a877880fe94", "role": "component_release_control_owner"},
+  "previous_inventory": {"path": "release/migration/v2/inventory.json", "sha256": "sha256:ec975b09ac98d63c389a4ceadf4afee7899c94ee6fbc9cd1a395c9c7a5f47a16", "disposition": "preserved_superseded_server_set_handoff"},
+  "component_contract": {
+    "schema": "release/migration/v3/component-release.schema.json",
+    "record_scope": "one_deployable_producer_component",
+    "candidate_owner": "endless-net/releases",
+    "released_owner": "endless-net/releases",
+    "validation": {"environment_class": "validation", "source_kind": "component_candidate", "required_gates": "affected_consumer_provider_edges_and_required_end_to_end"},
+    "production": {"source_kind": "released_component", "desired_state": "infrastructure_owned", "record_digest": "immutable_required"},
+    "producer_signal": {"destination": "endless-net/infrastructure", "payload": ["component", "released_record_digest", "manifest_commit", "event_id"], "deduplication": ["environment", "component", "released_record_digest", "config_generation"], "forbidden_inputs": ["host", "command", "artifact_override", "skip_checks", "credentials"]},
+    "ownership": {"public_browser_contracts": "endless-net/client-api", "deployment": "endless-net/infrastructure"}
+  },
+  "retained_tooling": [
+    {"source_path": "systemtests/releasecontract/contract.go", "disposition": "compatibility_validator_for_component_cutover"},
+    {"source_path": "systemtests/releasecontract/types.go", "disposition": "compatibility_validator_for_component_cutover"},
+    {"source_path": "systemtests/cmd/releasecontract/main.go", "disposition": "compatibility_validator_for_component_cutover"},
+    {"source_path": "systemtests/release_contract_test.go", "disposition": "compatibility_validator_for_component_cutover"}
+  ],
+  "cutover_gates": [
+    {"id": "releases_component_records", "owner": "endless-net/releases", "status": "pending", "requirement": "Releases accepts and promotes one immutable component candidate at a time, without assembling a mandatory seven-component production unit.", "evidence": []},
+    {"id": "system_tests_affected_edges", "owner": "endless-net/system-tests", "status": "pending", "requirement": "System Tests publishes immutable evidence for only the released component's affected consumer/provider edges and required end-to-end scenarios.", "evidence": []},
+    {"id": "infrastructure_component_signal", "owner": "endless-net/infrastructure", "status": "pending", "requirement": "Infrastructure accepts only a released component record by digest, deduplicates its signal with config generation, and owns desired state, plans, host access, probes and apply.", "evidence": []},
+    {"id": "client_api_public_contract_ownership", "owner": "endless-net/client-api", "status": "verified", "requirement": "Client API retains executable public/browser contracts and does not receive production credentials, inventory or host mutation authority.", "evidence": [{"repository": "endless-net/client-api", "revision": "788507a5a821d11e57a57d1ac8abe044e3251837", "path": "contracts/frontend-api.openapi.json", "sha256": "sha256:2fdb65ce50c266fbfe4a4e690c3fc30a5cd02fa4d129b2497bd6358364b35c30"}]}
+  ],
+  "completion": {"status": "not_complete", "production_authorized": false, "reason": "D-025 component records and the Infrastructure signal are specified here, but Releases, System Tests and Infrastructure have not yet supplied immutable cutover evidence."}
+}

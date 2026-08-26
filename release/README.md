@@ -1,5 +1,35 @@
 # Frozen server release migration source
 
+## Current D-025 component contract
+
+Architecture commit
+[`a7a42114af6f38b389ffbce85678999e69021e70`](https://github.com/endless-net/architecture/tree/a7a42114af6f38b389ffbce85678999e69021e70)
+supersedes the full server-set rollout model retained below as historical
+context. A new candidate and released record each describe one deployable
+producer component only. No component waits for a mandatory seven-component
+production snapshot.
+
+The component record binds its exact commit, immutable GitHub Release archive
+digest, module/contract pins, provenance, and the consumer/provider gates that
+the component actually affects. Promotion binds the released record to that
+exact candidate digest. A changed artifact digest requires a new candidate and
+fresh affected-edge evidence.
+
+Releases sends Infrastructure only the component, immutable released-record
+digest, manifest commit, and event ID. Infrastructure deduplicates on
+`(environment, component, released record digest, config generation)` and owns
+desired state, plan/apply, host access, probe policy, rollback, inventory and
+secrets. Candidates, arbitrary artifact overrides, host targets, commands,
+`skip_checks`, and credentials are never producer inputs to deployment.
+
+The executable schema and validation fixtures for this handoff are in
+[`migration/v3`](migration/v3/). They are documentation and compatibility
+fixtures, not new production release records. `client-api` continues to own
+public client/browser contracts; it does not own Infrastructure deployment or
+server release-control records.
+
+## Superseded full-server-set handoff
+
 Server release-control ownership moved to the private
 [`endless-net/releases`](https://github.com/endless-net/releases) repository.
 Under architecture decisions D-020 and D-025, `client-api` continues to own
@@ -7,8 +37,8 @@ public/client and browser contracts plus contract gates, but it no longer owns
 server manifest schemas, candidates, evidence, approval, promotion, or released
 envelopes.
 
-Authority is pinned in the versioned migration inventory to architecture commit
-`a4a4798de03ca93d626dd242b55884aa3d478c67`. The Releases implementation is
+The superseded handoff authority is pinned in the versioned migration inventory to architecture commit
+`a4a4798de03ca93d626dd242b55884aa3d478c67`. Its Releases implementation is
 pinned at
 [`89e6129dd7304a05bb2b7f18c771d776058b3dcc`](https://github.com/endless-net/releases/tree/89e6129dd7304a05bb2b7f18c771d776058b3dcc).
 

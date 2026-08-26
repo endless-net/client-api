@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://endlessnet.ru/contracts/release-migration/v3/component-release.schema.json",
+  "title": "EndlessNet D-025 component release handoff v3",
+  "oneOf": [
+    {"$ref": "#/$defs/candidate"},
+    {"$ref": "#/$defs/released"},
+    {"$ref": "#/$defs/infrastructureSignal"}
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "component": {"type": "string", "pattern": "^[0-9A-Za-z._-]+$"},
+    "reference": {
+      "type": "object", "additionalProperties": false, "required": ["uri", "digest"],
+      "properties": {"uri": {"type": "string", "minLength": 1}, "digest": {"$ref": "#/$defs/digest"}}
+    },
+    "artifact": {"type": "string", "pattern": "^https://github\\.com/endless-net/[0-9A-Za-z._-]+/releases/download/[0-9A-Za-z._-]+-[0-9a-f]{40}-d025/[0-9A-Za-z._-]+-[0-9a-f]{40}-d025\\.tar\\.gz@sha256:[0-9a-f]{64}$"},
+    "module": {
+      "type": "object", "additionalProperties": false, "required": ["path", "version", "sum"],
+      "properties": {"path": {"type": "string", "minLength": 1}, "version": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"}, "sum": {"type": "string", "pattern": "^h1:[A-Za-z0-9+/=]+$"}}
+    },
+    "contract": {
+      "type": "object", "additionalProperties": false, "required": ["name", "version", "architecture_repository", "architecture_commit"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "version": {"type": "integer", "minimum": 1}, "architecture_repository": {"const": "endless-net/architecture"}, "architecture_commit": {"$ref": "#/$defs/commit"}}
+    },
+    "gate": {
+      "type": "object", "additionalProperties": false, "required": ["provider", "consumer", "contract", "version"],
+      "properties": {"provider": {"$ref": "#/$defs/component"}, "consumer": {"$ref": "#/$defs/component"}, "contract": {"type": "string", "minLength": 1}, "version": {"type": "integer", "minimum": 1}}
+    },
+    "candidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["$schema", "schema_version", "kind", "component", "repository", "git_commit", "artifact", "compatibility_gates", "provenance"],
+      "properties": {
+        "$schema": {"const": "./component-release.schema.json"}, "schema_version": {"const": 2}, "kind": {"const": "candidate"}, "component": {"$ref": "#/$defs/component"}, "repository": {"type": "string", "pattern": "^endless-net/[0-9A-Za-z._-]+$"}, "git_commit": {"$ref": "#/$defs/commit"}, "artifact": {"$ref": "#/$defs/artifact"}, "modules": {"type": "array", "items": {"$ref": "#/$defs/module"}}, "contracts": {"type": "array", "items": {"$ref": "#/$defs/contract"}}, "compatibility_gates": {"type": "array", "items": {"$ref": "#/$defs/gate"}},
+        "provenance": {"type": "object", "additionalProperties": false, "required": ["producer_release", "build", "attestation_digest"], "properties": {"producer_release": {"$ref": "#/$defs/reference"}, "attestation_digest": {"$ref": "#/$defs/digest"}, "build": {"type": "object", "additionalProperties": false, "required": ["repository", "source_commit", "run", "attestation_digest"], "properties": {"repository": {"type": "string", "pattern": "^endless-net/[0-9A-Za-z._-]+$"}, "source_commit": {"$ref": "#/$defs/commit"}, "run": {"type": "string", "pattern": "^https://github\\.com/endless-net/[0-9A-Za-z._-]+/actions/runs/[1-9][0-9]*$"}, "attestation_digest": {"$ref": "#/$defs/digest"}}}}}
+      }
+    },
+    "released": {
+      "type": "object", "additionalProperties": false,
+      "required": ["$schema", "schema_version", "kind", "component", "repository", "git_commit", "artifact", "candidate", "candidate_provenance", "compatibility_evidence", "promotion"],
+      "properties": {
+        "$schema": {"const": "./component-release.schema.json"}, "schema_version": {"const": 2}, "kind": {"const": "released"}, "component": {"$ref": "#/$defs/component"}, "repository": {"type": "string", "pattern": "^endless-net/[0-9A-Za-z._-]+$"}, "git_commit": {"$ref": "#/$defs/commit"}, "artifact": {"$ref": "#/$defs/artifact"}, "candidate": {"$ref": "#/$defs/reference"}, "candidate_provenance": {"$ref": "#/$defs/reference"},
+        "compatibility_evidence": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["provider", "consumer", "contract", "version", "evidence"], "properties": {"provider": {"$ref": "#/$defs/component"}, "consumer": {"$ref": "#/$defs/component"}, "contract": {"type": "string", "minLength": 1}, "version": {"type": "integer", "minimum": 1}, "evidence": {"$ref": "#/$defs/reference"}}}},
+        "promotion": {"type": "object", "additionalProperties": false, "required": ["repository", "run", "approved_by"], "properties": {"repository": {"const": "endless-net/releases"}, "run": {"type": "string", "pattern": "^https://github\\.com/endless-net/releases/actions/runs/[1-9][0-9]*$"}, "approved_by": {"type": "string", "minLength": 1}}}
+      }
+    },
+    "infrastructureSignal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["$schema", "schema_version", "kind", "environment", "component", "released_record", "manifest_commit", "event_id", "config_generation"],
+      "properties": {"$schema": {"const": "./component-release.schema.json"}, "schema_version": {"const": 2}, "kind": {"const": "released_component"}, "environment": {"const": "production"}, "component": {"$ref": "#/$defs/component"}, "released_record": {"$ref": "#/$defs/reference"}, "manifest_commit": {"$ref": "#/$defs/commit"}, "event_id": {"type": "string", "pattern": "^[0-9A-Za-z._:-]+$"}, "config_generation": {"type": "string", "minLength": 1}}
+    }
+  }
+}

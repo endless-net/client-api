@@ -1,0 +1,11 @@
+{
+  "$schema": "./component-release.schema.json",
+  "schema_version": 2,
+  "kind": "candidate",
+  "component": "gateway",
+  "repository": "endless-net/gateway",
+  "git_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "artifact": "https://github.com/endless-net/gateway/releases/download/gateway-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d025/gateway-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-d025.tar.gz@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "compatibility_gates": [{"provider": "gateway", "consumer": "identity", "contract": "browser-auth", "version": 1}],
+  "provenance": {"producer_release": {"uri": "https://github.com/endless-net/gateway/blob/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/producer-manifest.json", "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"}, "build": {"repository": "endless-net/gateway", "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "run": "https://github.com/endless-net/gateway/actions/runs/1", "attestation_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"}, "attestation_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"}
+}

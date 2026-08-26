@@ -12,7 +12,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fatalf("usage: releasecontract <promote|resolve-candidate|resolve-release|verify-history> [flags]")
+		fatalf("usage: releasecontract <promote|resolve-candidate|resolve-release|validate-component-candidate|validate-released-component|validate-infrastructure-signal|verify-history> [flags]")
 	}
 	switch os.Args[1] {
 	case "promote":
@@ -21,10 +21,62 @@ func main() {
 		resolveCandidate(os.Args[2:])
 	case "resolve-release":
 		resolveRelease(os.Args[2:])
+	case "validate-component-candidate":
+		validateComponentCandidate(os.Args[2:])
+	case "validate-released-component":
+		validateReleasedComponent(os.Args[2:])
+	case "validate-infrastructure-signal":
+		validateInfrastructureSignal(os.Args[2:])
 	case "verify-history":
 		verifyHistory(os.Args[2:])
 	default:
 		fatalf("unknown command %q", os.Args[1])
+	}
+}
+
+func validateComponentCandidate(arguments []string) {
+	flags := flag.NewFlagSet("validate-component-candidate", flag.ExitOnError)
+	candidatePath := flags.String("candidate", "", "component candidate record")
+	_ = flags.Parse(arguments)
+	if *candidatePath == "" {
+		flags.Usage()
+		os.Exit(2)
+	}
+	_, candidate := read[releasecontract.ComponentCandidate](*candidatePath)
+	if err := releasecontract.ValidateComponentCandidate(candidate); err != nil {
+		fatalf("validate component candidate: %v", err)
+	}
+}
+
+func validateReleasedComponent(arguments []string) {
+	flags := flag.NewFlagSet("validate-released-component", flag.ExitOnError)
+	candidatePath := flags.String("candidate", "", "component candidate record")
+	releasedPath := flags.String("released", "", "released component record")
+	_ = flags.Parse(arguments)
+	if *candidatePath == "" || *releasedPath == "" {
+		flags.Usage()
+		os.Exit(2)
+	}
+	candidateRaw, candidate := read[releasecontract.ComponentCandidate](*candidatePath)
+	_, released := read[releasecontract.ReleasedComponent](*releasedPath)
+	if err := releasecontract.ValidateReleasedComponent(released, candidate, candidateRaw); err != nil {
+		fatalf("validate released component: %v", err)
+	}
+}
+
+func validateInfrastructureSignal(arguments []string) {
+	flags := flag.NewFlagSet("validate-infrastructure-signal", flag.ExitOnError)
+	releasedPath := flags.String("released", "", "released component record")
+	signalPath := flags.String("signal", "", "Infrastructure released-component signal")
+	_ = flags.Parse(arguments)
+	if *releasedPath == "" || *signalPath == "" {
+		flags.Usage()
+		os.Exit(2)
+	}
+	releasedRaw, released := read[releasecontract.ReleasedComponent](*releasedPath)
+	_, signal := read[releasecontract.InfrastructureSignal](*signalPath)
+	if err := releasecontract.ValidateInfrastructureSignal(signal, released, releasedRaw); err != nil {
+		fatalf("validate Infrastructure signal: %v", err)
 	}
 }
 

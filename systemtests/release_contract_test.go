@@ -414,6 +414,79 @@ func TestServerReleaseMigrationInventoryV2PointsAtReleasesAndKeepsCutoverIncompl
 	}
 }
 
+func TestD025ComponentReleaseContractDoesNotRequireServerSet(t *testing.T) {
+	compiler := releaseSchemaCompiler(t)
+	recordSchema, err := compiler.Compile("https://endlessnet.ru/contracts/release-migration/v3/component-release.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	inventorySchema, err := compiler.Compile("https://endlessnet.ru/contracts/release-migration/v3/inventory.schema.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var inventory any
+	decodePath(t, "../release/migration/v3/inventory.json", &inventory)
+	if err := inventorySchema.Validate(inventory); err != nil {
+		t.Fatalf("D-025 inventory rejected: %v", err)
+	}
+
+	var candidateDocument any
+	candidateRaw := decodePath(t, "../release/migration/v3/candidate.json", &candidateDocument)
+	if err := recordSchema.Validate(candidateDocument); err != nil {
+		t.Fatalf("single-component candidate rejected: %v", err)
+	}
+	var candidate releasecontract.ComponentCandidate
+	if err := releasecontract.DecodeStrict(candidateRaw, &candidate); err != nil {
+		t.Fatal(err)
+	}
+	if err := releasecontract.ValidateComponentCandidate(candidate); err != nil {
+		t.Fatalf("single-component candidate rejected semantically: %v", err)
+	}
+
+	var releasedDocument any
+	releasedRaw := decodePath(t, "../release/migration/v3/released.json", &releasedDocument)
+	if err := recordSchema.Validate(releasedDocument); err != nil {
+		t.Fatalf("released component rejected: %v", err)
+	}
+	var released releasecontract.ReleasedComponent
+	if err := releasecontract.DecodeStrict(releasedRaw, &released); err != nil {
+		t.Fatal(err)
+	}
+	if err := releasecontract.ValidateReleasedComponent(released, candidate, candidateRaw); err != nil {
+		t.Fatalf("released component rejected semantically: %v", err)
+	}
+
+	var signalDocument any
+	signalRaw := decodePath(t, "../release/migration/v3/infrastructure-signal.json", &signalDocument)
+	if err := recordSchema.Validate(signalDocument); err != nil {
+		t.Fatalf("Infrastructure signal rejected: %v", err)
+	}
+	var signal releasecontract.InfrastructureSignal
+	if err := releasecontract.DecodeStrict(signalRaw, &signal); err != nil {
+		t.Fatal(err)
+	}
+	if err := releasecontract.ValidateInfrastructureSignal(signal, released, releasedRaw); err != nil {
+		t.Fatalf("Infrastructure signal rejected semantically: %v", err)
+	}
+
+	t.Run("released record requires every affected edge", func(t *testing.T) {
+		drifted := released
+		drifted.CompatibilityEvidence = nil
+		if err := releasecontract.ValidateReleasedComponent(drifted, candidate, candidateRaw); err == nil {
+			t.Fatal("released component without affected compatibility evidence was accepted")
+		}
+	})
+
+	t.Run("signal cannot substitute a candidate or override the component", func(t *testing.T) {
+		drifted := signal
+		drifted.Component = "identity"
+		if err := releasecontract.ValidateInfrastructureSignal(drifted, released, releasedRaw); err == nil {
+			t.Fatal("Infrastructure signal with a component override was accepted")
+		}
+	})
+}
+
 func TestPromotionCopiesTheExactTestedCandidate(t *testing.T) {
 	fixture := loadReleaseContractFixture(t)
 	actual, err := releasecontract.BuildReleasedEnvelope(
@@ -673,16 +746,18 @@ func releaseSchemaCompiler(t *testing.T) *jsonschema.Compiler {
 	t.Helper()
 	compiler := jsonschema.NewCompiler()
 	resources := map[string]string{
-		"https://endlessnet.ru/contracts/release-manifest.schema.json":                "../release/manifest.schema.json",
-		"https://endlessnet.ru/contracts/release/v1/common.schema.json":               "../release/schemas/v1/common.schema.json",
-		"https://endlessnet.ru/contracts/release/v1/candidate.schema.json":            "../release/schemas/v1/candidate.schema.json",
-		"https://endlessnet.ru/contracts/release/v1/candidate-provenance.schema.json": "../release/schemas/v1/candidate-provenance.schema.json",
-		"https://endlessnet.ru/contracts/release/v1/system-test-evidence.schema.json": "../release/schemas/v1/system-test-evidence.schema.json",
-		"https://endlessnet.ru/contracts/release/v1/promotion-request.schema.json":    "../release/schemas/v1/promotion-request.schema.json",
-		"https://endlessnet.ru/contracts/release/v1/released-envelope.schema.json":    "../release/schemas/v1/released-envelope.schema.json",
-		"https://endlessnet.ru/contracts/release/v1/resolution.schema.json":           "../release/schemas/v1/resolution.schema.json",
-		"https://endlessnet.ru/contracts/release-migration/v1/inventory.schema.json":  "../release/migration/v1/inventory.schema.json",
-		"https://endlessnet.ru/contracts/release-migration/v2/inventory.schema.json":  "../release/migration/v2/inventory.schema.json",
+		"https://endlessnet.ru/contracts/release-manifest.schema.json":                       "../release/manifest.schema.json",
+		"https://endlessnet.ru/contracts/release/v1/common.schema.json":                      "../release/schemas/v1/common.schema.json",
+		"https://endlessnet.ru/contracts/release/v1/candidate.schema.json":                   "../release/schemas/v1/candidate.schema.json",
+		"https://endlessnet.ru/contracts/release/v1/candidate-provenance.schema.json":        "../release/schemas/v1/candidate-provenance.schema.json",
+		"https://endlessnet.ru/contracts/release/v1/system-test-evidence.schema.json":        "../release/schemas/v1/system-test-evidence.schema.json",
+		"https://endlessnet.ru/contracts/release/v1/promotion-request.schema.json":           "../release/schemas/v1/promotion-request.schema.json",
+		"https://endlessnet.ru/contracts/release/v1/released-envelope.schema.json":           "../release/schemas/v1/released-envelope.schema.json",
+		"https://endlessnet.ru/contracts/release/v1/resolution.schema.json":                  "../release/schemas/v1/resolution.schema.json",
+		"https://endlessnet.ru/contracts/release-migration/v1/inventory.schema.json":         "../release/migration/v1/inventory.schema.json",
+		"https://endlessnet.ru/contracts/release-migration/v2/inventory.schema.json":         "../release/migration/v2/inventory.schema.json",
+		"https://endlessnet.ru/contracts/release-migration/v3/inventory.schema.json":         "../release/migration/v3/inventory.schema.json",
+		"https://endlessnet.ru/contracts/release-migration/v3/component-release.schema.json": "../release/migration/v3/component-release.schema.json",
 	}
 	for identifier, path := range resources {
 		raw, err := os.ReadFile(path)
