@@ -9,8 +9,8 @@ Contracts:
 - `frontend-api.openapi.json` — browser-facing management HTTP API. It
   deliberately excludes node control, map streaming, relay and
   service-to-service endpoints.
-- `frontend-runtime-config.schema.json` — runtime configuration shared by the
-  browser consumers.
+- `frontend-runtime-config.schema.json` — runtime configuration consumed by the
+  public site in `endless-net/front`. Admin bootstrap is not a consumer.
 - `browser-auth.md` — normative redirect, cookie and CORS behavior that cannot
   be expressed completely by OpenAPI.
 

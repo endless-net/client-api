@@ -13,18 +13,17 @@ same-origin browser API.
 
 ## Flow
 
-1. Flutter loads `/runtime-config.json`.
-2. Flutter requests `GET /api/v1/auth/me` with browser credentials.
-3. `200` enters the authenticated application. `401` causes Flutter to request
+1. Flutter requests same-origin `GET /api/v1/auth/me` with browser credentials.
+2. `200` enters the authenticated application. `401` causes Flutter to request
    `GET /api/v1/auth/providers`. `403` shows the global forbidden state.
-4. The provider response contains only stable `id` and display `name` fields.
-5. Flutter navigates the document to
+3. The provider response contains only stable `id` and display `name` fields.
+4. Flutter navigates the document to
    `/api/v1/auth/login?provider=<id>&return_to=<validated-relative-admin-uri>`.
-6. Management validates `return_to`, starts OIDC and stores the destination in
+5. Management validates `return_to`, starts OIDC and stores the destination in
    the server-side one-time login transaction.
-7. Management consumes `/api/v1/auth/callback`, creates the server-side
+6. Management consumes `/api/v1/auth/callback`, creates the server-side
    session, writes the session cookie and redirects to the stored destination.
-8. `POST /api/v1/auth/logout` invalidates the session, clears the cookie and
+7. `POST /api/v1/auth/logout` invalidates the session, clears the cookie and
    returns `204`, including when no session remains.
 
 The callback remains a Management API route. Flutter never processes the web
@@ -32,13 +31,12 @@ OIDC `code` or `state`.
 
 ## Redirects
 
-- `return_to` is a root-relative URI under the configured admin root.
+- `return_to` is a root-relative URI under the Admin root `/`.
 - Scheme, authority, fragment, control characters, backslashes, protocol
   relative URLs, API paths and auth UI paths are rejected.
 - The browser validates the route before login. Management validates it again
   before storing and before redirecting.
-- A successful callback redirects to the stored destination or the configured
-  admin root.
+- A successful callback redirects to the stored destination or `/`.
 - A failed callback redirects to `/login?auth_error=<code>`, where `code` is
   one of `access_denied`, `provider_error`, `invalid_callback` or
   `session_creation_failed`.

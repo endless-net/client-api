@@ -6,7 +6,8 @@ binary and is not the server release-control owner.
 
 - `clientapi/` — canonical v1 plus the independently pinnable
   `github.com/endless-net/client-api/clientapi/v2` recovery contract;
-- `contracts/` — browser OpenAPI and runtime configuration contracts;
+- `contracts/` — browser OpenAPI/auth contracts and the public-site runtime
+  configuration contract consumed by `endless-net/front`;
 - `architecture/` — cross-service boundaries and interaction rules;
 - `release/` — frozen legacy server-release records and the versioned handoff
   inventory for migration to private `endless-net/releases`;
