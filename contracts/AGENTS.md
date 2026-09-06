@@ -1,12 +1,13 @@
 # Contract agent guidance
 
-- This directory is the source of truth for browser-facing producer contracts.
-  Do not expose node-control, map-streaming, relay, signing, or service APIs.
+- This directory owns browser-auth semantics and the public-site runtime schema.
+  Management owns the browser API as a Buf-validated Protobuf/Connect contract;
+  do not create or restore an OpenAPI/REST duplicate here.
 - Do not preserve legacy behavior, obsolete interfaces, or backward
   compatibility. Evolve `x-endlessnet-contract-version` and contract fields
   for the current design, including breaking changes when required.
-- Update owning Go DTOs and the OpenAPI contract together. Never patch a
-  generated consumer artifact in another repository from here.
+- Update API messages in the owning producer repository and consume its
+  generated SDK. Never patch a generated consumer artifact from here.
 - Run `go test ./contracts` and the PR verification tier after a contract change.
 
 ## Version increases
