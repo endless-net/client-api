@@ -186,27 +186,6 @@ type UpdateNodeEndpointRequest struct {
 	ClientVersion string   `json:"client_version,omitempty"`
 }
 
-type AdvertisedRoute struct {
-	NetworkID string    `json:"network_id"`
-	NodeID    string    `json:"node_id"`
-	Hostname  string    `json:"hostname"`
-	CIDR      string    `json:"cidr"`
-	Approved  bool      `json:"approved"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-}
-
-type SetAdvertisedRouteApprovalRequest struct {
-	NodeID   string `json:"node_id"`
-	CIDR     string `json:"cidr"`
-	Approved bool   `json:"approved"`
-}
-
-type SetAdvertisedRouteApprovalResponse struct {
-	Route   AdvertisedRoute `json:"route"`
-	Network Network         `json:"network"`
-}
-
 type Peer struct {
 	ID                 string     `json:"id"`
 	Hostname           string     `json:"hostname"`

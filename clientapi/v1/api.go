@@ -210,18 +210,6 @@ func (a *API) ListNodes(network string) ([]Node, error) {
 	return out, a.request(http.MethodGet, path, nil, &out)
 }
 
-func (a *API) ListAdvertisedRoutes(network string) ([]AdvertisedRoute, error) {
-	path := "/networks/" + url.PathEscape(network) + "/routes"
-	var out []AdvertisedRoute
-	return out, a.request(http.MethodGet, path, nil, &out)
-}
-
-func (a *API) SetAdvertisedRouteApproval(network string, req SetAdvertisedRouteApprovalRequest) (SetAdvertisedRouteApprovalResponse, error) {
-	path := "/networks/" + url.PathEscape(network) + "/routes/approval"
-	var out SetAdvertisedRouteApprovalResponse
-	return out, a.request(http.MethodPost, path, req, &out)
-}
-
 func (a *API) CreateJoinToken(req CreateJoinTokenRequest) (CreateJoinTokenResponse, error) {
 	var out CreateJoinTokenResponse
 	if strings.TrimSpace(req.IdempotencyKey) == "" {
