@@ -3,7 +3,7 @@ module github.com/endless-net/client-api/clientapi/v2
 go 1.27.0
 
 require (
-	github.com/endless-net/client-api/clientapi v1.2.0
+	github.com/endless-net/client-api/clientapi v1.4.0
 	github.com/endless-net/relay v1.1.4
 )
 

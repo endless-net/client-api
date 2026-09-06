@@ -18,6 +18,7 @@ type (
 	Node                 = v1.Node
 	Peer                 = v1.Peer
 	ACLPort              = v1.ACLPort
+	ACLGrant             = v1.ACLGrant
 	STUNEndpoint         = v1.STUNEndpoint
 	MapRevision          = v1.MapRevision
 	MapSignature         = v1.MapSignature
