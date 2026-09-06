@@ -219,12 +219,21 @@ type Peer struct {
 	AllowedIPs         []string   `json:"allowed_ips"`
 	AllowedPorts       []ACLPort  `json:"allowed_ports,omitempty"`
 	ACLRestricted      bool       `json:"acl_restricted,omitempty"`
+	ACLGrants          []ACLGrant `json:"acl_grants,omitempty"`
 	Tags               []string   `json:"tags,omitempty"`
 }
 
 type ACLPort struct {
 	Protocol string `json:"protocol"`
 	Port     int    `json:"port"`
+}
+
+// ACLGrant is one correlated destination/port permission. Grants are unioned;
+// traffic outside all grants is denied when ACLRestricted is true. Empty ports
+// means all protocols for these destinations, never for other destinations.
+type ACLGrant struct {
+	DestinationCIDRs []string  `json:"destination_cidrs"`
+	AllowedPorts     []ACLPort `json:"allowed_ports,omitempty"`
 }
 
 type STUNEndpoint struct {

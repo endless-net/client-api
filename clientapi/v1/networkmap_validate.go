@@ -213,6 +213,9 @@ func validateMapPeer(peer Peer) error {
 			return fmt.Errorf("allowed_ports[%d].port is invalid", i)
 		}
 	}
+	if err := validateACLGrants(peer); err != nil {
+		return err
+	}
 	for i, tag := range peer.Tags {
 		if err := validateMapText(fmt.Sprintf("tags[%d]", i), tag); err != nil {
 			return err
