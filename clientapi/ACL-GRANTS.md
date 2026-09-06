@@ -19,6 +19,13 @@ Tests mutate destination, protocol, port and grant presence independently and
 verify that each mutation changes the signed payload. This does not replace
 end-to-end signature verification and enforcement acceptance in consumers.
 
+The map-stream regression test additionally signs a real delta, verifies its
+reconstructed result, rejects a changed grant port with the original signature,
+and confirms that accepted grants no longer alias event buffers. Snapshot and
+delta copies detach nested peer grants, ports, route lists, node slices and
+timestamps before consumers retain them. Runtime firewall acceptance is still
+separate from these signature and memory-isolation checks.
+
 Do not emit grants in production until the pinned Coordinator, Signing and Client
 artifacts all support the exact model and traffic tests prove the intended
 decisions. No production cutover or signature/schema generation increase occurs

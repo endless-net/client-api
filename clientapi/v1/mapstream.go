@@ -103,7 +103,7 @@ func applyMapDelta(current NetworkMapSnapshot, delta MapDelta) (NetworkMapSnapsh
 		return NetworkMapSnapshot{}, err
 	}
 	next.Relays = relays
-	return next, nil
+	return cloneNetworkMapSnapshot(next), nil
 }
 
 func mergePeers(current, upserts []Peer, removeIDs []string) ([]Peer, error) {
@@ -191,7 +191,27 @@ func normalizedIDSet(field string, values []string) (map[string]struct{}, error)
 
 func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 	clone := snapshot
+	clone.Network.DNS = append([]string(nil), snapshot.Network.DNS...)
+	clone.Node.EndpointCandidates = append([]string(nil), snapshot.Node.EndpointCandidates...)
+	clone.Node.AdvertisedIPs = append([]string(nil), snapshot.Node.AdvertisedIPs...)
+	clone.Node.RequestedTags = append([]string(nil), snapshot.Node.RequestedTags...)
+	clone.Node.Tags = append([]string(nil), snapshot.Node.Tags...)
+	clone.Node.EndpointExpiresAt = cloneMapTime(snapshot.Node.EndpointExpiresAt)
+	clone.Node.KeyExpiresAt = cloneMapTime(snapshot.Node.KeyExpiresAt)
 	clone.Peers = append([]Peer(nil), snapshot.Peers...)
+	for index := range clone.Peers {
+		peer := &clone.Peers[index]
+		peer.EndpointCandidates = append([]string(nil), peer.EndpointCandidates...)
+		peer.AllowedIPs = append([]string(nil), peer.AllowedIPs...)
+		peer.AllowedPorts = append([]ACLPort(nil), peer.AllowedPorts...)
+		peer.Tags = append([]string(nil), peer.Tags...)
+		peer.EndpointExpiresAt = cloneMapTime(peer.EndpointExpiresAt)
+		peer.ACLGrants = append([]ACLGrant(nil), peer.ACLGrants...)
+		for grant := range peer.ACLGrants {
+			peer.ACLGrants[grant].DestinationCIDRs = append([]string(nil), peer.ACLGrants[grant].DestinationCIDRs...)
+			peer.ACLGrants[grant].AllowedPorts = append([]ACLPort(nil), peer.ACLGrants[grant].AllowedPorts...)
+		}
+	}
 	clone.STUNEndpoints = append([]STUNEndpoint(nil), snapshot.STUNEndpoints...)
 	clone.Relays = append([]relayauth.Endpoint(nil), snapshot.Relays...)
 	if snapshot.RelayCredential != nil {
@@ -200,6 +220,14 @@ func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 	}
 	clone.MapSignature = cloneMapSignature(snapshot.MapSignature)
 	return clone
+}
+
+func cloneMapTime(value *time.Time) *time.Time {
+	if value == nil {
+		return nil
+	}
+	clone := *value
+	return &clone
 }
 
 func cloneMapSignature(signature *MapSignature) *MapSignature {
