@@ -12,6 +12,7 @@ import (
 	managementapi "github.com/endless-net/management/managementapi/v1"
 	"github.com/endless-net/service-kit/event"
 	signingapi "github.com/endless-net/signing/signingapi/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestPinnedModulesShareCompatibilityBaseline(t *testing.T) {
@@ -45,7 +46,7 @@ func TestPinnedModulesShareCompatibilityBaseline(t *testing.T) {
 		OccurredAt: now, Projection: json.RawMessage(`{}`),
 	}
 	_ = signingapi.SignRequest{
-		RequestID: "command-1", Purpose: signingapi.PurposeNetworkMap,
-		Payload: json.RawMessage(`{}`), IssuedAt: now, ExpiresAt: now.Add(time.Minute),
+		RequestId: "command-1", Purpose: signingapi.SigningPurpose_SIGNING_PURPOSE_NETWORK_MAP,
+		CanonicalMessage: []byte(`{}`), IssuedAt: timestamppb.New(now), ExpiresAt: timestamppb.New(now.Add(time.Minute)),
 	}
 }

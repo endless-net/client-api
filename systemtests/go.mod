@@ -9,8 +9,9 @@ require (
 	github.com/endless-net/identity/identityapi v1.0.0-rc.2
 	github.com/endless-net/management/managementapi v1.0.0-rc.2
 	github.com/endless-net/service-kit v1.0.1
-	github.com/endless-net/signing/signingapi v1.0.0
+	github.com/endless-net/signing/signingapi v1.1.1
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
