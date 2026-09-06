@@ -331,10 +331,6 @@ func mapStreamCapabilitiesEqual(got, want []string) bool {
 	return true
 }
 
-func (a *API) DeleteNode(id string) error {
-	return a.request(http.MethodDelete, "/nodes/"+url.PathEscape(id), nil, nil)
-}
-
 func (a *API) Logout() error {
 	return a.request(http.MethodPost, "/auth/logout", nil, nil)
 }
