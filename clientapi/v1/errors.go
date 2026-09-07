@@ -35,13 +35,13 @@ var knownErrorCodes = []ErrorCode{
 	ErrorCodeTemporarilyUnavailable,
 }
 
-// KnownErrorCodes returns the complete v2 wire enum in stable declaration
+// KnownErrorCodes returns the complete current wire enum in stable declaration
 // order. The returned slice is independent and may be modified by the caller.
 func KnownErrorCodes() []ErrorCode {
 	return append([]ErrorCode(nil), knownErrorCodes...)
 }
 
-// Valid reports whether c belongs to the closed v2 wire enum.
+// Valid reports whether c belongs to the closed current wire enum.
 func (c ErrorCode) Valid() bool {
 	_, ok := c.HTTPStatus()
 	return ok
@@ -89,7 +89,7 @@ type PublicError struct {
 	RequestID         string    `json:"request_id"`
 }
 
-// NewPublicError constructs and validates a v2 error body.
+// NewPublicError constructs and validates a current error body.
 func NewPublicError(code ErrorCode, diagnosticMessage, requestID string) (PublicError, error) {
 	value := PublicError{
 		SchemaVersion:     SchemaVersion,

@@ -1,8 +1,8 @@
-# EndlessNet Client API v2 recovery contract
+# EndlessNet Client API recovery contract
 
-Module: `github.com/endless-net/client-api/clientapi/v2`
+Module: `github.com/endless-net/client-api/clientapi/v1`
 
-This module owns the public wire contract for node credential recovery after a
+This package owns the public wire contract for node credential recovery after a
 server signing-identity change. It implements the contract accepted at
 `endless-net/architecture@6cf37091846920e238bef631ef8951d395c084a1` without a
 plain-text, message-matching, or HTTP-status-only compatibility path.
@@ -43,7 +43,7 @@ unmatched route do not impersonate recovery domain errors.
 
 ## Credential renewal and re-registration
 
-`RegisterNodeRequest` and `RegisterNodeResponse` are the v2 bodies for
+`RegisterNodeRequest` and `RegisterNodeResponse` are the current bodies for
 `POST /nodes/register`. Both require `schema_version` and the same
 `idempotency_id`. The client creates the ID with
 `NewRegistrationIdempotencyID`, saves it durably before the request, and reuses

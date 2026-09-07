@@ -42,35 +42,6 @@ jobs:
         run: go vet ./...
       - name: Test
         run: go test -short ./...
-  clientapi-v2:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: clientapi/v2
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version-file: clientapi/v2/go.mod
-          cache: false
-      - name: Verify modules
-        run: go mod verify
-      - name: Verify dependency licenses
-        run: ../../scripts/check-licenses.sh .
-      - name: Check formatting
-        shell: bash
-        run: |
-          set -euo pipefail
-          unformatted="$(gofmt -l .)"
-          test -z "$unformatted" || {
-            printf '%s\n' "$unformatted"
-            exit 1
-          }
-      - name: Vet
-        run: go vet ./...
-      - name: Test
-        run: go test -short ./...
   browser-contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 10

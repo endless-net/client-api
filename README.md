@@ -4,8 +4,7 @@ This public repository owns public/client and browser-facing contracts plus
 their cross-repository contract gates. It intentionally contains no runtime
 binary and is not the server release-control owner.
 
-- `clientapi/` — canonical v1 plus the independently pinnable
-  `github.com/endless-net/client-api/clientapi/v2` recovery contract;
+- `clientapi/` — the single v1 client contract, including recovery and node RPCs;
 - `contracts/` — browser-auth semantics and the public-site runtime
   configuration contract consumed by `endless-net/front`; Management owns the
   browser API as Protobuf/Connect and publishes its generated SDK;

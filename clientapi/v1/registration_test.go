@@ -8,8 +8,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	v1 "github.com/endless-net/client-api/clientapi/v1"
 )
 
 func TestRegisterNodeRenewalStrictRoundTrip(t *testing.T) {
@@ -191,7 +189,7 @@ func renewalRequestFixture(t *testing.T) RegisterNodeRequest {
 func renewalResponseFixture(t *testing.T, req RegisterNodeRequest) RegisterNodeResponse {
 	t.Helper()
 	signingKey := ed25519.NewKeyFromSeed(bytes.Repeat([]byte{4}, ed25519.SeedSize))
-	credential, err := v1.SignNodeCredential(
+	credential, err := SignNodeCredential(
 		signingKey,
 		req.NetworkID,
 		"node-1",

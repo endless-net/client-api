@@ -3,6 +3,8 @@ Third-party components
 
 The `github.com/endless-net/client-api/clientapi` module includes:
 
+- connectrpc.com/connect — Apache-2.0
+- google.golang.org/protobuf — BSD-3-Clause
 - github.com/endless-net/relay â€” Apache-2.0
 - golang.org/x/crypto â€” BSD-3-Clause
 

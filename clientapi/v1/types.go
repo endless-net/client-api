@@ -190,21 +190,23 @@ type CreateJoinTokenResponse struct {
 }
 
 type RegisterNodeRequest struct {
+	SchemaVersion       int      `json:"schema_version"`
+	IdempotencyID       string   `json:"idempotency_id"`
 	NetworkID           string   `json:"network_id"`
 	NetworkName         string   `json:"network_name"`
 	AccountID           string   `json:"account_id,omitempty"`
 	CellID              string   `json:"cell_id,omitempty"`
-	IdempotencyKey      string   `json:"idempotency_key,omitempty"`
 	JoinToken           string   `json:"join_token,omitempty"`
 	NodeCredential      string   `json:"node_credential,omitempty"`
+	RegistrationBinding string   `json:"registration_binding,omitempty"`
 	SessionTokenBinding string   `json:"session_token_binding,omitempty"`
 	Hostname            string   `json:"hostname"`
 	ClientVersion       string   `json:"client_version,omitempty"`
-	IdentityPublicKey   string   `json:"identity_public_key,omitempty"`
-	IdentitySignature   string   `json:"identity_signature,omitempty"`
+	IdentityPublicKey   string   `json:"identity_public_key"`
+	IdentitySignature   string   `json:"identity_signature"`
 	PublicKey           string   `json:"public_key"`
-	DeviceFingerprint   string   `json:"device_fingerprint,omitempty"`
-	Endpoint            string   `json:"endpoint"`
+	DeviceFingerprint   string   `json:"device_fingerprint"`
+	Endpoint            string   `json:"endpoint,omitempty"`
 	EndpointGeneration  uint64   `json:"generation,omitempty"`
 	EndpointCandidates  []string `json:"candidates,omitempty"`
 	EndpointTTL         string   `json:"ttl,omitempty"`
@@ -296,16 +298,18 @@ type STUNEndpoint struct {
 }
 
 type RegisterNodeResponse struct {
+	SchemaVersion       int                   `json:"schema_version"`
+	IdempotencyID       string                `json:"idempotency_id"`
 	Revision            MapRevision           `json:"revision"`
 	Network             Network               `json:"network"`
 	Node                Node                  `json:"node"`
 	Peers               []Peer                `json:"peers"`
-	RegistrationBinding string                `json:"registration_binding,omitempty"`
-	NodeCredential      string                `json:"node_credential,omitempty"`
+	RegistrationBinding string                `json:"registration_binding"`
+	NodeCredential      string                `json:"node_credential"`
 	STUNEndpoints       []STUNEndpoint        `json:"stun_endpoints,omitempty"`
 	Relays              []relayauth.Endpoint  `json:"relays"`
 	RelayCredential     *relayauth.Credential `json:"relay_credential,omitempty"`
-	MapSignature        *MapSignature         `json:"map_signature,omitempty"`
+	MapSignature        *MapSignature         `json:"map_signature"`
 }
 
 // NetworkMapSnapshot is the complete, signed client projection. Enrollment
@@ -396,3 +400,8 @@ type MapSignature struct {
 	PayloadHash string    `json:"payload_hash"`
 	Signature   string    `json:"signature"`
 }
+
+// SchemaVersion is the existing registration and recovery wire schema.
+const SchemaVersion = 2
+
+func (r RegisterNodeRequest) IsCredentialRenewal() bool { return r.NodeCredential != "" }

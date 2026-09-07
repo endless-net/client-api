@@ -154,7 +154,13 @@ func (a *API) CreateJoinToken(req CreateJoinTokenRequest) (CreateJoinTokenRespon
 
 func (a *API) RegisterNode(req RegisterNodeRequest) (RegisterNodeResponse, error) {
 	var out RegisterNodeResponse
-	return out, a.request(http.MethodPost, "/nodes/register", req, &out)
+	if err := req.Validate(); err != nil {
+		return out, err
+	}
+	if err := a.request(http.MethodPost, "/nodes/register", req, &out); err != nil {
+		return out, err
+	}
+	return out, out.ValidateForRequest(req)
 }
 
 func (a *API) CreateNodeEnrollmentRequest(req RegisterNodeRequest) (CreateNodeEnrollmentRequestResponse, error) {

@@ -8,9 +8,9 @@ The module contains:
 - the `v1` package: public HTTP DTOs, the strict control-plane HTTP SDK,
   map-stream v3 framing, identity proof binding, signed map and
   node-credential verification;
-- the nested `github.com/endless-net/client-api/clientapi/v2` module: the
-  machine-readable public recovery error contract and strict, durably
-  idempotent node credential renewal/re-registration DTOs;
+- `v1` also owns strict recovery errors and idempotent registration/renewal;
+- `v1/clientrpc` and `v1/clientrpc/clientrpcconnect`: client-owned protobuf DTOs
+  and Connect clients/handlers generated from `proto/client/v1/client.proto`;
 - `wireguard`: shared WireGuard key, address, prefix and endpoint validation used
   on both sides of the contract.
 
@@ -27,7 +27,9 @@ personalized delta history or explicit ACK is part of the protocol.
 [Signed machine sharing](SHARING.md) defines exact endpoint grants, recipient-only
 initiation, short leases and the enforcement requirements for consumers.
 
-The v1 module uses tags such as `clientapi/v1.2.0`. The independently pinnable
-v2 module uses tags such as `clientapi/v2.0.0-rc.4`. A breaking contract
-change requires a new Go module major version and an explicit product migration;
-the v2 recovery cutover has no v1 plain-text compatibility fallback.
+The sole Go module is `github.com/endless-net/client-api/clientapi`.
+The nested recovery module has been removed. This is an explicitly authorized
+breaking change within v1, with no compatibility aliases or wire fallback.
+Schema and proof generation numbers retain their existing values.
+See [recovery](RECOVERY.md) and [cutover requirements](UNIFIED-CONTRACT.md).
+Module release and consumer pin changes require separate version approval.

@@ -13,12 +13,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	v1 "github.com/endless-net/client-api/clientapi/v1"
 	wgkeys "github.com/endless-net/client-api/clientapi/wireguard"
 )
 
 const (
-	registrationProofDomain   = "endlessnet-register-identity-v4"
+	registrationProofDomain   = "endlessnet-register-identity-v3"
 	idempotencyEntropyBytes   = 32
 	maxIdentifierBytes        = 128
 	maxRequestIDBytes         = 128
@@ -47,7 +46,7 @@ func RegistrationSessionTokenBinding(token string) string {
 	return secretBinding(token)
 }
 
-// RegistrationIdentityProofPayload is the canonical v2 payload signed by the
+// RegistrationIdentityProofPayload is the canonical current payload signed by the
 // device identity key. Raw bearer values are represented only by digests.
 func RegistrationIdentityProofPayload(req RegisterNodeRequest) []byte {
 	canonical := struct {
@@ -121,14 +120,14 @@ func SetRegisterNodeIdentityProof(req *RegisterNodeRequest, privateKey ed25519.P
 	if !ok {
 		return errors.New("invalid identity public key")
 	}
-	req.IdentityPublicKey = v1.IdentityPublicKeyPrefix + base64.RawURLEncoding.EncodeToString(publicKey)
+	req.IdentityPublicKey = IdentityPublicKeyPrefix + base64.RawURLEncoding.EncodeToString(publicKey)
 	req.IdentitySignature = base64.RawURLEncoding.EncodeToString(ed25519.Sign(privateKey, RegistrationIdentityProofPayload(*req)))
 	return nil
 }
 
-// VerifyRegisterNodeIdentityProof verifies the canonical v2 device proof.
+// VerifyRegisterNodeIdentityProof verifies the canonical current device proof.
 func VerifyRegisterNodeIdentityProof(req RegisterNodeRequest) error {
-	publicKey, err := v1.DecodeIdentityPublicKey(req.IdentityPublicKey)
+	publicKey, err := DecodeIdentityPublicKey(req.IdentityPublicKey)
 	if err != nil {
 		return err
 	}
@@ -143,7 +142,7 @@ func VerifyRegisterNodeIdentityProof(req RegisterNodeRequest) error {
 	return nil
 }
 
-// Validate checks v2 registration shape and proof semantics. Credential
+// Validate checks current registration shape and proof semantics. Credential
 // verification, revocation, expiry, scope, and authoritative binding lookup
 // remain producer responsibilities.
 func (r RegisterNodeRequest) Validate() error {
@@ -235,13 +234,13 @@ func (r RegisterNodeRequest) Validate() error {
 	if err := validateDigest("session_token_binding", r.SessionTokenBinding, false); err != nil {
 		return err
 	}
-	if _, err := v1.DecodeIdentityPublicKey(r.IdentityPublicKey); err != nil {
+	if _, err := DecodeIdentityPublicKey(r.IdentityPublicKey); err != nil {
 		return err
 	}
 	return VerifyRegisterNodeIdentityProof(r)
 }
 
-// Validate checks a standalone v2 registration result.
+// Validate checks a standalone current registration result.
 func (r RegisterNodeResponse) Validate() error {
 	if r.SchemaVersion != SchemaVersion {
 		return fmt.Errorf("register response schema_version = %d, want %d", r.SchemaVersion, SchemaVersion)
@@ -258,7 +257,7 @@ func (r RegisterNodeResponse) Validate() error {
 	if r.NodeCredential == "" {
 		return errors.New("node_credential is required")
 	}
-	claims, err := v1.DecodeNodeCredential(r.NodeCredential)
+	claims, err := DecodeNodeCredential(r.NodeCredential)
 	if err != nil {
 		return fmt.Errorf("node_credential: %w", err)
 	}
@@ -268,7 +267,7 @@ func (r RegisterNodeResponse) Validate() error {
 	if r.MapSignature == nil {
 		return errors.New("map_signature is required")
 	}
-	if err := v1.ValidateNetworkMap(r.NetworkMap()); err != nil {
+	if err := ValidateNetworkMap(r); err != nil {
 		return fmt.Errorf("network map: %w", err)
 	}
 	return nil

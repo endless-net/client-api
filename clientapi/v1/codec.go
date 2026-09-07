@@ -14,12 +14,12 @@ const (
 	maxRegisterNodeResponseBytes = 4 << 20
 )
 
-// MarshalPublicError validates and serializes a canonical v2 public error.
+// MarshalPublicError validates and serializes a canonical current public error.
 func MarshalPublicError(value PublicError) ([]byte, error) {
 	return marshalValidated(value, value.Validate)
 }
 
-// DecodePublicError strictly decodes a single v2 public error JSON object.
+// DecodePublicError strictly decodes a single current public error JSON object.
 func DecodePublicError(reader io.Reader) (PublicError, error) {
 	var value PublicError
 	err := decodeStrict(reader, maxPublicErrorBytes, &value)
@@ -29,12 +29,12 @@ func DecodePublicError(reader io.Reader) (PublicError, error) {
 	return value, err
 }
 
-// MarshalRegisterNodeRequest validates and serializes a canonical v2 request.
+// MarshalRegisterNodeRequest validates and serializes a canonical current request.
 func MarshalRegisterNodeRequest(value RegisterNodeRequest) ([]byte, error) {
 	return marshalValidated(value, value.Validate)
 }
 
-// DecodeRegisterNodeRequest strictly decodes one v2 registration request.
+// DecodeRegisterNodeRequest strictly decodes one current registration request.
 func DecodeRegisterNodeRequest(reader io.Reader) (RegisterNodeRequest, error) {
 	var value RegisterNodeRequest
 	err := decodeStrict(reader, maxRegisterNodeRequestBytes, &value)
@@ -44,12 +44,12 @@ func DecodeRegisterNodeRequest(reader io.Reader) (RegisterNodeRequest, error) {
 	return value, err
 }
 
-// MarshalRegisterNodeResponse validates and serializes a canonical v2 result.
+// MarshalRegisterNodeResponse validates and serializes a canonical current result.
 func MarshalRegisterNodeResponse(value RegisterNodeResponse) ([]byte, error) {
 	return marshalValidated(value, value.Validate)
 }
 
-// DecodeRegisterNodeResponse strictly decodes one v2 registration result.
+// DecodeRegisterNodeResponse strictly decodes one current registration result.
 func DecodeRegisterNodeResponse(reader io.Reader) (RegisterNodeResponse, error) {
 	var value RegisterNodeResponse
 	err := decodeStrict(reader, maxRegisterNodeResponseBytes, &value)

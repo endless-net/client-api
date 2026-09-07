@@ -42,7 +42,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for module in clientapi clientapi/v2 contracts systemtests; do
+          for module in clientapi contracts systemtests; do
             (
               cd "$module"
               go build ./...

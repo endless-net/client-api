@@ -1,0 +1,66 @@
+syntax = "proto3";
+package endlessnet.client.v1;
+option go_package = "github.com/endless-net/client-api/clientapi/v1/clientrpc;clientrpc";
+import "google/protobuf/timestamp.proto";
+
+// UserService exposes only caller-authorized resources. Implementations must
+// enforce membership per account/network; identifiers never grant access.
+service UserService {
+ rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+ rpc ListNetworks(ListNetworksRequest) returns (ListNetworksResponse);
+ rpc ListAdvertisedRoutes(ListAdvertisedRoutesRequest) returns (ListAdvertisedRoutesResponse);
+ rpc ListBillingPlans(ListBillingPlansRequest) returns (ListBillingPlansResponse);
+ rpc GetBillingSubscription(GetBillingSubscriptionRequest) returns (GetBillingSubscriptionResponse);
+ rpc GetBillingUsage(GetBillingUsageRequest) returns (GetBillingUsageResponse);
+ rpc CreateBillingCheckout(CreateBillingCheckoutRequest) returns (CreateBillingCheckoutResponse);
+ rpc ListBillingInvoices(ListBillingInvoicesRequest) returns (ListBillingInvoicesResponse);
+}
+// Node services require a node credential bound to node_id, never a session.
+service ConnectorService {
+ rpc ReportApplicationDiscovery(ReportApplicationDiscoveryRequest) returns (ReportApplicationDiscoveryResponse);
+}
+service FlowLogService {
+ rpc GetFlowLogPolicy(GetFlowLogPolicyRequest) returns (GetFlowLogPolicyResponse);
+ rpc ReportFlowLog(ReportFlowLogRequest) returns (ReportFlowLogResponse);
+}
+message PageRequest { uint32 page_size = 1; string page_token = 2; }
+message PageResponse { string next_page_token = 1; }
+message Account { string account_id = 1; string name = 2; string account_type = 3; string status = 4; }
+message Network { string network_id = 1; string name = 2; }
+message AdvertisedRoute { string network_id = 1; string node_id = 2; string hostname = 3; string cidr = 4; bool approved = 5; }
+message Plan { string plan_id = 1; string name = 2; optional uint64 monthly_price = 3; string currency = 4; string billing_provider = 5; uint64 network_limit = 6; uint64 node_limit = 7; uint64 user_limit = 8; bool public = 9; }
+message Subscription { string account_id = 1; string plan_id = 2; string status = 3; }
+message Usage { string account_id = 1; uint64 networks = 2; uint64 nodes = 3; uint64 users = 4; uint64 network_limit = 5; uint64 node_limit = 6; uint64 user_limit = 7; }
+message Checkout { string checkout_id = 1; string account_id = 2; string status = 3; string provider = 4; string confirmation_url = 5; }
+message Invoice { string invoice_id = 1; string status = 2; uint64 amount = 3; string currency = 4; string number = 5; }
+message ListAccountsRequest { PageRequest page = 1; }
+message ListAccountsResponse { repeated Account accounts = 1; PageResponse page = 2; }
+message ListNetworksRequest { string account_id = 1; PageRequest page = 2; }
+message ListNetworksResponse { repeated Network networks = 1; PageResponse page = 2; }
+message ListAdvertisedRoutesRequest { string network_id = 1; PageRequest page = 2; }
+message ListAdvertisedRoutesResponse { repeated AdvertisedRoute routes = 1; PageResponse page = 2; }
+message ListBillingPlansRequest {}
+message ListBillingPlansResponse { repeated Plan plans = 1; }
+message GetBillingSubscriptionRequest { string account_id = 1; }
+message GetBillingSubscriptionResponse { Subscription subscription = 1; }
+message GetBillingUsageRequest { string account_id = 1; }
+message GetBillingUsageResponse { Usage usage = 1; }
+// Checkout retries must reuse this key. The service must check billing rights
+// and persist the idempotent result before returning a provider URL.
+message OperationMetadata { string idempotency_key = 1; }
+message CreateBillingCheckoutRequest { string account_id = 1; string plan_id = 2; string billing_period = 3; OperationMetadata operation = 4; }
+message CreateBillingCheckoutResponse { Checkout checkout = 1; }
+message ListBillingInvoicesRequest { string account_id = 1; PageRequest page = 2; }
+message ListBillingInvoicesResponse { repeated Invoice invoices = 1; PageResponse page = 2; }
+// Discovery is accepted only for a currently authorized connector and policy
+// hash. Addresses and the bounded lease must be validated by the service.
+message ReportApplicationDiscoveryRequest { string node_id = 1; string application_id = 2; string policy_hash = 3; repeated string addresses = 4; uint32 ttl_seconds = 5; }
+message ReportApplicationDiscoveryResponse {}
+message GetFlowLogPolicyRequest { string node_id = 1; }
+// A policy grants collection only during this interval and consent generation.
+message GetFlowLogPolicyResponse { uint64 consent_version = 1; google.protobuf.Timestamp collection_not_before = 2; google.protobuf.Timestamp collection_expires_at = 3; }
+message ReportFlowLogRequest { string node_id = 1; uint64 consent_version = 2; FlowWindow window = 3; }
+// window_id is immutable across retries; acknowledgement requires durable
+// acceptance under the still-valid collection consent.
+message FlowWindow { string window_id = 1; string source = 2; string destination = 3; uint32 destination_port = 4; string protocol = 5; string decision = 6; string rule_id = 7; uint64 bytes = 8; uint64 packets = 9; google.protobuf.Timestamp window_start = 10; google.protobuf.Timestamp window_end = 11; }
+message ReportFlowLogResponse { string window_id = 1; }
