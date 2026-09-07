@@ -2,6 +2,7 @@ package clientapi
 
 import (
 	"fmt"
+	"net/netip"
 	"strings"
 
 	wgkeys "github.com/endless-net/client-api/clientapi/wireguard"
@@ -49,6 +50,9 @@ func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 		if err := wgkeys.ValidateDNSIP(value); err != nil {
 			return fmt.Errorf("network.dns[%d]: %w", i, err)
 		}
+	}
+	if err := validateDNSConfig(response.Network.DNSConfig); err != nil {
+		return err
 	}
 	if err := validateMapNode(response.Node, networkID); err != nil {
 		return err
@@ -124,6 +128,76 @@ func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 		}
 	}
 	return nil
+}
+
+func validateDNSConfig(config *DNSConfig) error {
+	if config == nil {
+		return nil
+	}
+	if config.Suffix != "" && !validDNSDomain(config.Suffix) {
+		return fmt.Errorf("network.dns_config.suffix is invalid")
+	}
+	seenIDs := make(map[string]struct{}, len(config.Nameservers))
+	for index, nameserver := range config.Nameservers {
+		if strings.TrimSpace(nameserver.ID) == "" || nameserver.ID != strings.TrimSpace(nameserver.ID) {
+			return fmt.Errorf("network.dns_config.nameservers[%d].id is invalid", index)
+		}
+		if _, duplicate := seenIDs[nameserver.ID]; duplicate {
+			return fmt.Errorf("network.dns_config.nameservers[%d].id is duplicated", index)
+		}
+		seenIDs[nameserver.ID] = struct{}{}
+		address, err := netip.ParseAddr(nameserver.Address)
+		if err != nil || address.String() != nameserver.Address {
+			return fmt.Errorf("network.dns_config.nameservers[%d].address is invalid", index)
+		}
+		switch nameserver.Scope {
+		case "global":
+			if len(nameserver.SplitDomains) != 0 {
+				return fmt.Errorf("network.dns_config.nameservers[%d] global resolver has split domains", index)
+			}
+		case "split":
+			if len(nameserver.SplitDomains) == 0 {
+				return fmt.Errorf("network.dns_config.nameservers[%d] split resolver has no domains", index)
+			}
+		default:
+			return fmt.Errorf("network.dns_config.nameservers[%d].scope is invalid", index)
+		}
+		for domainIndex, domain := range nameserver.SplitDomains {
+			if !validDNSDomain(domain) {
+				return fmt.Errorf("network.dns_config.nameservers[%d].split_domains[%d] is invalid", index, domainIndex)
+			}
+		}
+	}
+	seenDomains := make(map[string]struct{}, len(config.SearchDomains))
+	for index, domain := range config.SearchDomains {
+		if !validDNSDomain(domain) {
+			return fmt.Errorf("network.dns_config.search_domains[%d] is invalid", index)
+		}
+		normalized := strings.ToLower(strings.TrimSuffix(domain, "."))
+		if _, duplicate := seenDomains[normalized]; duplicate {
+			return fmt.Errorf("network.dns_config.search_domains[%d] is duplicated", index)
+		}
+		seenDomains[normalized] = struct{}{}
+	}
+	return nil
+}
+
+func validDNSDomain(value string) bool {
+	value = strings.TrimSuffix(value, ".")
+	if value == "" || len(value) > 253 || value != strings.TrimSpace(value) {
+		return false
+	}
+	for _, label := range strings.Split(value, ".") {
+		if label == "" || len(label) > 63 || label[0] == '-' || label[len(label)-1] == '-' {
+			return false
+		}
+		for _, char := range label {
+			if (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') && (char < '0' || char > '9') && char != '-' {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func validateMapNode(node Node, networkID string) error {

@@ -192,6 +192,7 @@ func normalizedIDSet(field string, values []string) (map[string]struct{}, error)
 func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 	clone := snapshot
 	clone.Network.DNS = append([]string(nil), snapshot.Network.DNS...)
+	clone.Network.DNSConfig = cloneDNSConfig(snapshot.Network.DNSConfig)
 	clone.Node.EndpointCandidates = append([]string(nil), snapshot.Node.EndpointCandidates...)
 	clone.Node.AdvertisedIPs = append([]string(nil), snapshot.Node.AdvertisedIPs...)
 	clone.Node.RequestedTags = append([]string(nil), snapshot.Node.RequestedTags...)
@@ -220,6 +221,19 @@ func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 	}
 	clone.MapSignature = cloneMapSignature(snapshot.MapSignature)
 	return clone
+}
+
+func cloneDNSConfig(value *DNSConfig) *DNSConfig {
+	if value == nil {
+		return nil
+	}
+	clone := *value
+	clone.SearchDomains = append([]string(nil), value.SearchDomains...)
+	clone.Nameservers = append([]DNSNameserver(nil), value.Nameservers...)
+	for index := range clone.Nameservers {
+		clone.Nameservers[index].SplitDomains = append([]string(nil), value.Nameservers[index].SplitDomains...)
+	}
+	return &clone
 }
 
 func cloneMapTime(value *time.Time) *time.Time {

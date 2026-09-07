@@ -39,18 +39,39 @@ func MapStreamSupportedCapabilities() []string {
 }
 
 type Network struct {
-	ID                  string    `json:"id"`
-	Name                string    `json:"name"`
-	CIDR                string    `json:"cidr"`
-	IPv6CIDR            string    `json:"ipv6_cidr,omitempty"`
-	DNS                 []string  `json:"dns,omitempty"`
-	CellID              string    `json:"cell_id,omitempty"`
-	AuthoritativeCellID string    `json:"authoritative_cell_id,omitempty"`
-	MigratingToCellID   string    `json:"migrating_to_cell_id,omitempty"`
-	Revision            uint64    `json:"revision"`
-	OwnerID             string    `json:"owner_id"`
-	AccountID           string    `json:"account_id,omitempty"`
-	CreatedAt           time.Time `json:"created_at"`
+	ID                  string     `json:"id"`
+	Name                string     `json:"name"`
+	CIDR                string     `json:"cidr"`
+	IPv6CIDR            string     `json:"ipv6_cidr,omitempty"`
+	DNS                 []string   `json:"dns,omitempty"`
+	DNSConfig           *DNSConfig `json:"dns_config,omitempty"`
+	CellID              string     `json:"cell_id,omitempty"`
+	AuthoritativeCellID string     `json:"authoritative_cell_id,omitempty"`
+	MigratingToCellID   string     `json:"migrating_to_cell_id,omitempty"`
+	Revision            uint64     `json:"revision"`
+	OwnerID             string     `json:"owner_id"`
+	AccountID           string     `json:"account_id,omitempty"`
+	CreatedAt           time.Time  `json:"created_at"`
+}
+
+// DNSConfig is the effective, signed DNS configuration delivered to clients.
+// Nameservers contains only enabled resolvers; split resolvers are bound to
+// their declared domains and must never fall through to a global resolver.
+type DNSConfig struct {
+	MagicDNSEnabled   bool            `json:"magicdns_enabled"`
+	HTTPSCertsEnabled bool            `json:"https_certs_enabled"`
+	OverrideLocalDNS  bool            `json:"override_local_dns"`
+	Suffix            string          `json:"suffix,omitempty"`
+	Nameservers       []DNSNameserver `json:"nameservers,omitempty"`
+	SearchDomains     []string        `json:"search_domains,omitempty"`
+}
+
+type DNSNameserver struct {
+	ID           string   `json:"id"`
+	Address      string   `json:"address"`
+	Scope        string   `json:"scope"`
+	Priority     uint32   `json:"priority"`
+	SplitDomains []string `json:"split_domains,omitempty"`
 }
 
 type Node struct {
