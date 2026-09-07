@@ -58,7 +58,8 @@ protoc -I clientapi/proto --go_out=clientapi --go_opt=module=github.com/endless-
   The live YDB sharing run found an obsolete enrollment fixture; its correction
   is [`bbae79c`](https://github.com/endless-net/coordinator/commit/bbae79c).
   [Run 34161022236](https://github.com/endless-net/coordinator/actions/runs/34161022236)
-  must finish successfully before claiming that live check passed.
+  finished successfully. This checks component-owned YDB sharing/enrollment
+  transactions, not the whole unified Client API artifact set.
 - [management, main](https://github.com/endless-net/management/tree/main):
   all eight UserService projections implemented in
   [`b116710`](https://github.com/endless-net/management/commit/b116710c3544fedd5ef6b7297d51c91d6aeb97ff).
@@ -79,12 +80,24 @@ protoc -I clientapi/proto --go_out=clientapi --go_opt=module=github.com/endless-
   [`282a132`](https://github.com/endless-net/system-tests/commit/282a132)
   updates recovery manifests to the unified module and rejects a second Client
   API module; local tests and vet passed. This is verifier coverage, not a live
-  acceptance run. Existing D-025 HTTP checks do not exercise the new UserService,
-  application discovery or flow-window RPCs. Those scenario additions and an
-  immutable complete artifact set remain required; Windows recovery additionally
+  acceptance run. HTTP probe implementations now cover UserService, discovery,
+  flow windows, logout, direct registration and browser enrollment at
+  [`2b34179`](https://github.com/endless-net/system-tests/commit/2b34179669f7b2f20a6221243828ff94d91fc9d4);
+  [CI 34163216211](https://github.com/endless-net/system-tests/actions/runs/34163216211)
+  passed. These use test servers; live environment/controller binding remains
+  absent. The temporary D-025-v2 integration was removed because current native
+  Releases candidates use schema v1. Native preflight passed against the exact
+  candidate below, using producer-owned schema bytes and the binary's module
+  build pin. It does not emit live success. Windows recovery additionally
   requires the pinned Client UI MSI, schema artifact and signed recovery driver.
 - [releases, main](https://github.com/endless-net/releases/tree/main): record
   affected-edge evidence after module publication and consumer implementation.
+  Candidate
+  [`server-unified-client-api-20260908`](https://github.com/endless-net/releases/blob/d520a04e04aa56356ef70ff06a65964b213fef93/candidates/server-unified-client-api-20260908.json)
+  pins the seven published native archives and Client API v1.12.0. Its digest is
+  `sha256:9b4509891a304ea7af5c0d5b042f23e6514c67c38ece90dc2d1287fc315e06ce`.
+  Candidate/provenance and repository checks passed. There is no live acceptance
+  envelope, promotion or deployment for this candidate.
   Deployment needs separate approval in
   [infrastructure, main](https://github.com/endless-net/infrastructure/tree/main).
 
