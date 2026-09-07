@@ -22,7 +22,7 @@ func ParseApplicationTarget(kind, target string) (ApplicationTarget, error) {
 	switch kind {
 	case "cidr":
 		prefix, err := netip.ParsePrefix(target)
-		if err != nil || prefix.Masked().String() != target || prefix.Bits() == 0 || !applicationAddressAllowed(prefix.Addr()) {
+		if err != nil || prefix.Masked().String() != target || !applicationPrefixAllowed(prefix) {
 			return ApplicationTarget{}, errors.New("invalid application CIDR")
 		}
 		return ApplicationTarget{Prefix: prefix}, nil
@@ -53,7 +53,22 @@ func ParseApplicationTarget(kind, target string) (ApplicationTarget, error) {
 }
 
 func applicationAddressAllowed(address netip.Addr) bool {
-	return address.IsValid() && !address.IsLoopback() && !address.IsLinkLocalUnicast() && !address.IsLinkLocalMulticast() && !address.IsMulticast() && !address.IsUnspecified() && !address.Is4In6()
+	if !address.IsValid() || address.Is4In6() {
+		return false
+	}
+	return applicationPrefixAllowed(netip.PrefixFrom(address, address.BitLen()))
+}
+
+func applicationPrefixAllowed(prefix netip.Prefix) bool {
+	if !prefix.IsValid() || prefix.Addr().Is4In6() || prefix.Bits() == 0 {
+		return false
+	}
+	for _, value := range []string{"0.0.0.0/8", "127.0.0.0/8", "169.254.0.0/16", "224.0.0.0/4", "240.0.0.0/4", "::/128", "::1/128", "::ffff:0:0/96", "fe80::/10", "ff00::/8"} {
+		if prefix.Overlaps(netip.MustParsePrefix(value)) {
+			return false
+		}
+	}
+	return true
 }
 
 func ValidateApplicationAddress(address netip.Addr) error {
@@ -95,8 +110,13 @@ func validateApplicationBindings(snapshot NetworkMapSnapshot) error {
 			prefixes := make(map[string]bool)
 			for _, value := range route.CIDRs {
 				prefix, err := netip.ParsePrefix(value)
-				if err != nil || prefix.Masked().String() != value || !applicationAddressAllowed(prefix.Addr()) || prefixes[value] {
+				if err != nil || prefix.Masked().String() != value || !applicationPrefixAllowed(prefix) || prefixes[value] {
 					return errors.New("invalid application route destination")
+				}
+				for _, overlay := range []string{snapshot.Network.CIDR, snapshot.Network.IPv6CIDR} {
+					if network, err := netip.ParsePrefix(overlay); err == nil && prefix.Overlaps(network) {
+						return errors.New("application route overlaps overlay network")
+					}
 				}
 				if target.Prefix.IsValid() && prefix != target.Prefix || !target.Prefix.IsValid() && prefix.Bits() != prefix.Addr().BitLen() {
 					return errors.New("application route exceeds target scope")

@@ -10,6 +10,7 @@ func TestApplicationTargetRejectsUnenforceableScope(t *testing.T) {
 	for _, target := range []struct{ kind, value string }{
 		{"url", "https://example.com/admin"}, {"url", "https://user:password@example.com"}, {"url", "https://example.com?secret=1"},
 		{"domain", "*.example.com"}, {"cidr", "0.0.0.0/0"}, {"cidr", "127.0.0.0/8"}, {"cidr", "169.254.0.0/16"}, {"cidr", "10.0.0.1/24"},
+		{"cidr", "128.0.0.0/1"}, {"cidr", "126.0.0.0/7"}, {"cidr", "169.0.0.0/8"}, {"cidr", "fe00::/8"}, {"cidr", "255.255.255.255/32"},
 	} {
 		if _, err := ParseApplicationTarget(target.kind, target.value); err == nil {
 			t.Fatalf("unenforceable target accepted: %v", target)
@@ -35,6 +36,7 @@ func TestApplicationRouteBindingsFailClosed(t *testing.T) {
 		"scope":     func(a *Application) { a.Routes[0].CIDRs = []string{"10.0.0.0/8"} },
 		"expiry":    func(a *Application) { a.Routes[0].ExpiresAt = time.Time{} },
 		"policy":    func(a *Application) { a.PolicyHash = "" },
+		"overlay":   func(a *Application) { a.Routes[0].CIDRs = []string{snapshot.Node.AssignedIP + "/32"} },
 	} {
 		t.Run(name, func(t *testing.T) {
 			clone := cloneNetworkMapSnapshot(snapshot)
