@@ -1,10 +1,13 @@
 package clientapi
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestNetworkMapValidatesApplicationAndServiceProjection(t *testing.T) {
 	snapshot := validMapStreamSnapshot()
-	snapshot.Network.Applications = []Application{{ID: "app-1", Name: "portal", TargetType: "url", Target: "https://portal.example", AllowedUsers: []string{"user-1"}, ConnectorTags: []string{"connector"}, DNSEnabled: true}}
+	snapshot.Network.Applications = []Application{{ID: "app-1", Name: "portal", TargetType: "url", Target: "https://portal.example", PolicyHash: strings.Repeat("a", 64), Sources: []ServiceHost{{NodeID: snapshot.Node.ID, PublicKey: snapshot.Node.PublicKey}}, DNSEnabled: true}}
 	snapshot.Network.Services = []AdvertisedService{{ID: "service-1", Name: "database", DNSName: "database.example", Ports: []ServicePort{{Protocol: "tcp", Port: 5432}}, ApprovalMode: "manual", ApprovalStatus: "approved", Health: "healthy"}}
 	if err := ValidateNetworkMapSnapshot(snapshot); err != nil {
 		t.Fatal(err)
@@ -27,13 +30,13 @@ func TestNetworkMapValidatesApplicationAndServiceProjection(t *testing.T) {
 
 func TestNetworkMapCloneDetachesApplicationAndServiceProjection(t *testing.T) {
 	snapshot := validMapStreamSnapshot()
-	snapshot.Network.Applications = []Application{{ID: "app-1", Name: "portal", TargetType: "url", Target: "https://portal.example", AllowedUsers: []string{"user-1"}}}
+	snapshot.Network.Applications = []Application{{ID: "app-1", Name: "portal", TargetType: "url", Target: "https://portal.example", PolicyHash: strings.Repeat("a", 64), Sources: []ServiceHost{{NodeID: snapshot.Node.ID, PublicKey: snapshot.Node.PublicKey}}}}
 	snapshot.Network.Services = []AdvertisedService{{ID: "service-1", Name: "database", DNSName: "database.example", Ports: []ServicePort{{Protocol: "tcp", Port: 5432}}, Tags: []string{"database"}, ApprovalMode: "manual", ApprovalStatus: "approved", Health: "healthy"}}
 	clone := cloneNetworkMapSnapshot(snapshot)
-	clone.Network.Applications[0].AllowedUsers[0] = "changed"
+	clone.Network.Applications[0].Sources[0].NodeID = "changed"
 	clone.Network.Services[0].Ports[0].Port = 443
 	clone.Network.Services[0].Tags[0] = "changed"
-	if snapshot.Network.Applications[0].AllowedUsers[0] != "user-1" || snapshot.Network.Services[0].Ports[0].Port != 5432 || snapshot.Network.Services[0].Tags[0] != "database" {
+	if snapshot.Network.Applications[0].Sources[0].NodeID != snapshot.Node.ID || snapshot.Network.Services[0].Ports[0].Port != 5432 || snapshot.Network.Services[0].Tags[0] != "database" {
 		t.Fatal("clone shares application or service projection storage")
 	}
 }

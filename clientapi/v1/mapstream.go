@@ -228,10 +228,12 @@ func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 func cloneApplications(values []Application) []Application {
 	result := append([]Application(nil), values...)
 	for index := range result {
-		result[index].AllowedGroups = append([]string(nil), values[index].AllowedGroups...)
-		result[index].AllowedUsers = append([]string(nil), values[index].AllowedUsers...)
-		result[index].ConnectorNodes = append([]string(nil), values[index].ConnectorNodes...)
-		result[index].ConnectorTags = append([]string(nil), values[index].ConnectorTags...)
+		result[index].Sources = append([]ServiceHost(nil), values[index].Sources...)
+		result[index].Connectors = append([]ServiceHost(nil), values[index].Connectors...)
+		result[index].Routes = append([]ApplicationRoute(nil), values[index].Routes...)
+		for route := range result[index].Routes {
+			result[index].Routes[route].CIDRs = append([]string(nil), values[index].Routes[route].CIDRs...)
+		}
 	}
 	return result
 }

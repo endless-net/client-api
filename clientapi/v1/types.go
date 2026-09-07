@@ -57,18 +57,26 @@ type Network struct {
 }
 
 // Application is an effective account application published in the signed map.
-// Connector selectors tell an agent whether it should expose the target;
-// access selectors are evaluated by the consuming connector, never inferred.
+// Coordinator resolves all account selectors to authenticated node identities.
+// Clients never receive or interpret raw user/group selectors.
 type Application struct {
-	ID             string   `json:"id"`
-	Name           string   `json:"name"`
-	Target         string   `json:"target"`
-	TargetType     string   `json:"target_type"`
-	AllowedGroups  []string `json:"allowed_groups,omitempty"`
-	AllowedUsers   []string `json:"allowed_users,omitempty"`
-	ConnectorNodes []string `json:"connector_nodes,omitempty"`
-	ConnectorTags  []string `json:"connector_tags,omitempty"`
-	DNSEnabled     bool     `json:"dns_enabled,omitempty"`
+	ID         string             `json:"id"`
+	Name       string             `json:"name"`
+	Target     string             `json:"target"`
+	TargetType string             `json:"target_type"`
+	DNSEnabled bool               `json:"dns_enabled,omitempty"`
+	PolicyHash string             `json:"policy_hash"`
+	Sources    []ServiceHost      `json:"sources,omitempty"`
+	Connectors []ServiceHost      `json:"connectors,omitempty"`
+	Routes     []ApplicationRoute `json:"routes,omitempty"`
+}
+
+// ApplicationRoute is an expiring L3 authorization, bound to one connector.
+// CIDRs come from a verified connector observation or an explicit CIDR target.
+type ApplicationRoute struct {
+	Connector ServiceHost `json:"connector"`
+	CIDRs     []string    `json:"cidrs"`
+	ExpiresAt time.Time   `json:"expires_at"`
 }
 
 // AdvertisedService is an effective service catalog entry delivered to agents.

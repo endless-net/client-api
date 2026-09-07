@@ -66,6 +66,9 @@ func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 	if err := validateServiceHosts(response); err != nil {
 		return err
 	}
+	if err := validateApplicationBindings(response); err != nil {
+		return err
+	}
 	seenPeers := make(map[string]struct{}, len(response.Peers))
 	for i, peer := range response.Peers {
 		if err := validateMapPeer(peer); err != nil {
@@ -154,15 +157,8 @@ func validateApplications(applications []Application) error {
 				return err
 			}
 		}
-		for field, values := range map[string][]string{"allowed_groups": application.AllowedGroups, "allowed_users": application.AllowedUsers, "connector_nodes": application.ConnectorNodes, "connector_tags": application.ConnectorTags} {
-			for valueIndex, value := range values {
-				if strings.TrimSpace(value) == "" {
-					return fmt.Errorf("network.applications[%d].%s[%d] is empty", index, field, valueIndex)
-				}
-				if err := validateMapText(fmt.Sprintf("network.applications[%d].%s[%d]", index, field, valueIndex), value); err != nil {
-					return err
-				}
-			}
+		if _, err := ParseApplicationTarget(application.TargetType, application.Target); err != nil {
+			return err
 		}
 	}
 	return nil
