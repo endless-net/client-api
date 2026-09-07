@@ -1,13 +1,19 @@
 # Unified Client API v1 cutover
 
-Status: source implementation under component verification. Module publication,
-server support, release acceptance and production activation are not established.
+Status on 2026-09-07: module `v1.12.0` published from
+[`307d5c4`](https://github.com/endless-net/client-api/commit/307d5c4c48ab79063a74564d182c254fe091278a).
+The client pins the published module in
+[`ea736d7`](https://github.com/endless-net/client/commit/ea736d7).
+Client `go vet`, lint and `go test -short ./...` passed with `GOWORK=off`, and
+`git diff --check` passed. Server support, release acceptance and production
+activation are not established.
 
 The authorized hard cutover keeps one Go module,
 `github.com/endless-net/client-api/clientapi`, with HTTP/recovery types in `v1`.
 The nested v2 module and its aliases are removed. Existing registration/error
 `schema_version` 2 and v1 proof domain `endlessnet-register-identity-v3` are retained;
-no version number is increased. Registration replaces `idempotency_key` with
+only the separately approved Go module minor version is increased. Registration
+replaces `idempotency_key` with
 required `idempotency_id` and `schema_version`. Renewal requires its prior
 registration binding. The SDK validates identity proofs and response binding.
 Browser enrollment must persist and echo the registration operation ID; its
@@ -36,12 +42,13 @@ administration RPCs. Generate from repository root with installed protoc plugins
 protoc -I clientapi/proto --go_out=clientapi --go_opt=module=github.com/endless-net/client-api/clientapi --connect-go_out=clientapi --connect-go_opt=module=github.com/endless-net/client-api/clientapi clientapi/proto/client/v1/client.proto
 ```
 
-## Required follow-up
+## Client implementation and required follow-up
 
-- [client, main](https://github.com/endless-net/client/tree/main): consume only
-  this module, remove administrative route commands and use Client API logout.
-  A separately approved module release and new pin are required before committing
-  the consumer cutover. A temporary Go workspace checks source, not the old pin.
+- [client, main](https://github.com/endless-net/client/tree/main): completed.
+  The client consumes only this module, removes administrative route commands
+  and uses Client API logout. The approved `v1.12.0` pin was validated without
+  a local module replacement or workspace; temporary verification files were
+  removed. These component checks do not establish cross-service acceptance.
 - [coordinator, main](https://github.com/endless-net/coordinator/tree/main):
   implement discovery/flow handlers, node authorization, consent and durable
   acknowledgement; consume strict registration proofs and echo operation IDs.
