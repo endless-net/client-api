@@ -240,6 +240,7 @@ func cloneServices(values []AdvertisedService) []AdvertisedService {
 	result := append([]AdvertisedService(nil), values...)
 	for index := range result {
 		result[index].Ports = append([]ServicePort(nil), values[index].Ports...)
+		result[index].Hosts = append([]ServiceHost(nil), values[index].Hosts...)
 		result[index].Tags = append([]string(nil), values[index].Tags...)
 		result[index].EligibleTags = append([]string(nil), values[index].EligibleTags...)
 	}

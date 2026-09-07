@@ -83,6 +83,14 @@ type AdvertisedService struct {
 	ApprovalMode   string        `json:"approval_mode"`
 	ApprovalStatus string        `json:"approval_status"`
 	Health         string        `json:"health"`
+	Hosts          []ServiceHost `json:"hosts,omitempty"`
+}
+
+// ServiceHost binds authorization to the current WireGuard identity, not just a
+// reusable node identifier. Only hosts present in this signed map may be used.
+type ServiceHost struct {
+	NodeID    string `json:"node_id"`
+	PublicKey string `json:"public_key"`
 }
 
 type ServicePort struct {

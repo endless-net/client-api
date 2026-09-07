@@ -63,6 +63,9 @@ func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 	if err := validateMapNode(response.Node, networkID); err != nil {
 		return err
 	}
+	if err := validateServiceHosts(response); err != nil {
+		return err
+	}
 	seenPeers := make(map[string]struct{}, len(response.Peers))
 	for i, peer := range response.Peers {
 		if err := validateMapPeer(peer); err != nil {
@@ -187,6 +190,26 @@ func validateServices(services []AdvertisedService) error {
 			if (port.Protocol != "tcp" && port.Protocol != "udp") || port.Port == 0 || port.Port > 65535 {
 				return fmt.Errorf("network.services[%d].ports[%d] is invalid", index, portIndex)
 			}
+		}
+	}
+	return nil
+}
+
+func validateServiceHosts(snapshot NetworkMapSnapshot) error {
+	identities := map[string]string{snapshot.Node.ID: snapshot.Node.PublicKey}
+	for _, peer := range snapshot.Peers {
+		identities[peer.ID] = peer.PublicKey
+	}
+	for _, service := range snapshot.Network.Services {
+		if len(service.Hosts) > 0 && service.ApprovalStatus != "approved" {
+			return fmt.Errorf("service %q has hosts without approval", service.ID)
+		}
+		seen := make(map[string]bool, len(service.Hosts))
+		for _, host := range service.Hosts {
+			if host.NodeID == "" || host.PublicKey == "" || identities[host.NodeID] != host.PublicKey || seen[host.NodeID] {
+				return fmt.Errorf("service %q has an invalid or duplicate host identity", service.ID)
+			}
+			seen[host.NodeID] = true
 		}
 	}
 	return nil
