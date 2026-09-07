@@ -195,6 +195,7 @@ func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 	clone.Network.DNSConfig = cloneDNSConfig(snapshot.Network.DNSConfig)
 	clone.Network.Applications = cloneApplications(snapshot.Network.Applications)
 	clone.Network.Services = cloneServices(snapshot.Network.Services)
+	clone.Network.SharePeerGrants = cloneSharePeerGrants(snapshot.Network.SharePeerGrants)
 	clone.Node.EndpointCandidates = append([]string(nil), snapshot.Node.EndpointCandidates...)
 	clone.Node.AdvertisedIPs = append([]string(nil), snapshot.Node.AdvertisedIPs...)
 	clone.Node.RequestedTags = append([]string(nil), snapshot.Node.RequestedTags...)

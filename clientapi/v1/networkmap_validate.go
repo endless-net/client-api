@@ -70,6 +70,9 @@ func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 		return err
 	}
 	seenPeers := make(map[string]struct{}, len(response.Peers))
+	if err := validateSharePeerGrants(response); err != nil {
+		return err
+	}
 	for i, peer := range response.Peers {
 		if err := validateMapPeer(peer); err != nil {
 			return fmt.Errorf("peers[%d]: %w", i, err)
@@ -336,7 +339,7 @@ func validateMapPeer(peer Peer) error {
 	if strings.TrimSpace(peer.ID) == "" {
 		return fmt.Errorf("peer_id is missing")
 	}
-	for field, value := range map[string]string{"id": peer.ID, "status": peer.Status} {
+	for field, value := range map[string]string{"id": peer.ID, "network_id": peer.NetworkID, "status": peer.Status} {
 		if err := validateMapText("peer."+field, value); err != nil {
 			return err
 		}

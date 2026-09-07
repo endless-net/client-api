@@ -47,6 +47,7 @@ type Network struct {
 	DNSConfig           *DNSConfig          `json:"dns_config,omitempty"`
 	Applications        []Application       `json:"applications,omitempty"`
 	Services            []AdvertisedService `json:"services,omitempty"`
+	SharePeerGrants     []SharePeerGrant    `json:"share_peer_grants,omitempty"`
 	CellID              string              `json:"cell_id,omitempty"`
 	AuthoritativeCellID string              `json:"authoritative_cell_id,omitempty"`
 	MigratingToCellID   string              `json:"migrating_to_cell_id,omitempty"`
@@ -261,6 +262,7 @@ type UpdateNodeEndpointRequest struct {
 
 type Peer struct {
 	ID                 string     `json:"id"`
+	NetworkID          string     `json:"network_id,omitempty"`
 	Hostname           string     `json:"hostname"`
 	PublicKey          string     `json:"public_key"`
 	Endpoint           string     `json:"endpoint,omitempty"`

@@ -183,7 +183,7 @@ func VerifyNetworkMapSnapshotSignatureAt(snapshot NetworkMapSnapshot, expectedPu
 	if !ed25519.Verify(ed25519.PublicKey(publicKeyRaw), payload, signatureRaw) {
 		return errors.New("network map signature verification failed")
 	}
-	return nil
+	return ValidateSharePeerGrantsAt(snapshot, now)
 }
 
 func canonicalNetworkMapPayload(snapshot NetworkMapSnapshot, keyID string, issuedAt, expiresAt time.Time) ([]byte, error) {
