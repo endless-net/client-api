@@ -39,19 +39,55 @@ func MapStreamSupportedCapabilities() []string {
 }
 
 type Network struct {
-	ID                  string     `json:"id"`
-	Name                string     `json:"name"`
-	CIDR                string     `json:"cidr"`
-	IPv6CIDR            string     `json:"ipv6_cidr,omitempty"`
-	DNS                 []string   `json:"dns,omitempty"`
-	DNSConfig           *DNSConfig `json:"dns_config,omitempty"`
-	CellID              string     `json:"cell_id,omitempty"`
-	AuthoritativeCellID string     `json:"authoritative_cell_id,omitempty"`
-	MigratingToCellID   string     `json:"migrating_to_cell_id,omitempty"`
-	Revision            uint64     `json:"revision"`
-	OwnerID             string     `json:"owner_id"`
-	AccountID           string     `json:"account_id,omitempty"`
-	CreatedAt           time.Time  `json:"created_at"`
+	ID                  string              `json:"id"`
+	Name                string              `json:"name"`
+	CIDR                string              `json:"cidr"`
+	IPv6CIDR            string              `json:"ipv6_cidr,omitempty"`
+	DNS                 []string            `json:"dns,omitempty"`
+	DNSConfig           *DNSConfig          `json:"dns_config,omitempty"`
+	Applications        []Application       `json:"applications,omitempty"`
+	Services            []AdvertisedService `json:"services,omitempty"`
+	CellID              string              `json:"cell_id,omitempty"`
+	AuthoritativeCellID string              `json:"authoritative_cell_id,omitempty"`
+	MigratingToCellID   string              `json:"migrating_to_cell_id,omitempty"`
+	Revision            uint64              `json:"revision"`
+	OwnerID             string              `json:"owner_id"`
+	AccountID           string              `json:"account_id,omitempty"`
+	CreatedAt           time.Time           `json:"created_at"`
+}
+
+// Application is an effective account application published in the signed map.
+// Connector selectors tell an agent whether it should expose the target;
+// access selectors are evaluated by the consuming connector, never inferred.
+type Application struct {
+	ID             string   `json:"id"`
+	Name           string   `json:"name"`
+	Target         string   `json:"target"`
+	TargetType     string   `json:"target_type"`
+	AllowedGroups  []string `json:"allowed_groups,omitempty"`
+	AllowedUsers   []string `json:"allowed_users,omitempty"`
+	ConnectorNodes []string `json:"connector_nodes,omitempty"`
+	ConnectorTags  []string `json:"connector_tags,omitempty"`
+	DNSEnabled     bool     `json:"dns_enabled,omitempty"`
+}
+
+// AdvertisedService is an effective service catalog entry delivered to agents.
+type AdvertisedService struct {
+	ID             string        `json:"id"`
+	Name           string        `json:"name"`
+	Description    string        `json:"description,omitempty"`
+	DNSName        string        `json:"dns_name"`
+	Ports          []ServicePort `json:"ports"`
+	Tags           []string      `json:"tags,omitempty"`
+	EligibleTags   []string      `json:"eligible_tags,omitempty"`
+	ApprovalMode   string        `json:"approval_mode"`
+	ApprovalStatus string        `json:"approval_status"`
+	Health         string        `json:"health"`
+}
+
+type ServicePort struct {
+	Protocol string `json:"protocol"`
+	Port     uint32 `json:"port"`
 }
 
 // DNSConfig is the effective, signed DNS configuration delivered to clients.

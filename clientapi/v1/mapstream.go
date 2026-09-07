@@ -193,6 +193,8 @@ func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 	clone := snapshot
 	clone.Network.DNS = append([]string(nil), snapshot.Network.DNS...)
 	clone.Network.DNSConfig = cloneDNSConfig(snapshot.Network.DNSConfig)
+	clone.Network.Applications = cloneApplications(snapshot.Network.Applications)
+	clone.Network.Services = cloneServices(snapshot.Network.Services)
 	clone.Node.EndpointCandidates = append([]string(nil), snapshot.Node.EndpointCandidates...)
 	clone.Node.AdvertisedIPs = append([]string(nil), snapshot.Node.AdvertisedIPs...)
 	clone.Node.RequestedTags = append([]string(nil), snapshot.Node.RequestedTags...)
@@ -221,6 +223,27 @@ func cloneNetworkMapSnapshot(snapshot NetworkMapSnapshot) NetworkMapSnapshot {
 	}
 	clone.MapSignature = cloneMapSignature(snapshot.MapSignature)
 	return clone
+}
+
+func cloneApplications(values []Application) []Application {
+	result := append([]Application(nil), values...)
+	for index := range result {
+		result[index].AllowedGroups = append([]string(nil), values[index].AllowedGroups...)
+		result[index].AllowedUsers = append([]string(nil), values[index].AllowedUsers...)
+		result[index].ConnectorNodes = append([]string(nil), values[index].ConnectorNodes...)
+		result[index].ConnectorTags = append([]string(nil), values[index].ConnectorTags...)
+	}
+	return result
+}
+
+func cloneServices(values []AdvertisedService) []AdvertisedService {
+	result := append([]AdvertisedService(nil), values...)
+	for index := range result {
+		result[index].Ports = append([]ServicePort(nil), values[index].Ports...)
+		result[index].Tags = append([]string(nil), values[index].Tags...)
+		result[index].EligibleTags = append([]string(nil), values[index].EligibleTags...)
+	}
+	return result
 }
 
 func cloneDNSConfig(value *DNSConfig) *DNSConfig {

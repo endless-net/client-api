@@ -54,6 +54,12 @@ func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 	if err := validateDNSConfig(response.Network.DNSConfig); err != nil {
 		return err
 	}
+	if err := validateApplications(response.Network.Applications); err != nil {
+		return err
+	}
+	if err := validateServices(response.Network.Services); err != nil {
+		return err
+	}
 	if err := validateMapNode(response.Node, networkID); err != nil {
 		return err
 	}
@@ -124,6 +130,62 @@ func ValidateNetworkMapSnapshot(response NetworkMapSnapshot) error {
 		} {
 			if err := validateMapText(field, value); err != nil {
 				return err
+			}
+		}
+	}
+	return nil
+}
+
+func validateApplications(applications []Application) error {
+	seen := make(map[string]struct{}, len(applications))
+	for index, application := range applications {
+		if strings.TrimSpace(application.ID) == "" || strings.TrimSpace(application.Name) == "" || strings.TrimSpace(application.TargetType) == "" || strings.TrimSpace(application.Target) == "" {
+			return fmt.Errorf("network.applications[%d] is incomplete", index)
+		}
+		if _, duplicate := seen[application.ID]; duplicate {
+			return fmt.Errorf("network.applications[%d].id is duplicated", index)
+		}
+		seen[application.ID] = struct{}{}
+		for field, value := range map[string]string{"id": application.ID, "name": application.Name, "target_type": application.TargetType, "target": application.Target} {
+			if err := validateMapText(fmt.Sprintf("network.applications[%d].%s", index, field), value); err != nil {
+				return err
+			}
+		}
+		for field, values := range map[string][]string{"allowed_groups": application.AllowedGroups, "allowed_users": application.AllowedUsers, "connector_nodes": application.ConnectorNodes, "connector_tags": application.ConnectorTags} {
+			for valueIndex, value := range values {
+				if strings.TrimSpace(value) == "" {
+					return fmt.Errorf("network.applications[%d].%s[%d] is empty", index, field, valueIndex)
+				}
+				if err := validateMapText(fmt.Sprintf("network.applications[%d].%s[%d]", index, field, valueIndex), value); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func validateServices(services []AdvertisedService) error {
+	seen := make(map[string]struct{}, len(services))
+	for index, service := range services {
+		if strings.TrimSpace(service.ID) == "" || strings.TrimSpace(service.Name) == "" || !validDNSDomain(service.DNSName) || len(service.Ports) == 0 {
+			return fmt.Errorf("network.services[%d] is incomplete", index)
+		}
+		if _, duplicate := seen[service.ID]; duplicate {
+			return fmt.Errorf("network.services[%d].id is duplicated", index)
+		}
+		seen[service.ID] = struct{}{}
+		for field, value := range map[string]string{"id": service.ID, "name": service.Name, "description": service.Description, "dns_name": service.DNSName, "approval_status": service.ApprovalStatus, "health": service.Health} {
+			if err := validateMapText(fmt.Sprintf("network.services[%d].%s", index, field), value); err != nil {
+				return err
+			}
+		}
+		if service.ApprovalMode != "manual" && service.ApprovalMode != "auto" {
+			return fmt.Errorf("network.services[%d].approval_mode is invalid", index)
+		}
+		for portIndex, port := range service.Ports {
+			if (port.Protocol != "tcp" && port.Protocol != "udp") || port.Port == 0 || port.Port > 65535 {
+				return fmt.Errorf("network.services[%d].ports[%d] is invalid", index, portIndex)
 			}
 		}
 	}
