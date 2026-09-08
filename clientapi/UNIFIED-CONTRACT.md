@@ -1,6 +1,6 @@
 # Unified Client API v1 cutover
 
-Status on 2026-09-07: module `v1.12.0` published from
+Status on 2026-09-08: module `v1.12.0` published from
 [`307d5c4`](https://github.com/endless-net/client-api/commit/307d5c4c48ab79063a74564d182c254fe091278a).
 The client pins the published module in
 [`ea736d7`](https://github.com/endless-net/client/commit/ea736d7).
@@ -43,7 +43,28 @@ administration RPCs. Generate from repository root with installed protoc plugins
 protoc -I clientapi/proto --go_out=clientapi --go_opt=module=github.com/endless-net/client-api/clientapi --connect-go_out=clientapi --connect-go_opt=module=github.com/endless-net/client-api/clientapi clientapi/proto/client/v1/client.proto
 ```
 
-## Client implementation and required follow-up
+## Migration completion criteria
+
+Verification is anchored to the published module above. Required evidence is
+consumer tests using Client API test-server interfaces/DTOs, provider tests of
+actual handlers against that same contract, and repository-boundary checks.
+Cover requests/responses, authorization, typed errors, pagination, stable retries
+and connection recovery. Add missing contracts in this repository first, then
+implement and test providers and consumers independently.
+
+The boundary must reject managementapi, coordinatorapi, copied local control-plane
+DTOs, local contract replacements and a second Client API module. Existing client
+checks cover imports and pins; explicit copied-DTO enforcement remains to add.
+Audit requirement-to-test coverage and close gaps before declaring completion.
+
+Full-system deployment, same-artifact acceptance and production activation are
+separate verification scopes, not gates for this migration. The revised
+[verification plan, main](https://github.com/endless-net/releases/blob/main/candidates/unified-client-api-acceptance-proposal.md)
+replaces the seven-service Infrastructure proposal. No Infrastructure changes
+are needed for this contract/component plan. Previously recorded checks below
+retain their original evidence scope and are not new test runs.
+
+## Implementation evidence and separate system follow-up
 
 - [client, main](https://github.com/endless-net/client/tree/main): completed.
   The client consumes only this module, removes administrative route commands
@@ -65,7 +86,8 @@ protoc -I clientapi/proto --go_out=clientapi --go_opt=module=github.com/endless-
   [`b116710`](https://github.com/endless-net/management/commit/b116710c3544fedd5ef6b7297d51c91d6aeb97ff).
   Component tests cover producer actor/account/cursor forwarding, denied access,
   public-plan filtering and the exact Gateway workload boundary. Vet, lint and
-  short tests passed; live producer authorization remains an acceptance gate.
+  short tests passed. Live producer authorization is separate system verification;
+  provider conformance is established by tests of the actual handlers.
 - [identity, main](https://github.com/endless-net/identity/tree/main) and
   [gateway, main](https://github.com/endless-net/gateway/tree/main): expose
   `/auth/logout` and RPC routing implemented in Gateway
@@ -75,7 +97,7 @@ protoc -I clientapi/proto --go_out=clientapi --go_opt=module=github.com/endless-
   Both passed vet, lint and short tests, including host/workload isolation.
   These checks do not prove persistent revocation through the deployed Gateway.
 - [system-tests, main](https://github.com/endless-net/system-tests/tree/main):
-  verify affected edges against the same pinned artifacts: denied operations,
+  separate system follow-up may verify affected edges against pinned artifacts: denied operations,
   direct/browser enrollment, recovery, pagination and immutable flow retries.
   [`282a132`](https://github.com/endless-net/system-tests/commit/282a132)
   updates recovery manifests to the unified module and rejects a second Client
@@ -102,5 +124,6 @@ protoc -I clientapi/proto --go_out=clientapi --go_opt=module=github.com/endless-
   [infrastructure, main](https://github.com/endless-net/infrastructure/tree/main).
 
 Historical `release/` records describe their original v2 artifacts and remain
-unchanged. They are not evidence for this cutover. Component tests do not prove
-server support, release acceptance or deployment.
+unchanged. They are not evidence for this cutover. Consumer mocks alone do not prove server support. Tests of actual provider
+handlers establish component conformance; neither constitutes deployed
+end-to-end operation, release acceptance or production activation.
