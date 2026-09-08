@@ -33,3 +33,18 @@ The superseded full-server-set destination implementation is pinned at
 The ownership handoff is implemented, but production cutover remains incomplete
 until System Tests and Infrastructure provide the evidence listed in
 `release/migration/v2/inventory.json`.
+
+## Continuous integration
+
+[CI](https://github.com/endless-net/client-api/actions/workflows/ci.yml) is the
+single workflow entry point. Pull requests and pushes to `main` run public API,
+browser contract, frozen release-history, and CodeQL checks. Pull requests also
+require DCO sign-offs. The `checks` job requires all applicable checks to pass.
+On a successful `main` push, the same run publishes a digest-verified migration
+audit if that commit changes a migration inventory.
+
+Manual runs offer `operation: check` for the contract checks or
+`operation: system` for the cutover system suite using the `cutover-candidate`
+environment. The system suite requires that environment's API URL and node ID.
+The weekly schedule runs CodeQL only. Migration audits reference their own CI
+run and do not authorize production deployment.

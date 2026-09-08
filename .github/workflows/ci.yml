@@ -4,16 +4,28 @@ name: CI
   pull_request:
   push:
     branches: [main]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Run contract checks or the cutover system suite
+        type: choice
+        options: [check, system]
+        default: check
+        required: true
 
 permissions:
   contents: read
 
+# Keep manual system runs and scheduled scans independent from branch checks.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.operation }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+
 jobs:
   verify:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -43,6 +55,7 @@ jobs:
       - name: Test
         run: go test -short ./...
   browser-contracts:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -57,6 +70,7 @@ jobs:
       - run: go vet ./...
       - run: go test -short ./...
   compatibility:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -81,8 +95,274 @@ jobs:
           cache: false
       - name: Reject changes to frozen legacy server-release source
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || format('{0}^', github.sha) }}
         run: go run ./cmd/releasecontract verify-history --base "$BASE_SHA" --head "$GITHUB_SHA"
       - run: go mod verify
       - run: go vet ./...
       - run: go test -short ./...
+
+  analyze:
+    if: github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    name: Analyze Go
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: clientapi/go.mod
+          cache: false
+      - name: Configure private modules
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: go
+          build-mode: manual
+      - name: Build Go modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          for module in clientapi contracts systemtests; do
+            (
+              cd "$module"
+              go build ./...
+            )
+          done
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:go
+
+  signoff:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require Signed-off-by on every pull request commit
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$BASE_SHA"
+          failed=false
+          while read -r commit; do
+            if ! git show -s --format=%B "$commit" \
+              | grep -Eiq '^Signed-off-by: .+ <[^<>]+>$'; then
+              echo "::error::commit $commit is missing a valid Signed-off-by trailer"
+              failed=true
+            fi
+          done < <(git rev-list "$BASE_SHA..$HEAD_SHA")
+          if "$failed"; then
+            exit 1
+          fi
+
+  checks:
+    if: >-
+      always() && (github.event_name == 'pull_request' || github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.operation == 'check'))
+    needs: [verify, browser-contracts, compatibility, analyze, signoff]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require every contract and security check
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: >-
+          jq -e 'to_entries | all(.[];
+          if .key == "signoff" and env.EVENT_NAME != "pull_request"
+          then .value.result == "skipped"
+          else .value.result == "success" end)' <<< "$RESULTS"
+
+  publish-migration-source:
+    needs: checks
+    if: >-
+      !cancelled() && needs.checks.result == 'success' &&
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Locate versioned migration inventory
+        id: migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mapfile -t inventories < <(
+            git diff-tree --no-commit-id --name-only -r "$SOURCE_SHA^" "$SOURCE_SHA" -- 'release/migration/*/inventory.json'
+          )
+          if (( ${#inventories[@]} == 0 )); then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if (( ${#inventories[@]} != 1 )); then
+            printf 'expected one changed migration inventory, got %s\n' "${#inventories[@]}" >&2
+            exit 1
+          fi
+          inventory="${inventories[0]}"
+          schema="$(dirname "$inventory")/inventory.schema.json"
+          test -f "$schema"
+          test "$(jq -er '.source.repository' "$inventory")" = "endless-net/client-api"
+          source_revision="$(jq -er '.source.revision' "$inventory")"
+          git cat-file -e "${source_revision}^{commit}"
+          git merge-base --is-ancestor "$source_revision" "$SOURCE_SHA"
+          test "$(jq -er '.target.repository' "$inventory")" = "endless-net/releases"
+          test "$(jq -er '.completion.status' "$inventory")" = "not_complete"
+          test "$(jq -r '.completion.production_authorized' "$inventory")" = "false"
+
+          record_inventory="$inventory"
+          previous_inventory="$(jq -r '.previous_inventory.path // empty' "$inventory")"
+          if [[ -n "$previous_inventory" ]]; then
+            test -f "$previous_inventory"
+            expected_previous_digest="$(jq -er '.previous_inventory.sha256' "$inventory")"
+            actual_previous_digest="sha256:$(sha256sum "$previous_inventory" | cut -d' ' -f1)"
+            test "$actual_previous_digest" = "$expected_previous_digest"
+            record_inventory="$previous_inventory"
+          fi
+          {
+            echo "publish=true"
+            echo "inventory=$inventory"
+            echo "schema=$schema"
+            echo "record_inventory=$record_inventory"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Assemble digest-verified migration audit
+        if: steps.migration.outputs.publish == 'true'
+        id: bundle
+        shell: bash
+        env:
+          INVENTORY: ${{ steps.migration.outputs.inventory }}
+          INVENTORY_SCHEMA: ${{ steps.migration.outputs.schema }}
+          RECORD_INVENTORY: ${{ steps.migration.outputs.record_inventory }}
+          CI_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bundle="$RUNNER_TEMP/server-release-migration-source"
+          mkdir -p "$bundle/$(dirname "$INVENTORY")"
+          cp "$INVENTORY" "$bundle/$INVENTORY"
+          cp "$INVENTORY_SCHEMA" "$bundle/$INVENTORY_SCHEMA"
+
+          if [[ "$RECORD_INVENTORY" != "$INVENTORY" ]]; then
+            record_schema="$(dirname "$RECORD_INVENTORY")/inventory.schema.json"
+            test -f "$record_schema"
+            mkdir -p "$bundle/$(dirname "$RECORD_INVENTORY")"
+            cp "$RECORD_INVENTORY" "$bundle/$RECORD_INVENTORY"
+            cp "$record_schema" "$bundle/$record_schema"
+          fi
+
+          while IFS=$'\t' read -r source_path expected_digest; do
+            test -f "$source_path"
+            actual_digest="sha256:$(sha256sum "$source_path" | cut -d' ' -f1)"
+            test "$actual_digest" = "$expected_digest"
+            mkdir -p "$bundle/$(dirname "$source_path")"
+            cp "$source_path" "$bundle/$source_path"
+          done < <(jq -r '.records[] | [.source_path, (.source_sha256 // .sha256)] | @tsv' "$RECORD_INVENTORY")
+
+          while IFS= read -r source_path; do
+            test -f "$source_path"
+            mkdir -p "$bundle/$(dirname "$source_path")"
+            cp "$source_path" "$bundle/$source_path"
+          done < <(jq -r '.retained_tooling[].source_path' "$INVENTORY")
+
+          inventory_digest="sha256:$(sha256sum "$INVENTORY" | cut -d' ' -f1)"
+          jq -n \
+            --arg source_repository "$GITHUB_REPOSITORY" \
+            --arg source_revision "$SOURCE_SHA" \
+            --arg target_repository "$(jq -er '.target.repository' "$INVENTORY")" \
+            --arg target_baseline "$(jq -er '.target.baseline_revision' "$INVENTORY")" \
+            --arg target_implementation "$(jq -er '.target.implementation_revision // .target.baseline_revision' "$INVENTORY")" \
+            --arg authority_revision "$(jq -er '.authority.revision' "$INVENTORY")" \
+            --arg inventory_digest "$inventory_digest" \
+            --arg ci_run "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${CI_RUN_ID}" \
+            '{schema_version: 1, purpose: "server_release_control_migration_source", source_repository: $source_repository, source_revision: $source_revision, target_repository: $target_repository, target_baseline: $target_baseline, target_implementation: $target_implementation, authority_revision: $authority_revision, inventory_digest: $inventory_digest, ci_run: $ci_run, production_authorized: false}' \
+            > "$bundle/publication.json"
+          sums="$RUNNER_TEMP/server-release-migration-SHA256SUMS"
+          (
+            cd "$bundle"
+            find . -type f -print0 | sort -z | xargs -0 sha256sum
+          ) > "$sums"
+          mv "$sums" "$bundle/SHA256SUMS"
+          echo "inventory_digest=$inventory_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Upload commit-addressed migration source
+        if: steps.migration.outputs.publish == 'true'
+        id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: endlessnet-server-release-migration-source-${{ env.SOURCE_SHA }}
+          path: ${{ runner.temp }}/server-release-migration-source
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+          overwrite: false
+
+      - name: Record non-production migration audit
+        if: steps.migration.outputs.publish == 'true'
+        env:
+          INVENTORY_DIGEST: ${{ steps.bundle.outputs.inventory_digest }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+        run: |
+          {
+            echo "### Frozen server release migration audit"
+            echo
+            echo "- Source revision: \`$SOURCE_SHA\`"
+            echo "- Inventory: \`$INVENTORY_DIGEST\`"
+            echo "- Artifact: [\`$ARTIFACT_ID\`]($ARTIFACT_URL) (\`$ARTIFACT_DIGEST\`)"
+            echo "- Production authorized: \`false\`"
+            echo
+            echo "This bundle is a frozen compatibility archive and migration audit; canonical server release records come from endless-net/releases. It is not a promoted release."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  system:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'system'
+    runs-on: ubuntu-latest
+    environment: cutover-candidate
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+      ENDLESSNET_SYSTEM_API_URL: ${{ vars.ENDLESSNET_SYSTEM_API_URL }}
+      ENDLESSNET_SYSTEM_NODE_ID: ${{ vars.ENDLESSNET_SYSTEM_NODE_ID }}
+    defaults:
+      run:
+        working-directory: systemtests
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure private modules
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: systemtests/go.mod
+          cache: false
+      - run: go test -tags=system -count=1 ./...
