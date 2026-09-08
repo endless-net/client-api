@@ -75,13 +75,49 @@ const (
 
 // UserServiceClient is a client for the endlessnet.client.v1.UserService service.
 type UserServiceClient interface {
+	// ListAccounts returns one page of accounts visible to the authenticated
+	// caller, including their names, types and statuses. It is used to select an
+	// account before account-scoped calls; it does not enumerate other tenants.
+	// Pass the returned next_page_token in the next request to continue listing.
 	ListAccounts(context.Context, *connect.Request[clientrpc.ListAccountsRequest]) (*connect.Response[clientrpc.ListAccountsResponse], error)
+	// ListNetworks returns one page of network IDs and names in account_id that
+	// the caller may access. Account/network membership must be checked by the
+	// producer. This selection projection contains no node map or network secrets.
+	// Continue with the returned page token and the same account_id.
 	ListNetworks(context.Context, *connect.Request[clientrpc.ListNetworksRequest]) (*connect.Response[clientrpc.ListNetworksResponse], error)
+	// ListAdvertisedRoutes returns one page of routes advertised in network_id,
+	// identifying each advertising node, its hostname, CIDR and approval flag.
+	// The caller must be authorized for the network. Reading an advertised route
+	// does not approve it or grant dataplane access; use the signed map for that.
+	// Continue with the returned page token and the same network_id.
 	ListAdvertisedRoutes(context.Context, *connect.Request[clientrpc.ListAdvertisedRoutesRequest]) (*connect.Response[clientrpc.ListAdvertisedRoutesResponse], error)
+	// ListBillingPlans returns the public plan catalog for client display and
+	// checkout selection, including prices, currencies, providers and resource
+	// limits. The request has no filters or pagination. An absent monthly_price
+	// is distinct from an explicit zero; listing a plan does not subscribe to it.
 	ListBillingPlans(context.Context, *connect.Request[clientrpc.ListBillingPlansRequest]) (*connect.Response[clientrpc.ListBillingPlansResponse], error)
+	// GetBillingSubscription reads the current subscription projection for
+	// account_id: account, plan and status. The producer must authorize access to
+	// that account's billing data. This call neither changes the plan nor proves
+	// that a checkout has been paid; interpret the returned subscription status.
 	GetBillingSubscription(context.Context, *connect.Request[clientrpc.GetBillingSubscriptionRequest]) (*connect.Response[clientrpc.GetBillingSubscriptionResponse], error)
+	// GetBillingUsage reads network, node and user counts and their corresponding
+	// limits for account_id after account authorization. Use it to display current
+	// consumption. The response is an observation, not a capacity reservation or
+	// authorization to create resources; concurrent operations can change usage.
 	GetBillingUsage(context.Context, *connect.Request[clientrpc.GetBillingUsageRequest]) (*connect.Response[clientrpc.GetBillingUsageResponse], error)
+	// CreateBillingCheckout starts checkout for account_id, plan_id and the
+	// producer-supported billing_period. The caller must have billing rights.
+	// Persist operation.idempotency_key before sending and reuse the key and
+	// unchanged input after an ambiguous failure. The producer must durably store
+	// the idempotent result before returning checkout metadata and confirmation_url.
+	// The URL continues the provider payment flow; success is not payment settlement
+	// or confirmation that subscription entitlements have already changed.
 	CreateBillingCheckout(context.Context, *connect.Request[clientrpc.CreateBillingCheckoutRequest]) (*connect.Response[clientrpc.CreateBillingCheckoutResponse], error)
+	// ListBillingInvoices returns one page of invoices for an authorized account_id,
+	// with each invoice's ID, status, amount, currency and number. This is a read
+	// projection; it neither pays nor cancels invoices and contains no document URL.
+	// Continue with the returned page token and the same account_id.
 	ListBillingInvoices(context.Context, *connect.Request[clientrpc.ListBillingInvoicesRequest]) (*connect.Response[clientrpc.ListBillingInvoicesResponse], error)
 }
 
@@ -201,13 +237,49 @@ func (c *userServiceClient) ListBillingInvoices(ctx context.Context, req *connec
 
 // UserServiceHandler is an implementation of the endlessnet.client.v1.UserService service.
 type UserServiceHandler interface {
+	// ListAccounts returns one page of accounts visible to the authenticated
+	// caller, including their names, types and statuses. It is used to select an
+	// account before account-scoped calls; it does not enumerate other tenants.
+	// Pass the returned next_page_token in the next request to continue listing.
 	ListAccounts(context.Context, *connect.Request[clientrpc.ListAccountsRequest]) (*connect.Response[clientrpc.ListAccountsResponse], error)
+	// ListNetworks returns one page of network IDs and names in account_id that
+	// the caller may access. Account/network membership must be checked by the
+	// producer. This selection projection contains no node map or network secrets.
+	// Continue with the returned page token and the same account_id.
 	ListNetworks(context.Context, *connect.Request[clientrpc.ListNetworksRequest]) (*connect.Response[clientrpc.ListNetworksResponse], error)
+	// ListAdvertisedRoutes returns one page of routes advertised in network_id,
+	// identifying each advertising node, its hostname, CIDR and approval flag.
+	// The caller must be authorized for the network. Reading an advertised route
+	// does not approve it or grant dataplane access; use the signed map for that.
+	// Continue with the returned page token and the same network_id.
 	ListAdvertisedRoutes(context.Context, *connect.Request[clientrpc.ListAdvertisedRoutesRequest]) (*connect.Response[clientrpc.ListAdvertisedRoutesResponse], error)
+	// ListBillingPlans returns the public plan catalog for client display and
+	// checkout selection, including prices, currencies, providers and resource
+	// limits. The request has no filters or pagination. An absent monthly_price
+	// is distinct from an explicit zero; listing a plan does not subscribe to it.
 	ListBillingPlans(context.Context, *connect.Request[clientrpc.ListBillingPlansRequest]) (*connect.Response[clientrpc.ListBillingPlansResponse], error)
+	// GetBillingSubscription reads the current subscription projection for
+	// account_id: account, plan and status. The producer must authorize access to
+	// that account's billing data. This call neither changes the plan nor proves
+	// that a checkout has been paid; interpret the returned subscription status.
 	GetBillingSubscription(context.Context, *connect.Request[clientrpc.GetBillingSubscriptionRequest]) (*connect.Response[clientrpc.GetBillingSubscriptionResponse], error)
+	// GetBillingUsage reads network, node and user counts and their corresponding
+	// limits for account_id after account authorization. Use it to display current
+	// consumption. The response is an observation, not a capacity reservation or
+	// authorization to create resources; concurrent operations can change usage.
 	GetBillingUsage(context.Context, *connect.Request[clientrpc.GetBillingUsageRequest]) (*connect.Response[clientrpc.GetBillingUsageResponse], error)
+	// CreateBillingCheckout starts checkout for account_id, plan_id and the
+	// producer-supported billing_period. The caller must have billing rights.
+	// Persist operation.idempotency_key before sending and reuse the key and
+	// unchanged input after an ambiguous failure. The producer must durably store
+	// the idempotent result before returning checkout metadata and confirmation_url.
+	// The URL continues the provider payment flow; success is not payment settlement
+	// or confirmation that subscription entitlements have already changed.
 	CreateBillingCheckout(context.Context, *connect.Request[clientrpc.CreateBillingCheckoutRequest]) (*connect.Response[clientrpc.CreateBillingCheckoutResponse], error)
+	// ListBillingInvoices returns one page of invoices for an authorized account_id,
+	// with each invoice's ID, status, amount, currency and number. This is a read
+	// projection; it neither pays nor cancels invoices and contains no document URL.
+	// Continue with the returned page token and the same account_id.
 	ListBillingInvoices(context.Context, *connect.Request[clientrpc.ListBillingInvoicesRequest]) (*connect.Response[clientrpc.ListBillingInvoicesResponse], error)
 }
 
@@ -327,6 +399,12 @@ func (UnimplementedUserServiceHandler) ListBillingInvoices(context.Context, *con
 
 // ConnectorServiceClient is a client for the endlessnet.client.v1.ConnectorService service.
 type ConnectorServiceClient interface {
+	// ReportApplicationDiscovery reports addresses observed by node_id for
+	// application_id under policy_hash, with a requested lease of ttl_seconds.
+	// The node credential must identify this node, which must still be an authorized
+	// connector for the current policy. The producer validates addresses and bounds
+	// the lease before accepting. Success has an empty body; it does not authorize
+	// clients to install routes independently of their verified signed map.
 	ReportApplicationDiscovery(context.Context, *connect.Request[clientrpc.ReportApplicationDiscoveryRequest]) (*connect.Response[clientrpc.ReportApplicationDiscoveryResponse], error)
 }
 
@@ -364,6 +442,12 @@ func (c *connectorServiceClient) ReportApplicationDiscovery(ctx context.Context,
 // ConnectorServiceHandler is an implementation of the endlessnet.client.v1.ConnectorService
 // service.
 type ConnectorServiceHandler interface {
+	// ReportApplicationDiscovery reports addresses observed by node_id for
+	// application_id under policy_hash, with a requested lease of ttl_seconds.
+	// The node credential must identify this node, which must still be an authorized
+	// connector for the current policy. The producer validates addresses and bounds
+	// the lease before accepting. Success has an empty body; it does not authorize
+	// clients to install routes independently of their verified signed map.
 	ReportApplicationDiscovery(context.Context, *connect.Request[clientrpc.ReportApplicationDiscoveryRequest]) (*connect.Response[clientrpc.ReportApplicationDiscoveryResponse], error)
 }
 
@@ -399,7 +483,19 @@ func (UnimplementedConnectorServiceHandler) ReportApplicationDiscovery(context.C
 
 // FlowLogServiceClient is a client for the endlessnet.client.v1.FlowLogService service.
 type FlowLogServiceClient interface {
+	// GetFlowLogPolicy reads the collection consent for the authenticated node_id.
+	// The result supplies consent_version and the collection_not_before and
+	// collection_expires_at interval. Collect only under valid consent within that
+	// interval, and attach its version to each reported window. Fetching policy does
+	// not extend consent or authorize collection after expiry or revocation.
 	GetFlowLogPolicy(context.Context, *connect.Request[clientrpc.GetFlowLogPolicyRequest]) (*connect.Response[clientrpc.GetFlowLogPolicyResponse], error)
+	// ReportFlowLog submits one window for the authenticated node_id and
+	// consent_version, including endpoints, protocol, decision, rule, counters and
+	// start/end timestamps. The producer must validate the still-current consent
+	// and collection interval before durable acceptance. Preserve window.window_id
+	// and the entire window across retries; a retry must not become a new window.
+	// Success echoes the durably accepted window_id, allowing the client to mark
+	// that window delivered. A transport failure alone does not prove rejection.
 	ReportFlowLog(context.Context, *connect.Request[clientrpc.ReportFlowLogRequest]) (*connect.Response[clientrpc.ReportFlowLogResponse], error)
 }
 
@@ -447,7 +543,19 @@ func (c *flowLogServiceClient) ReportFlowLog(ctx context.Context, req *connect.R
 
 // FlowLogServiceHandler is an implementation of the endlessnet.client.v1.FlowLogService service.
 type FlowLogServiceHandler interface {
+	// GetFlowLogPolicy reads the collection consent for the authenticated node_id.
+	// The result supplies consent_version and the collection_not_before and
+	// collection_expires_at interval. Collect only under valid consent within that
+	// interval, and attach its version to each reported window. Fetching policy does
+	// not extend consent or authorize collection after expiry or revocation.
 	GetFlowLogPolicy(context.Context, *connect.Request[clientrpc.GetFlowLogPolicyRequest]) (*connect.Response[clientrpc.GetFlowLogPolicyResponse], error)
+	// ReportFlowLog submits one window for the authenticated node_id and
+	// consent_version, including endpoints, protocol, decision, rule, counters and
+	// start/end timestamps. The producer must validate the still-current consent
+	// and collection interval before durable acceptance. Preserve window.window_id
+	// and the entire window across retries; a retry must not become a new window.
+	// Success echoes the durably accepted window_id, allowing the client to mark
+	// that window delivered. A transport failure alone does not prove rejection.
 	ReportFlowLog(context.Context, *connect.Request[clientrpc.ReportFlowLogRequest]) (*connect.Response[clientrpc.ReportFlowLogResponse], error)
 }
 

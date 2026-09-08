@@ -23,6 +23,9 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// PageRequest carries the producer's pagination input. Tokens are opaque:
+// forward next_page_token unchanged and retain the original account/network scope.
+// This schema does not specify a default or maximum page size or snapshot isolation.
 type PageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PageSize      uint32                 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
@@ -75,6 +78,7 @@ func (x *PageRequest) GetPageToken() string {
 	return ""
 }
 
+// PageResponse carries the continuation token; an empty token ends pagination.
 type PageResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	NextPageToken string                 `protobuf:"bytes,1,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`

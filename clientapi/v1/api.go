@@ -36,6 +36,16 @@ func IsControlPlaneStatus(err error, statusCode int) bool {
 	return errors.As(err, &statusErr) && statusErr.StatusCode == statusCode
 }
 
+// API calls the control-plane HTTP contract. Token is sent as a bearer token;
+// NodeCredential is sent separately as X-EndlessNet-Node-Credential. Producers
+// authorize each operation; configuring both does not make them interchangeable.
+// Requests fail over across configured origins on transport errors, HTTP 408,
+// HTTP 429 and 5xx, including for writes. Persist mutation IDs before calling.
+// JSON responses reject unknown fields and trailing JSON. Non-retried HTTP
+// failures return ControlPlaneStatusError; exhausted failover returns an
+// aggregate error. Recovery decisions require decoding and validating PublicError,
+// not matching diagnostic text or relying on HTTP status alone.
+// Successful calls update the active origin; API is not safe for concurrent use.
 type API struct {
 	BaseURL        string
 	BaseURLs       []string
@@ -104,11 +114,19 @@ func NewControlPlaneTLSConfig(rootCAs *x509.CertPool) *tls.Config {
 	}
 }
 
+// ServerKey reads GET /server-key and returns the server key projection. Fetching
+// a key over HTTP does not establish signing trust; credential and map verification
+// must use the caller's trusted signing bundles.
 func (a *API) ServerKey() (ServerKeyResponse, error) {
 	var out ServerKeyResponse
 	return out, a.request(http.MethodGet, "/server-key", nil, &out)
 }
 
+// CreateNetwork posts the requested name, address ranges, DNS and optional account
+// and cell selection to /networks, returning the created network. The producer
+// checks create rights and resource constraints. If IdempotencyKey is empty, the
+// SDK generates one for this invocation only. Persist and supply an explicit key
+// with unchanged input when retrying across calls or process restarts.
 func (a *API) CreateNetwork(req CreateNetworkRequest) (Network, error) {
 	var out Network
 	if strings.TrimSpace(req.IdempotencyKey) == "" {
@@ -121,10 +139,16 @@ func (a *API) CreateNetwork(req CreateNetworkRequest) (Network, error) {
 	return out, a.request(http.MethodPost, "/networks", req, &out)
 }
 
+// ListNetworks reads GET /networks without an account filter, returning the
+// networks exposed to the caller by the producer. It is equivalent to
+// ListNetworksForAccount(""); this HTTP response is an array, not an RPC page.
 func (a *API) ListNetworks() ([]Network, error) {
 	return a.ListNetworksForAccount("")
 }
 
+// ListNetworksForAccount reads GET /networks with an optional account_id query
+// filter. Whitespace is trimmed and a blank ID omits the filter. The producer
+// still enforces account/network access. The result is an unpaginated HTTP array.
 func (a *API) ListNetworksForAccount(accountID string) ([]Network, error) {
 	path := "/networks"
 	if strings.TrimSpace(accountID) != "" {
@@ -134,12 +158,20 @@ func (a *API) ListNetworksForAccount(accountID string) ([]Network, error) {
 	return out, a.request(http.MethodGet, path, nil, &out)
 }
 
+// ListNodes reads GET /networks/{network}/nodes for an authorized network ID and
+// returns node metadata as an array. Listing nodes does not grant connectivity;
+// peer configuration and traffic authorization come from the verified signed map.
 func (a *API) ListNodes(network string) ([]Node, error) {
 	path := "/networks/" + url.PathEscape(network) + "/nodes"
 	var out []Node
 	return out, a.request(http.MethodGet, path, nil, &out)
 }
 
+// CreateJoinToken posts network selection, TTL, enrollment flags and tags to
+// /nodes/join-tokens. The producer authorizes issuance; the result contains the
+// secret token, effective scope/options and expiry. Keep the token confidential.
+// An empty IdempotencyKey is generated for this call only; supply a persisted key
+// and unchanged input to retry token creation across separate calls safely.
 func (a *API) CreateJoinToken(req CreateJoinTokenRequest) (CreateJoinTokenResponse, error) {
 	var out CreateJoinTokenResponse
 	if strings.TrimSpace(req.IdempotencyKey) == "" {
@@ -152,6 +184,14 @@ func (a *API) CreateJoinToken(req CreateJoinTokenRequest) (CreateJoinTokenRespon
 	return out, a.request(http.MethodPost, "/nodes/join-tokens", req, &out)
 }
 
+// RegisterNode posts direct enrollment or credential renewal to /nodes/register.
+// Enrollment binds the device proof to join-token or session authorization;
+// renewal uses the old node credential and saved registration binding. Persist
+// IdempotencyID and the signed request before sending, and reuse them on retries.
+// The SDK validates the request before sending and the response's identity and
+// operation binding on success. The caller must additionally verify credential
+// and map signatures with trusted bundles before committing the returned state.
+// See RECOVERY.md for typed recovery errors and durable retry requirements.
 func (a *API) RegisterNode(req RegisterNodeRequest) (RegisterNodeResponse, error) {
 	var out RegisterNodeResponse
 	if err := req.Validate(); err != nil {
@@ -163,27 +203,59 @@ func (a *API) RegisterNode(req RegisterNodeRequest) (RegisterNodeResponse, error
 	return out, out.ValidateForRequest(req)
 }
 
+// CreateNodeEnrollmentRequest posts a browser-mediated enrollment request to
+// /nodes/enrollment-requests. Persist the registration operation ID before sending.
+// The result contains request state, an approval URL, a secret PollToken and the
+// suggested polling delay. Browser approval/poll authorization is separate from
+// direct enrollment; this method does not invoke RegisterNodeRequest.Validate.
+// Creation alone does not enroll the node; poll and complete the approved request.
 func (a *API) CreateNodeEnrollmentRequest(req RegisterNodeRequest) (CreateNodeEnrollmentRequestResponse, error) {
 	var out CreateNodeEnrollmentRequestResponse
 	return out, a.request(http.MethodPost, "/nodes/enrollment-requests", req, &out)
 }
 
+// NodeEnrollmentRequestStatus reads GET /nodes/enrollment-requests/{id} using
+// only pollToken as bearer authorization, clearing the configured node credential
+// on a copy of the API. It returns request state and the suggested next polling
+// delay. Pending, approved, rejected, expired and enrolled are defined states;
+// approval is not yet a registration result. The original API credentials persist.
 func (a *API) NodeEnrollmentRequestStatus(id, pollToken string) (NodeEnrollmentRequestStatusResponse, error) {
 	var out NodeEnrollmentRequestStatusResponse
 	return out, a.withBearer(pollToken).request(http.MethodGet, "/nodes/enrollment-requests/"+url.PathEscape(strings.TrimSpace(id)), nil, &out)
 }
 
+// CompleteNodeEnrollmentRequest posts to /nodes/enrollment-requests/{id}/complete
+// using only the request's poll token, without changing this API's credentials.
+// It requests completion of approved browser enrollment and returns request state
+// plus an optional registration. Check for a registration before using it and
+// validate the saved operation/device binding and trusted signatures before
+// persisting credentials or applying the map; this method only decodes the body.
 func (a *API) CompleteNodeEnrollmentRequest(id, pollToken string) (CompleteNodeEnrollmentRequestResponse, error) {
 	var out CompleteNodeEnrollmentRequestResponse
 	return out, a.withBearer(pollToken).request(http.MethodPost, "/nodes/enrollment-requests/"+url.PathEscape(strings.TrimSpace(id))+"/complete", nil, &out)
 }
 
+// UpdateNodeEndpointState patches /nodes/{nodeID}/endpoint with the node's
+// endpoint, generation, candidates, TTL and optional status/client version.
+// The producer must bind the operation to the authenticated node and validate
+// endpoint state. The response uses RegisterNodeResponse as its map projection;
+// this method only strictly decodes JSON and does not call ValidateForRequest.
+// Authenticate the returned map before applying it to local network state.
 func (a *API) UpdateNodeEndpointState(nodeID string, req UpdateNodeEndpointRequest) (RegisterNodeResponse, error) {
 	var out RegisterNodeResponse
 	path := "/nodes/" + url.PathEscape(nodeID) + "/endpoint"
 	return out, a.request(http.MethodPatch, path, req, &out)
 }
 
+// ReadMapStreamEvent reads /maps/{nodeID}/stream from the supplied network/global
+// revision and map hash using the configured node authorization. It negotiates
+// the current map protocol/capabilities, skips heartbeats, and returns the first
+// snapshot, delta, checkpoint or resync event, closing the stream afterwards.
+// timeout is sent to the server; HTTPClient.Timeout independently bounds the call.
+// EOF before an event returns ErrMapStreamNoEvent. Framing and event shape are
+// checked, but signature verification and delta reconstruction remain the caller's
+// responsibility. Commit a cursor only with verified state; request a full snapshot
+// when the base cannot be reconstructed or authenticated.
 func (a *API) ReadMapStreamEvent(nodeID string, cursor MapCursor, timeout time.Duration) (MapStreamEvent, error) {
 	capabilities := MapStreamSupportedCapabilities()
 	path := fmt.Sprintf(
@@ -337,6 +409,10 @@ func mapStreamCapabilitiesEqual(got, want []string) bool {
 	return true
 }
 
+// Logout posts /auth/logout to invalidate the authenticated session at the
+// producer. A successful response has no decoded payload. This call does not
+// clear Token, NodeCredential or persisted local state; the caller manages local
+// sign-out. A failed request does not confirm server-side session revocation.
 func (a *API) Logout() error {
 	return a.request(http.MethodPost, "/auth/logout", nil, nil)
 }
