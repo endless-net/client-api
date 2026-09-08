@@ -7,7 +7,7 @@ trap 'rm -f "$report_file"' EXIT
 
 (
   cd "$module_dir"
-  go run github.com/google/go-licenses/v2@v2.0.1 report ./...
+  go run github.com/google/go-licenses/v2@v2.0.1 report --include_tests ./...
 ) >"$report_file"
 
 failed=false

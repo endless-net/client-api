@@ -1,0 +1,10 @@
+version: v2
+modules:
+  - path: proto
+lint:
+  use: [MINIMAL]
+  except:
+    # Published package endlessnet.client.v1 lives under the existing client/v1 path.
+    - PACKAGE_DIRECTORY_MATCH
+breaking:
+  use: [FILE]

@@ -1,0 +1,13 @@
+version: "2"
+
+linters:
+  default: standard
+  exclusions:
+    rules:
+      # Only the frozen migration CLI and its audit tests may import this archive.
+      - path: (cmd/releasecontract/main|release_contract_test)\.go$
+        linters: [staticcheck]
+        text: 'SA1019: github.com/endless-net/client-api/systemtests/releasecontract is deprecated'
+
+formatters:
+  enable: [gofmt, goimports]

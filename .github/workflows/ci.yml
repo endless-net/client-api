@@ -24,52 +24,244 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
 
 jobs:
-  verify:
+  format:
     if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [clientapi, contracts, systemtests]
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
     defaults:
       run:
-        working-directory: clientapi
+        working-directory: ${{ matrix.module }}
+        shell: bash
     steps:
       - uses: actions/checkout@v7
+      - name: Configure private modules
+        if: matrix.module == 'systemtests'
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
       - uses: actions/setup-go@v7
         with:
-          go-version-file: clientapi/go.mod
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache: false
+      - name: Install goimports
+        run: go install golang.org/x/tools/cmd/goimports@v0.36.0
+      - name: Check Go formatting and imports
+        run: |
+          set -euo pipefail
+          unformatted="$(goimports -l .)"
+          if [[ -n "$unformatted" ]]; then
+            printf '%s\n' "$unformatted"
+            exit 1
+          fi
+
+  lint:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [clientapi, contracts, systemtests]
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure private modules
+        if: matrix.module == 'systemtests'
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache: false
+      - name: Vet
+        run: go vet ./...
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13.2
+          working-directory: ${{ matrix.module }}
+          args: --config ../.golangci-lint.yaml --timeout 5m
+          skip-cache: true
+
+  unit-test:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [clientapi, contracts, systemtests]
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure private modules
+        if: matrix.module == 'systemtests'
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache: false
+      - name: Run all Go tests
+        run: go test -count=1 -timeout 10m ./...
+
+  race:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [clientapi, contracts, systemtests]
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure private modules
+        if: matrix.module == 'systemtests'
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache: false
+      - name: Run Go race tests
+        env:
+          CGO_ENABLED: "1"
+        run: go test -race -count=1 -timeout 10m ./...
+
+  vulnerability-scan:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [clientapi, contracts, systemtests]
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure private modules
+        if: matrix.module == 'systemtests'
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache: false
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
+      - name: Scan reachable vulnerabilities
+        run: govulncheck -test ./...
+
+  modules-licenses:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [clientapi, contracts, systemtests]
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: Configure private modules
+        if: matrix.module == 'systemtests'
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
           cache: false
       - name: Verify modules
         run: go mod verify
       - name: Verify dependency licenses
         run: ../scripts/check-licenses.sh .
-      - name: Check formatting
-        shell: bash
-        run: |
-          set -euo pipefail
-          unformatted="$(gofmt -l .)"
-          test -z "$unformatted" || {
-            printf '%s\n' "$unformatted"
-            exit 1
-          }
-      - name: Vet
-        run: go vet ./...
-      - name: Test
-        run: go test -short ./...
-  browser-contracts:
+
+  build:
     if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [clientapi, contracts, systemtests]
+    env:
+      GOPRIVATE: github.com/endless-net/*
+      GONOSUMDB: github.com/endless-net/*
     defaults:
       run:
-        working-directory: contracts
+        working-directory: ${{ matrix.module }}
+        shell: bash
     steps:
       - uses: actions/checkout@v7
+      - name: Configure private modules
+        if: matrix.module == 'systemtests'
+        env:
+          MODULE_TOKEN: ${{ secrets.ENDLESSNET_MODULE_TOKEN }}
+        run: |
+          test -n "$MODULE_TOKEN"
+          git config --global url."https://x-access-token:${MODULE_TOKEN}@github.com/".insteadOf "https://github.com/"
       - uses: actions/setup-go@v7
         with:
-          go-version-file: contracts/go.mod
+          go-version-file: ${{ matrix.module }}/go.mod
           cache: false
-      - run: go vet ./...
-      - run: go test -short ./...
-  compatibility:
+      - name: Build all Go packages
+        run: go build ./...
+
+  release-history:
     if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -97,9 +289,39 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || format('{0}^', github.sha) }}
         run: go run ./cmd/releasecontract verify-history --base "$BASE_SHA" --head "$GITHUB_SHA"
-      - run: go mod verify
-      - run: go vet ./...
-      - run: go test -short ./...
+
+  protobuf:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: bufbuild/buf-action@v1
+        with:
+          version: 1.72.0
+          setup_only: true
+      - name: Lint Protobuf
+        run: buf lint clientapi
+      - name: Build Protobuf descriptor
+        run: buf build clientapi -o "${{ runner.temp }}/clientapi.binpb"
+      - name: Check released Protobuf compatibility (advisory)
+        id: breaking
+        continue-on-error: true
+        run: bash scripts/check-protobuf-compatibility.sh
+      - name: Report breaking changes
+        if: steps.breaking.outcome == 'failure'
+        run: echo '::warning::Released Protobuf compatibility check failed; inspect the contract report.'
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: protobuf-contract-report
+          path: |
+            protobuf-contract-report.txt
+            ${{ runner.temp }}/clientapi.binpb
+          if-no-files-found: error
+          retention-days: 14
 
   analyze:
     if: github.event_name == 'schedule' || github.event_name == 'pull_request' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'check')
@@ -175,11 +397,11 @@ jobs:
             exit 1
           fi
 
-  checks:
+  test-complete:
     if: >-
       always() && (github.event_name == 'pull_request' || github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && inputs.operation == 'check'))
-    needs: [verify, browser-contracts, compatibility, analyze, signoff]
+    needs: [format, lint, unit-test, race, vulnerability-scan, modules-licenses, build, release-history, protobuf, analyze, signoff]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -194,9 +416,9 @@ jobs:
           else .value.result == "success" end)' <<< "$RESULTS"
 
   publish-migration-source:
-    needs: checks
+    needs: test-complete
     if: >-
-      !cancelled() && needs.checks.result == 'success' &&
+      !cancelled() && needs.test-complete.result == 'success' &&
       github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10

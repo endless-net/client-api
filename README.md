@@ -37,14 +37,36 @@ until System Tests and Infrastructure provide the evidence listed in
 ## Continuous integration
 
 [CI](https://github.com/endless-net/client-api/actions/workflows/ci.yml) is the
-single workflow entry point. Pull requests and pushes to `main` run public API,
-browser contract, frozen release-history, and CodeQL checks. Pull requests also
-require DCO sign-offs. The `checks` job requires all applicable checks to pass.
-On a successful `main` push, the same run publishes a digest-verified migration
-audit if that commit changes a migration inventory.
+single workflow entry point. Pull requests, pushes to `main`, and manual
+`operation: check` runs execute these checks for **each** Go module (`clientapi`,
+`contracts`, and `systemtests`):
 
-Manual runs offer `operation: check` for the contract checks or
-`operation: system` for the cutover system suite using the `cutover-candidate`
-environment. The system suite requires that environment's API URL and node ID.
-The weekly schedule runs CodeQL only. Migration audits reference their own CI
-run and do not authorize production deployment.
+| Job | Required checks |
+| --- | --- |
+| `format` | `goimports` formatting and import order |
+| `lint` | `go vet` and the shared standard `golangci-lint` configuration |
+| `unit-test` | Full `go test -count=1 ./...`, without `-short` |
+| `race` | Full tests with the Go race detector |
+| `vulnerability-scan` | `govulncheck -test` including test dependencies |
+| `modules-licenses` | Module integrity and dependency licenses, including test dependencies |
+| `build` | Build every Go package |
+
+`release-history` rejects edits to frozen release records. `protobuf` lints and
+builds the public Protobuf contract, then reports breaking changes against the
+newest stable `clientapi/v*` tag with the same Go module path. The compatibility
+comparison is advisory; its artifact records the exact baseline or an explicit
+skip if no released Protobuf baseline exists. It does not check Go source API
+compatibility or HTTP/JSON behavior.
+
+CodeQL runs as `analyze`; pull requests also require DCO `signoff`.
+`test-complete` requires every applicable job to succeed. The shared lint config
+checks existing as well as new code; only the frozen migration CLI and its audit
+tests may import the deprecated release-control archive.
+
+After successful checks on a `main` push, `publish-migration-source` publishes a
+digest-verified migration audit if that commit changes a migration inventory.
+Audits reference their own CI run and do not authorize production deployment.
+
+Manual `operation: system` runs only the cutover system suite using the
+`cutover-candidate` environment and its API URL and node ID. The weekly schedule
+runs CodeQL only. Normal Go tests do not enable the `system` build tag.
